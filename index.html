@@ -198,7 +198,7 @@
 
     <!-- ================= ADMIN PAGE ================= -->
     <div id="page-admin" class="hidden-elm max-w-4xl mx-auto px-4 pb-12 pt-6 animate-slide-in">
-        <div class="glass-panel p-6 rounded-3xl text-center mb-6">
+        <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative">
             <div class="text-purple-200 text-sm uppercase tracking-widest mb-2">Now Serving (Staff View)</div>
             <div class="text-6xl md:text-8xl font-bold text-white queue-number mb-2" id="admin-display-queue">-</div>
             <div class="text-xl text-purple-300" id="admin-display-name">Waiting...</div>
@@ -210,8 +210,29 @@
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-blue-400" id="count-total">0</div><div class="text-xs text-gray-400">Today</div></div>
         </div>
 
+        <!-- System Settings Section -->
+        <div class="mb-6 flex justify-between items-center px-2">
+            <h3 class="text-white font-bold">📋 รายการคิวทั้งหมด</h3>
+            <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ ตั้งค่าระบบ Database</button>
+        </div>
+
+        <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border border-purple-500/30">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-white font-bold text-sm">GitHub Configuration</h4>
+                <button onclick="clearToken()" class="text-[10px] text-red-400">ล้างรหัส Token</button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[10px] text-gray-400 block mb-1 uppercase tracking-wider">GitHub Personal Access Token (PAT)</label>
+                    <input type="password" id="db-token-input" class="glass-input text-xs" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                </div>
+                <button onclick="saveSettings()" class="w-full py-3 bg-purple-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-600/20">บันทึกรหัสและเริ่มเชื่อมต่อ</button>
+            </div>
+            <p class="text-[9px] text-gray-500 mt-3">*รหัสจะถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่หลุดไปในโค้ด GitHub</p>
+        </div>
+
         <div id="admin-order-list" class="space-y-4">
-            <div class="text-center text-gray-500 py-10">กำลังโหลดรายการ...</div>
+            <div class="text-center text-gray-500 py-10">กำลังโหลดคิว...</div>
         </div>
     </div>
 
@@ -225,7 +246,7 @@
         </div>
     </div>
 
-    <div id="toast-container" class="fixed top-4 right-4 z-[70] space-y-2"></div>
+    <div id="toast-container" class="fixed top-4 right-4 z-[70] space-y-2 pointer-events-none"></div>
   </div>
 
   <script>
@@ -233,15 +254,13 @@
     // 🔗 GitHub JSON Database Config
     // ==========================================
     const CONFIG = {
-        // ใส่รหัส PAT ของคุณตรงนี้ (ใส่แค่พาร์ทหลัง ghp_)
-        token_suffix: 'qOguC11pbqdvZo3bHWgJ2srbdxdG743V6QNt', 
         owner: 'cestasrismburn-star', 
         repo: 'bloom-luxe-db',
         path: 'database.json'
     };
     
-    // รวมรหัส Token (แยกเพื่อลดโอกาสการโดน Bot สแกน แต่ GitHub Scanner อาจยังตรวจเจอ)
-    const getAuthToken = () => 'ghp_' + CONFIG.token_suffix;
+    // ดึง Token จาก Local Storage
+    const getAuthToken = () => localStorage.getItem('bloom_luxe_token') || '';
 
     const getHeaders = () => ({
         'Authorization': `token ${getAuthToken()}`,
@@ -255,14 +274,22 @@
     let isFetching = false;
 
     window.onload = () => {
+        // เตรียมค่า Token ในช่อง Input
+        document.getElementById('db-token-input').value = getAuthToken();
+        
         refreshData();
-        setInterval(refreshData, 5000); // อัปเดตข้อมูลทุก 5 วินาที
+        setInterval(refreshData, 5000); // Auto-refresh ทุก 5 วินาที
     };
 
     async function refreshData() {
         if (isFetching) return;
+        const token = getAuthToken();
+        if (!token) {
+            updateStatusIcon('error');
+            return;
+        }
+
         isFetching = true;
-        
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
         
         try {
@@ -270,8 +297,8 @@
             if (res.ok) {
                 const data = await res.json();
                 db_sha = data.sha;
-                // ถอดรหัส Base64 จาก GitHub
-                db_content = JSON.parse(atob(data.content));
+                // ถอดรหัส Base64 โดยรองรับภาษาไทย
+                db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 renderUI();
                 updateStatusIcon('live');
             } else {
@@ -292,8 +319,7 @@
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify({
-                    message: `Update Queue: ${new Date().toISOString()}`,
-                    // แปลงเป็น Base64 และจัดการเรื่องอักขระพิเศษ (Thai)
+                    message: `Update: ${new Date().toISOString()}`,
                     content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2)))),
                     sha: db_sha
                 })
@@ -304,32 +330,32 @@
         }
     }
 
-    // --- UI RENDER LOGIC ---
+    // --- UI RENDER ---
     function renderUI() {
         const waiting = db_content.filter(i => i.status === 'Waiting');
         const serving = db_content.find(i => i.status === 'Serving');
 
-        // หน้าลูกค้า
+        // Customer View
         document.getElementById('cust-display-queue').innerText = serving ? serving.id : '-';
-        document.getElementById('cust-display-name').innerText = serving ? serving.nickname : 'ยังไม่มีคิวที่กำลังให้บริการ';
+        document.getElementById('cust-display-name').innerText = serving ? serving.nickname : 'ยังไม่มีคิวบริการในขณะนี้';
 
         const custWaitingList = document.getElementById('cust-waiting-list');
-        custWaitingList.innerHTML = waiting.length ? '' : '<div class="text-gray-500 text-center py-4 bg-white/5 rounded-xl">ไม่มีคิวรอในขณะนี้</div>';
+        custWaitingList.innerHTML = waiting.length ? '' : '<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">ขณะนี้ไม่มีคิวรอ...</div>';
         waiting.forEach(q => {
             custWaitingList.innerHTML += `
-                <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl animate-slide-in border border-white/5">
+                <div class="flex justify-between items-center p-5 bg-white/5 rounded-2xl animate-slide-in border border-white/5">
                     <div class="flex items-center gap-4">
-                        <div class="font-mono text-xl font-bold text-white">${q.id}</div>
+                        <div class="font-mono text-2xl font-bold text-white">${q.id}</div>
                         <div class="text-gray-300 font-medium">${q.nickname}</div>
                     </div>
                     <span class="status-badge status-waiting">Waiting</span>
                 </div>`;
         });
 
-        // หน้าแอดมิน
+        // Admin View
         if (activePage === 'admin') {
             document.getElementById('admin-display-queue').innerText = serving ? serving.id : '-';
-            document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'Waiting...';
+            document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'No Serving';
             document.getElementById('count-waiting').innerText = waiting.length;
             document.getElementById('count-serving').innerText = serving ? 1 : 0;
             document.getElementById('count-total').innerText = db_content.length;
@@ -337,40 +363,45 @@
             const adminList = document.getElementById('admin-order-list');
             adminList.innerHTML = '';
             
-            // เรียง Serving ขึ้นก่อน
+            // เรียงลำดับ Serving ขึ้นก่อน
             const sorted = [...db_content].sort((a,b) => (a.status === 'Serving' ? -1 : 1));
             
             sorted.forEach(q => {
                 const isServing = q.status === 'Serving';
                 adminList.innerHTML += `
-                    <div class="glass-panel p-5 rounded-2xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
+                    <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
                         <div class="flex justify-between mb-4">
                             <div class="flex items-center gap-4">
-                                <div class="bg-white/10 px-3 py-1 rounded text-lg font-mono text-white border border-white/10">${q.id}</div>
-                                <div class="text-white font-bold">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
+                                <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
+                                <div class="text-white font-bold text-lg">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
                             </div>
                             <span class="status-badge ${isServing ? 'status-serving' : 'status-waiting'}">${q.status}</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400 mb-4 bg-black/20 p-3 rounded-lg">
-                            <div>💧 น้ำ: <span class="text-white">${q.waterTemp}</span></div>
-                            <div>🌿 กลิ่น: <span class="text-white">${q.oil}</span></div>
-                            <div>💆 นวด: <span class="text-white">${q.massagePressure}</span></div>
-                            <div>💆‍♀️ หัว: <span class="text-white">${q.headPressure}</span></div>
-                            <div class="col-span-2 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
+                        <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-5 bg-black/20 p-4 rounded-2xl">
+                            <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp}</span></div>
+                            <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil}</span></div>
+                            <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure}</span></div>
+                            <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure}</span></div>
+                            <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
                         </div>
-                        <div class="flex gap-2 justify-end">
-                            ${q.status === 'Waiting' ? `<button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 px-4 py-2 rounded-lg text-xs font-bold text-white shadow-lg">เรียกคิว</button>` : ''}
-                            ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold text-white shadow-lg">เสร็จงาน</button>` : ''}
-                            <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/20 text-red-400 px-4 py-2 rounded-lg text-xs">ลบรายการ</button>
+                        <div class="flex gap-3 justify-end">
+                            ${q.status === 'Waiting' ? `<button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>` : ''}
+                            ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">เสร็จงาน (Done)</button>` : ''}
+                            <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-xs transition-all">ลบ</button>
                         </div>
                     </div>`;
             });
         }
     }
 
-    // --- FORM SUBMIT ---
+    // --- LOGIC ---
     document.getElementById('customer-form').onsubmit = async (e) => {
         e.preventDefault();
+        if (!getAuthToken()) {
+            showToast('ระบบยังไม่ได้รับการตั้งค่า GitHub Token', 'error');
+            return;
+        }
+
         const btn = document.getElementById('submit-btn');
         btn.disabled = true;
         btn.innerText = 'กำลังส่งข้อมูล...';
@@ -391,7 +422,7 @@
             switchCustomerView('queue');
             refreshData();
         } else {
-            showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+            showToast('เชื่อมต่อล้มเหลว ตรวจสอบรหัส Token', 'error');
         }
         btn.disabled = false;
         btn.innerText = '✅ ยืนยันคิวบริการ';
@@ -404,23 +435,49 @@
         } else {
             updatedDB = db_content.map(i => {
                 if (i.id === id) return { ...i, status: newStatus };
-                // ถ้าเรียกคิวใหม่ ให้คิวเก่าที่ Serving อยู่ก่อนหน้าถูกปิดไป (สมมติว่าร้านมี 1 เตียง/คน)
+                // ถ้าเรียกคิวใหม่ คิวเก่าที่ Serving อยู่ให้หายไป
                 if (newStatus === 'Serving' && i.status === 'Serving') return null; 
                 return i;
             }).filter(Boolean);
         }
 
         if (await saveToGithub(updatedDB)) {
-            showToast('อัปเดตคิวสำเร็จ', 'success');
+            showToast('อัปเดตสถานะสำเร็จ', 'success');
             refreshData();
         }
     }
 
-    // --- NAVIGATION & UI HELPERS ---
+    // --- SETTINGS LOGIC ---
+    function toggleSettings() {
+        const p = document.getElementById('settings-panel');
+        p.classList.toggle('hidden-elm');
+    }
+
+    function saveSettings() {
+        const val = document.getElementById('db-token-input').value.trim();
+        if (val) {
+            localStorage.setItem('bloom_luxe_token', val);
+            showToast('บันทึกรหัสสำเร็จ', 'success');
+            toggleSettings();
+            refreshData();
+        } else {
+            showToast('กรุณากรอกรหัส Token', 'error');
+        }
+    }
+
+    function clearToken() {
+        if(confirm('ต้องการล้างรหัส Token ใช่หรือไม่?')) {
+            localStorage.removeItem('bloom_luxe_token');
+            location.reload();
+        }
+    }
+
+    // --- NAVIGATION HELPERS ---
     function showPage(page) {
         activePage = page;
-        if (page === 'admin') document.getElementById('login-modal').classList.remove('hidden-elm');
-        else {
+        if (page === 'admin') {
+            document.getElementById('login-modal').classList.remove('hidden-elm');
+        } else {
             document.getElementById('page-customer').classList.remove('hidden-elm');
             document.getElementById('page-admin').classList.add('hidden-elm');
             document.getElementById('login-modal').classList.add('hidden-elm');
@@ -435,8 +492,16 @@
             document.getElementById('page-admin').classList.remove('hidden-elm');
             toggleNavStyle('admin');
             renderUI();
+            
+            // ถ้ายังไม่มี Token ให้เตือนเปิด Settings
+            if (!getAuthToken()) {
+                setTimeout(() => {
+                    showToast('โปรดตั้งค่ารหัส GitHub Token', 'error');
+                    toggleSettings();
+                }, 800);
+            }
         } else {
-            showToast('รหัสผ่านไม่ถูกต้อง', 'error');
+            showToast('รหัสผ่านพนักงานไม่ถูกต้อง', 'error');
         }
     }
 
@@ -475,7 +540,7 @@
 
     function showToast(m, t) {
         const c = document.getElementById('toast-container'), el = document.createElement('div');
-        el.className = `animate-slide-in px-6 py-3 rounded-xl text-white text-sm shadow-2xl ${t==='success'?'bg-green-600':'bg-red-600'}`;
+        el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm shadow-2xl pointer-events-auto ${t==='success'?'bg-green-600/90':'bg-red-600/90'}`;
         el.innerText = m; c.appendChild(el);
         setTimeout(() => el.remove(), 4000);
     }
@@ -484,7 +549,7 @@
         const d = document.querySelector('.live-dot'), t = document.querySelector('#live-indicator span');
         if (s==='error') { 
             d.className='w-2 h-2 rounded-full bg-red-500'; 
-            t.innerText='Sync Error'; 
+            t.innerText='Database Offline'; 
             t.className='text-[10px] text-red-400 uppercase tracking-widest'; 
         } else { 
             d.className='w-2 h-2 rounded-full bg-green-500 live-dot'; 
