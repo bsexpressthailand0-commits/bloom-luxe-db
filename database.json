@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "Q-001",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T07:47:38.185Z",
+    "orderType": "booking",
+    "bookingDate": "2026-02-11",
+    "bookingTime": "14:47",
+    "nickname": "เชน",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Jasmine Rice",
+    "massagePressure": "กลาง",
+    "headPressure": "กลาง",
+    "caution": ""
+  }
+]
