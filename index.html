@@ -61,8 +61,8 @@
       
       <div class="glass-panel rounded-3xl p-6 mb-6 text-center relative overflow-hidden">
          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
-         <h2 class="text-xl font-bold text-white mb-1">Your Needs Test</h2>
-         <p class="text-purple-200/70 text-sm">แบบสอบถามเพื่อรับบริการระดับลักซ์ชูรี</p>
+         <h2 class="text-xl font-bold text-white mb-1">BLOOM LUXE SALON</h2>
+         <p class="text-purple-200/70 text-sm">แบบทดสอบความต้องการ Your Needs Test</p>
       </div>
 
       <div class="flex gap-4 mb-6">
@@ -92,7 +92,7 @@
             </div>
 
             <div>
-                <label class="block text-purple-200 text-sm mb-2">เพศ</label>
+                <label class="block text-purple-200 text-sm mb-2">เพศ (Gender)</label>
                 <div class="flex gap-3">
                     <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="ชาย (Male)" required class="accent-purple-500"><span class="text-gray-300 text-sm">ชาย</span></label>
                     <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="หญิง (Female)" class="accent-purple-500"><span class="text-gray-300 text-sm">หญิง</span></label>
@@ -100,29 +100,47 @@
             </div>
 
             <div class="space-y-6">
-                 <div><label class="block text-purple-200 text-sm mb-3">🌡️ อุณหภูมิน้ำ</label>
+                 <div><label class="block text-purple-200 text-sm mb-3">🌡️ อุณหภูมิของน้ำ/Water temperature</label>
                     <div class="flex gap-3">
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="อุ่น" required class="accent-purple-500"><span class="text-gray-300 text-sm">อุ่น</span></label>
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="เย็น" class="accent-purple-500"><span class="text-gray-300 text-sm">เย็น</span></label>
                     </div>
                  </div>
-                 <div><label class="block text-purple-200 text-sm mb-3">🌿 กลิ่นน้ำมันหอมระเหย</label>
+                 
+                 <div><label class="block text-purple-200 text-sm mb-3">🌿 กลิ่นน้ำมันอโรม่า/Signature Oil Massage</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label class="radio-box"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs">Jasmine Rice</span></label>
-                        <label class="radio-box"><input type="radio" name="oil" value="White Tea" class="accent-purple-500"><span class="text-gray-300 text-xs">White Tea</span></label>
-                        <label class="radio-box"><input type="radio" name="oil" value="Marigold" class="accent-purple-500"><span class="text-gray-300 text-xs">Marigold</span></label>
-                        <label class="radio-box"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs">Orchid</span></label>
+                        <label class="radio-box"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs">น้ำมันข้าว/Jasmine rice</span></label>
+                        <label class="radio-box"><input type="radio" name="oil" value="White Tea" class="accent-purple-500"><span class="text-gray-300 text-xs">ไรท์/White tea</span></label>
+                        <label class="radio-box"><input type="radio" name="oil" value="Marigold" class="accent-purple-500"><span class="text-gray-300 text-xs">มาริโกล์ด/Marigold</span></label>
+                        <label class="radio-box"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs">กล้วยไม้/Orchid</span></label>
                     </div>
                  </div>
-                 <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-purple-200 text-sm mb-2">น้ำหนักการนวด</label>
-                        <select name="massagePressure" class="glass-input"><option>เบา</option><option>กลาง</option><option>หนัก</option></select>
-                    </div>
-                    <div><label class="block text-purple-200 text-sm mb-2">เกาศีรษะ</label>
-                        <select name="headPressure" class="glass-input"><option>เบา</option><option>กลาง</option><option>หนัก</option></select>
+
+                 <div><label class="block text-purple-200 text-sm mb-3">🧴 กลิ่นแชมพูสระผม/The scent of shampoo</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="radio-box"><input type="radio" name="shampoo" value="Chance rich" required class="accent-purple-500"><span class="text-gray-300 text-xs">Chance rich</span></label>
+                        <label class="radio-box"><input type="radio" name="shampoo" value="Honey sunset" class="accent-purple-500"><span class="text-gray-300 text-xs">Honey sunset</span></label>
+                        <label class="radio-box"><input type="radio" name="shampoo" value="Pink Gold" class="accent-purple-500"><span class="text-gray-300 text-xs">Pink Gold</span></label>
                     </div>
                  </div>
-                 <div><label class="block text-purple-200 text-sm mb-2">⚠️ จุดที่ต้องระวังเป็นพิเศษ</label><textarea name="caution" rows="2" class="glass-input" placeholder="เช่น แผลผ่าตัด, ผิวแพ้ง่าย..."></textarea></div>
+
+                 <div><label class="block text-purple-200 text-sm mb-3">💆 น้ำหนักมือในการนวด/Levels of massage</label>
+                    <div class="flex gap-2">
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs">เบา Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs">กลาง Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs">หนัก Strong</span></label>
+                    </div>
+                 </div>
+
+                 <div><label class="block text-purple-200 text-sm mb-3">💆‍♀️ น้ำหนักมือในการเกาศีรษะ/Level of pressure hair</label>
+                    <div class="flex gap-2">
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs">เบา Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs">กลาง Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs">หนัก Strong</span></label>
+                    </div>
+                 </div>
+
+                 <div><label class="block text-purple-200 text-sm mb-2">⚠️ จุดที่ควรระวังเป็นพิเศษ</label><textarea name="caution" rows="2" class="glass-input" placeholder="เช่น แผลผ่าตัด, ผิวแพ้ง่าย..."></textarea></div>
             </div>
 
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02]">
@@ -489,6 +507,7 @@
                 <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl mt-3">
                     <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
                     <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil || '-'}</span></div>
+                    <div>🧴 แชมพู: <span class="text-white font-medium">${q.shampoo || '-'}</span></div>
                     <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
                     <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
                     ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution}</div>` : ''}
