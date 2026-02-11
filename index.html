@@ -31,9 +31,9 @@
   </style>
  </head>
  <body class="h-full m-0 p-0 bg-[#0f172a]">
-  
+   
   <div id="app" class="h-full w-full overflow-auto min-h-screen" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
-    
+     
     <!-- Navigation -->
     <nav class="flex justify-between items-center px-6 py-4 bg-black/20 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-2">
@@ -214,7 +214,7 @@
         token_part_1: 'ghp_',  // ใส่ ghp_ ตรงนี้
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'  // ใส่ส่วนที่เหลือยาวๆ ตรงนี้
     };
-    
+     
     // รวมรหัส Token จาก 2 ส่วน
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
 
@@ -363,7 +363,10 @@
             const adminList = document.getElementById('admin-order-list');
             if(adminList) {
                 adminList.innerHTML = '';
+                // Render ตามลำดับใน Database (ซึ่งเราจัดการ Sort ตอน Save แล้ว หรือแสดงตามธรรมชาติ)
+                // แต่เพื่อให้ Serving ขึ้นก่อนเสมอในหน้า Admin:
                 const sorted = [...db_content].sort((a,b) => (a.status === 'Serving' ? -1 : 1));
+                
                 sorted.forEach(q => {
                     const isServing = q.status === 'Serving';
                     adminList.innerHTML += `
@@ -382,8 +385,11 @@
                                 <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
                                 <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
                             </div>
-                            <div class="flex gap-3 justify-end">
-                                ${q.status === 'Waiting' ? `<button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>` : ''}
+                            <div class="flex gap-3 justify-end items-center">
+                                ${q.status === 'Waiting' ? `
+                                    <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 ลัดคิว</button>
+                                    <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>
+                                ` : ''}
                                 ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">เสร็จงาน (Done)</button>` : ''}
                                 <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-xs transition-all">ลบ</button>
                             </div>
@@ -433,6 +439,26 @@
         }
         if (await saveToGithub(updatedDB)) {
             showToast('อัปเดตสถานะสำเร็จ', 'success');
+            refreshData();
+        }
+    }
+
+    // --- SKIP QUEUE FUNCTION (NEW) ---
+    async function skipQueue(id) {
+        // หา Item ที่จะลัดคิว
+        const itemToSkip = db_content.find(i => i.id === id);
+        if (!itemToSkip) return;
+
+        // แยกกลุ่มข้อมูล
+        const serving = db_content.filter(i => i.status === 'Serving');
+        const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
+        const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
+
+        // เรียงใหม่: Serving -> [คนที่ลัดคิว] -> Waiting ที่เหลือ -> อื่นๆ
+        const newOrder = [...serving, itemToSkip, ...waiting, ...others];
+
+        if (await saveToGithub(newOrder)) {
+            showToast(`🚀 ลัดคิว ${id} ขึ้นนำหน้าเรียบร้อย`, 'success');
             refreshData();
         }
     }
