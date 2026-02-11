@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "Q-001",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T08:54:59.470Z",
+    "orderType": "walkin",
+    "bookingDate": "",
+    "bookingTime": "",
+    "nickname": "แนท",
+    "gender": "ชาย (Male)",
+    "waterTemp": "เย็น",
+    "oil": "White Tea",
+    "shampoo": "Chance rich",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": "เบาได้ยิ่งดี"
+  }
+]
