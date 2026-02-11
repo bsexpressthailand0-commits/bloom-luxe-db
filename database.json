@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "Q-001",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T08:30:57.064Z",
+    "orderType": "walkin",
+    "bookingDate": "",
+    "bookingTime": "",
+    "nickname": "เชน",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Marigold",
+    "shampoo": "Pink Gold",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": "ปวดหลังมาก เป็นแผลฟอกช้ำ เป็นแผลฟอกช้ำ"
+  }
+]
