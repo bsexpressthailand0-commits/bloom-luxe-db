@@ -606,7 +606,11 @@
         btn.innerText = 'กำลังส่งข้อมูล...';
         const fd = new FormData(e.target);
         
-        const nextId = "Q-" + String(db_content.length + 1).padStart(3, '0');
+        // **NEW ID GENERATION LOGIC**
+        // Extract number from all existing IDs (including completed ones) to find the absolute max
+        const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
+        const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
+        const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
         
         const newEntry = {
             id: nextId,
@@ -635,12 +639,16 @@
 
     async function updateStatus(id, newStatus) {
         let updatedDB;
-        if (newStatus === 'Delete' || newStatus === 'Done') {
+        if (newStatus === 'Delete') {
+             // Hard Delete (Remove from DB entirely)
             updatedDB = db_content.filter(i => i.id !== id);
+        } else if (newStatus === 'Done') {
+             // Soft Delete (Mark as Completed to keep history for ID generation)
+            updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Completed' } : i);
         } else {
             updatedDB = db_content.map(i => {
                 if (i.id === id) return { ...i, status: newStatus };
-                if (newStatus === 'Serving' && i.status === 'Serving') return null; 
+                if (newStatus === 'Serving' && i.status === 'Serving') return null; // Remove other serving statuses if single server (optional)
                 return i;
             }).filter(Boolean);
         }
