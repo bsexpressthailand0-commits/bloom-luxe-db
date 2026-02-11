@@ -13,5 +13,20 @@
     "massagePressure": "เบา",
     "headPressure": "เบา",
     "caution": ""
+  },
+  {
+    "id": "Q-002",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T08:02:52.739Z",
+    "orderType": "booking",
+    "bookingDate": "2026-02-11",
+    "bookingTime": "18:04",
+    "nickname": "ดาม",
+    "gender": "ชาย (Male)",
+    "waterTemp": "เย็น",
+    "oil": "White Tea",
+    "massagePressure": "เบา",
+    "headPressure": "เบา",
+    "caution": ""
   }
 ]
