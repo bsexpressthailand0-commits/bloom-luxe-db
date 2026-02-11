@@ -8,39 +8,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     body { box-sizing: border-box; font-family: 'Prompt', sans-serif; }
-    
-    /* Animation */
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
-    
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }
     .queue-active { animation: pulse-glow 2s infinite; border: 1px solid rgba(139, 92, 246, 0.5); }
-    
     @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .live-dot { animation: blink-green 2s infinite; }
-
-    /* Glass Effect */
     .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
     .glass-input { width: 100%; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: white; outline: none; transition: all 0.3s; }
     .glass-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
-    
-    /* Radio Box */
     .radio-box { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s; }
     .radio-box:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(139, 92, 246, 0.4); }
     .radio-box input:checked + span { color: #d8b4fe; font-weight: 600; }
-    
-    /* Tabs */
     .tab-btn { background: rgba(139, 92, 246, 0.1); color: #a78bfa; transition: all 0.3s; }
     .tab-btn.active { background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
-    
     .hidden-elm { display: none !important; }
-
-    /* Badges */
     .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
     .status-waiting { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); }
     .status-serving { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
     .status-completed { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
-
     .queue-number { font-family: 'Courier New', monospace; letter-spacing: -1px; }
   </style>
  </head>
@@ -55,7 +41,6 @@
             <div class="flex flex-col">
                 <span class="text-white font-bold tracking-wider hidden md:block leading-tight">BLOOM LUXE</span>
                 <div class="flex items-center gap-1.5" id="live-indicator">
-                    <!-- ID แก้ไขแล้วเพื่อป้องกัน Error -->
                     <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500"></div>
                     <span id="status-text" class="text-[10px] text-yellow-400 font-medium uppercase tracking-widest">Checking...</span>
                 </div>
@@ -195,7 +180,11 @@
                     <label class="text-[10px] text-gray-400 block mb-1 uppercase tracking-wider">GitHub Personal Access Token (PAT)</label>
                     <input type="password" id="db-token-input" class="glass-input text-xs" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
                 </div>
-                <button onclick="saveSettings()" class="w-full py-3 bg-purple-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-600/20">บันทึกรหัสและเริ่มเชื่อมต่อ</button>
+                <div class="flex gap-2">
+                    <button onclick="saveSettings()" class="flex-1 py-3 bg-purple-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-600/20">บันทึกรหัสและเริ่มเชื่อมต่อ</button>
+                    <!-- ปุ่ม Auto Fix 404 -->
+                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ กดปุ่มนี้เพื่อสร้างไฟล์ database.json (แก้ Error 404)</button>
+                </div>
             </div>
             <p class="text-[9px] text-gray-500 mt-3">*รหัสจะถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่หลุดไปในโค้ด GitHub</p>
         </div>
@@ -258,8 +247,7 @@
         isFetching = true;
         
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-        console.log("Fetching URL:", url);
-
+        
         try {
             const res = await fetch(`${url}?t=${Date.now()}`, { headers: getHeaders() });
             if (res.ok) {
@@ -269,15 +257,58 @@
                 db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 renderUI();
                 updateStatusIcon('live');
+                document.getElementById('btn-autofix').classList.add('hidden-elm'); // ซ่อนปุ่มถ้าไฟล์เจอแล้ว
             } else {
                 console.error("Fetch Error:", res.status);
                 updateStatusIcon('error', res.status);
+                
+                // ถ้า Error 404 ให้แสดงปุ่ม Auto Fix
+                if(res.status === 404) {
+                    const btn = document.getElementById('btn-autofix');
+                    if(btn) btn.classList.remove('hidden-elm');
+                }
             }
         } catch (e) {
             console.error(e);
             updateStatusIcon('error', 'NET');
         } finally {
             isFetching = false;
+        }
+    }
+
+    async function autoFix404() {
+        if(!getAuthToken()) { showToast("กรุณาใส่ Token ก่อน!", "error"); return; }
+        
+        const btn = document.getElementById('btn-autofix');
+        btn.innerText = "กำลังสร้างไฟล์...";
+        btn.disabled = true;
+
+        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+        try {
+            // สร้างไฟล์ database.json ว่างๆ []
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({
+                    message: "Create database.json (Auto Fix)",
+                    content: "W10=", // Base64 ของ []
+                })
+            });
+            
+            if(res.ok) {
+                showToast("สร้างไฟล์สำเร็จ! ระบบพร้อมใช้งาน", "success");
+                btn.classList.add('hidden-elm');
+                refreshData();
+            } else {
+                const err = await res.json();
+                showToast(`สร้างไม่สำเร็จ: ${err.message}`, "error");
+                btn.innerText = "ลองอีกครั้ง";
+                btn.disabled = false;
+            }
+        } catch(e) {
+            showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+            btn.innerText = "ลองอีกครั้ง";
+            btn.disabled = false;
         }
     }
 
@@ -435,6 +466,9 @@
             updateTokenDisplay();
             showToast('บันทึกรหัสสำเร็จ', 'success');
             toggleSettings();
+            
+            // รีเฟรชทันทีเพื่อดูว่า 404 หายไหม
+            isFetching = false; 
             refreshData();
         } else {
             showToast('กรุณากรอกรหัส Token', 'error');
