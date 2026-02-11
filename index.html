@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BLOOM LUXE SALON (Auto Login)</title>
+  <title>BLOOM LUXE SALON (Smart Notify)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
@@ -28,11 +28,15 @@
     .status-serving { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
     .status-completed { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
     .queue-number { font-family: 'Courier New', monospace; letter-spacing: -1px; }
+    
+    /* Notification Bar Animation */
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .my-queue-bar { animation: slideUp 0.5s ease-out forwards; }
   </style>
  </head>
  <body class="h-full m-0 p-0 bg-[#0f172a]">
    
-  <div id="app" class="h-full w-full overflow-auto min-h-screen" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+  <div id="app" class="h-full w-full overflow-auto min-h-screen pb-20" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
      
     <!-- Navigation -->
     <nav class="flex justify-between items-center px-6 py-4 bg-black/20 backdrop-blur-md sticky top-0 z-50">
@@ -122,8 +126,9 @@
             </div>
 
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02]">
-                <span id="submit-text">✅ ยืนยันคิวบริการ</span>
+                <span id="submit-text">✅ ยืนยันคิวบริการ (แจ้งเตือนผ่านมือถือ)</span>
             </button>
+            <div class="text-[10px] text-purple-300 text-center mt-2 opacity-70">*ระบบจะขออนุญาตส่งการแจ้งเตือนเพื่อให้คุณทราบเมื่อถึงคิว</div>
         </form>
       </div>
 
@@ -151,15 +156,15 @@
         </div>
 
         <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-yellow-400" id="count-waiting">0</div><div class="text-xs text-gray-400">Waiting</div></div>
+            <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-yellow-400" id="count-waiting">0</div><div class="text-xs text-gray-400">Total Waiting</div></div>
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-green-400" id="count-serving">0</div><div class="text-xs text-gray-400">Serving</div></div>
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-blue-400" id="count-total">0</div><div class="text-xs text-gray-400">Today</div></div>
         </div>
 
         <!-- System Settings Section -->
-        <div class="mb-6 flex justify-between items-center px-2">
-            <h3 class="text-white font-bold">📋 รายการคิวทั้งหมด</h3>
-            <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ ตั้งค่าระบบ Database</button>
+        <div class="mb-4 flex justify-between items-center px-2">
+            <h3 class="text-white font-bold">📋 จัดการคิว (Management)</h3>
+            <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ Config</button>
         </div>
 
         <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border border-purple-500/30">
@@ -179,11 +184,59 @@
                 <div class="flex gap-2">
                     <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ กดปุ่มนี้เพื่อสร้างไฟล์ database.json (แก้ Error 404)</button>
                 </div>
+
+                <!-- NEW: Split Reset Buttons -->
+                <div class="pt-4 mt-2 border-t border-white/10">
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                            <span class="text-lg">🗑️🚶</span> 
+                            <span>ล้าง Walk-in</span>
+                        </button>
+                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-500/10 text-orange-400 hover:bg-orange-600 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                            <span class="text-lg">🗑️📅</span> 
+                            <span>ล้าง Booking</span>
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-gray-500 text-center">กดเมื่อต้องการเริ่มวันใหม่ (ข้อมูลจะหายไปถาวร)</div>
+                </div>
             </div>
         </div>
 
-        <div id="admin-order-list" class="space-y-4">
-            <div class="text-center text-gray-500 py-10">กำลังโหลดคิว...</div>
+        <!-- Admin Tabs -->
+        <div class="flex bg-black/20 p-1.5 rounded-2xl mb-4">
+            <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">
+                🚶 Walk-in (<span id="badge-walkin">0</span>)
+            </button>
+            <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn">
+                📅 Booking (<span id="badge-booking">0</span>)
+            </button>
+        </div>
+
+        <!-- 1. Walk-in List -->
+        <div id="admin-walkin-list" class="space-y-4">
+            <!-- Content filled by JS -->
+        </div>
+
+        <!-- 2. Booking List -->
+        <div id="admin-booking-list" class="space-y-4 hidden-elm">
+            <!-- Content filled by JS -->
+        </div>
+    </div>
+    
+    <!-- CUSTOMER BOTTOM BAR (MY QUEUE) -->
+    <div id="my-queue-bar" class="fixed bottom-0 left-0 w-full z-40 p-4 hidden-elm my-queue-bar">
+        <div class="glass-panel p-4 rounded-2xl bg-[#0f172a]/95 border-purple-500/50 shadow-[0_-10px_40px_rgba(139,92,246,0.3)] flex justify-between items-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse"></div>
+            <div class="relative z-10 flex items-center gap-3">
+                <div class="bg-purple-600 px-3 py-1 rounded-lg text-white font-bold text-lg shadow-lg" id="bar-my-id">Q-001</div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-purple-200 uppercase tracking-widest">Your Queue</span>
+                    <span class="text-white font-bold text-sm" id="bar-my-status">Waiting...</span>
+                </div>
+            </div>
+            <button onclick="switchCustomerView('queue')" class="relative z-10 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs text-white transition-all">
+                View
+            </button>
         </div>
     </div>
 
@@ -198,26 +251,24 @@
     </div>
 
     <div id="toast-container" class="fixed top-4 right-4 z-[70] space-y-2 pointer-events-none"></div>
+    
+    <!-- Audio Element for Sound Alert -->
+    <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
   </div>
 
   <script>
     // ==========================================
-    // 🔗 GitHub JSON Database Config (Embedded)
+    // 🔗 GitHub JSON Database Config
     // ==========================================
     const CONFIG = {
-        // 1. ใส่ชื่อเจ้าของและ Repo ให้ถูกต้อง
         owner: 'bsexpressthailand0-commits', 
         repo: 'bloom-luxe-db',
         path: 'database.json',
-
-        // 2. ใส่รหัส Token โดยการหั่นครึ่ง (เพื่อหลบ Bot ตรวจจับ)
-        token_part_1: 'ghp_',  // ใส่ ghp_ ตรงนี้
-        token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'  // ใส่ส่วนที่เหลือยาวๆ ตรงนี้
+        token_part_1: 'ghp_',  
+        token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
      
-    // รวมรหัส Token จาก 2 ส่วน
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
-
     const getHeaders = () => {
         const token = getAuthToken();
         const headers = { 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
@@ -228,19 +279,81 @@
     let db_sha = '';
     let db_content = [];
     let activePage = 'customer';
+    let activeAdminTab = 'walkin';
     let isFetching = false;
+    let myQueueId = localStorage.getItem('bloom_my_queue_id'); // Load saved queue ID
+    let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
 
     window.onload = () => {
-        // Show hardcoded values in UI for verification
         const ownerInput = document.getElementById('db-owner-input');
         const repoInput = document.getElementById('db-repo-input');
-        
         if(ownerInput) ownerInput.value = CONFIG.owner;
         if(repoInput) repoInput.value = CONFIG.repo;
         
+        // Request Notification Permission on load if user has a queue
+        if(myQueueId && "Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
         refreshData();
         setInterval(refreshData, 5000); 
     };
+
+    // --- NOTIFICATION HELPERS ---
+    function triggerAlert() {
+        // 1. Play Sound
+        const audio = document.getElementById('notify-sound');
+        if(audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log("Audio play blocked by browser policy"));
+        }
+
+        // 2. Vibration (Mobile)
+        if (navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
+        }
+
+        // 3. Browser Notification
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("🎉 ถึงคิวของคุณแล้ว!", {
+                body: "กรุณามาที่จุดให้บริการ BLOOM LUXE ค่ะ",
+                icon: "https://cdn-icons-png.flaticon.com/512/3756/3756353.png"
+            });
+        }
+        
+        // 4. In-App Toast
+        showToast("🔔 ถึงคิวของคุณแล้ว! กรุณามาที่จุดให้บริการ", "success");
+    }
+
+    function checkMyQueueStatus(data) {
+        if (!myQueueId) {
+            document.getElementById('my-queue-bar').classList.add('hidden-elm');
+            return;
+        }
+
+        const myQueue = data.find(q => q.id === myQueueId);
+        
+        if (myQueue) {
+            // Update Bar UI
+            document.getElementById('my-queue-bar').classList.remove('hidden-elm');
+            document.getElementById('bar-my-id').innerText = myQueue.id;
+            document.getElementById('bar-my-status').innerText = myQueue.status === 'Serving' ? '🎉 ถึงคิวคุณแล้ว!' : 'Waiting...';
+            document.getElementById('bar-my-status').className = myQueue.status === 'Serving' ? 'text-green-400 font-bold text-sm animate-pulse' : 'text-white font-bold text-sm';
+
+            // Check for Status Change to Serving
+            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') {
+                triggerAlert();
+                lastKnownStatus = 'Serving';
+                localStorage.setItem('bloom_my_queue_status', 'Serving');
+            }
+        } else {
+            // Queue might be deleted or done
+            if (lastKnownStatus !== 'Done' && lastKnownStatus !== 'Delete') {
+                // Optional: Auto hide bar if queue is gone
+                // document.getElementById('my-queue-bar').classList.add('hidden-elm');
+            }
+        }
+    }
 
     async function refreshData() {
         if (isFetching) return;
@@ -255,13 +368,11 @@
                 db_sha = data.sha;
                 db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 renderUI();
+                checkMyQueueStatus(db_content); // Check for notification
                 updateStatusIcon('live');
                 document.getElementById('btn-autofix').classList.add('hidden-elm'); 
             } else {
-                console.error("Fetch Error:", res.status);
                 updateStatusIcon('error', res.status);
-                
-                // 404 Not Found -> หาไฟล์ไม่เจอ แสดงปุ่ม Auto Fix
                 if(res.status === 404) {
                     const btn = document.getElementById('btn-autofix');
                     if(btn) btn.classList.remove('hidden-elm');
@@ -279,20 +390,16 @@
         const btn = document.getElementById('btn-autofix');
         btn.innerText = "กำลังสร้างไฟล์...";
         btn.disabled = true;
-
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-        
         try {
-            // สร้างไฟล์ database.json ว่างๆ []
             const res = await fetch(url, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify({
                     message: "Create database.json (Auto Fix)",
-                    content: "W10=", // Base64 ของ []
+                    content: "W10=", 
                 })
             });
-            
             if(res.ok) {
                 showToast("สร้างไฟล์สำเร็จ! ระบบพร้อมใช้งาน", "success");
                 btn.classList.add('hidden-elm');
@@ -328,10 +435,81 @@
         }
     }
 
+    async function resetQueueByType(type) {
+        let confirmMsg = "";
+        if (type === 'walkin') confirmMsg = "⚠️ ยืนยัน: ต้องการล้างข้อมูลคิว 'Walk-in' ทั้งหมดใช่หรือไม่?\n(ข้อมูล Booking จะยังคงอยู่)";
+        if (type === 'booking') confirmMsg = "⚠️ ยืนยัน: ต้องการล้างข้อมูลคิว 'Booking' ทั้งหมดใช่หรือไม่?\n(ข้อมูล Walk-in จะยังคงอยู่)";
+
+        if(!confirm(confirmMsg)) return;
+
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerText = "Wait...";
+        btn.disabled = true;
+
+        let newContent = [];
+        if (type === 'walkin') {
+            newContent = db_content.filter(item => item.orderType === 'booking');
+        } else if (type === 'booking') {
+            newContent = db_content.filter(item => item.orderType !== 'booking');
+        }
+
+        if (await saveToGithub(newContent)) {
+            showToast(`ล้างคิว ${type} เรียบร้อยแล้ว`, 'success');
+            refreshData();
+        } else {
+            showToast('เกิดข้อผิดพลาดในการล้างข้อมูล', 'error');
+        }
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+
     // --- UI RENDER ---
+    function createAdminCard(q, isServing = false) {
+        const isBooking = q.orderType === 'booking';
+        const timeDisplay = isBooking ? `📅 ${q.bookingDate || ''} | ⏰ ${q.bookingTime || '??:??'}` : `🕒 Walk-in (${q.timestamp.split('T')[1].slice(0,5)})`;
+        const timeColor = isBooking ? 'text-orange-400' : 'text-gray-400';
+
+        return `
+            <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
+                <div class="flex justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
+                        <div>
+                            <div class="text-white font-bold text-lg leading-tight">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
+                            <div class="text-xs ${timeColor} font-bold mt-0.5">${timeDisplay}</div>
+                        </div>
+                    </div>
+                    <span class="status-badge ${isServing ? 'status-serving' : (isBooking ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30' : 'status-waiting')}">
+                        ${isServing ? 'Serving' : (isBooking ? 'Booking' : 'Walk-in')}
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl mt-3">
+                    <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
+                    <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil || '-'}</span></div>
+                    <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
+                    <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
+                    ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution}</div>` : ''}
+                </div>
+
+                <div class="flex gap-2 justify-end items-center">
+                    ${q.status === 'Waiting' ? `
+                        <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-3 py-2 rounded-lg text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 ลัดคิว</button>
+                        <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">Start</button>
+                    ` : ''}
+                    ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">Done</button>` : ''}
+                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-3 py-2 rounded-lg text-xs transition-all">Del</button>
+                </div>
+            </div>`;
+    }
+
     function renderUI() {
         const serving = db_content.find(i => i.status === 'Serving');
         const waiting = db_content.filter(i => i.status === 'Waiting');
+        const waitingWalkin = waiting.filter(i => i.orderType !== 'booking'); 
+        const waitingBooking = waiting.filter(i => i.orderType === 'booking');
 
         const custQ = document.getElementById('cust-display-queue');
         const custN = document.getElementById('cust-display-name');
@@ -342,13 +520,18 @@
         if(custWaitingList) {
             custWaitingList.innerHTML = waiting.length ? '' : '<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">ขณะนี้ไม่มีคิวรอ...</div>';
             waiting.forEach(q => {
+                const isBooking = q.orderType === 'booking';
+                const isMe = q.id === myQueueId;
                 custWaitingList.innerHTML += `
-                    <div class="flex justify-between items-center p-5 bg-white/5 rounded-2xl animate-slide-in border border-white/5">
+                    <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl animate-slide-in border ${isMe ? 'border-purple-500 bg-purple-900/20' : 'border-white/5'}">
                         <div class="flex items-center gap-4">
-                            <div class="font-mono text-2xl font-bold text-white">${q.id}</div>
-                            <div class="text-gray-300 font-medium">${q.nickname}</div>
+                            <div class="font-mono text-2xl font-bold ${isMe ? 'text-purple-400' : 'text-white'}">${q.id}</div>
+                            <div>
+                                <div class="text-gray-300 font-medium text-sm">${q.nickname} ${isMe ? '(คุณ)' : ''}</div>
+                                ${isBooking ? `<div class="text-orange-400 text-[10px] font-bold">Booking: ${q.bookingTime}</div>` : ''}
+                            </div>
                         </div>
-                        <span class="status-badge status-waiting">Waiting</span>
+                        <span class="status-badge ${isBooking ? 'bg-orange-500/10 text-orange-300 border-orange-500/20' : 'status-waiting'}">${isBooking ? 'Booking' : 'Waiting'}</span>
                     </div>`;
             });
         }
@@ -359,42 +542,33 @@
             document.getElementById('count-waiting').innerText = waiting.length;
             document.getElementById('count-serving').innerText = serving ? 1 : 0;
             document.getElementById('count-total').innerText = db_content.length;
+            document.getElementById('badge-walkin').innerText = waitingWalkin.length;
+            document.getElementById('badge-booking').innerText = waitingBooking.length;
 
-            const adminList = document.getElementById('admin-order-list');
-            if(adminList) {
-                adminList.innerHTML = '';
-                // Render ตามลำดับใน Database (ซึ่งเราจัดการ Sort ตอน Save แล้ว หรือแสดงตามธรรมชาติ)
-                // แต่เพื่อให้ Serving ขึ้นก่อนเสมอในหน้า Admin:
-                const sorted = [...db_content].sort((a,b) => (a.status === 'Serving' ? -1 : 1));
-                
-                sorted.forEach(q => {
-                    const isServing = q.status === 'Serving';
-                    adminList.innerHTML += `
-                        <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
-                            <div class="flex justify-between mb-4">
-                                <div class="flex items-center gap-4">
-                                    <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
-                                    <div class="text-white font-bold text-lg">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
-                                </div>
-                                <span class="status-badge ${isServing ? 'status-serving' : 'status-waiting'}">${q.status}</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-5 bg-black/20 p-4 rounded-2xl">
-                                <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
-                                <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil || '-'}</span></div>
-                                <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
-                                <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
-                                <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
-                            </div>
-                            <div class="flex gap-3 justify-end items-center">
-                                ${q.status === 'Waiting' ? `
-                                    <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 ลัดคิว</button>
-                                    <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>
-                                ` : ''}
-                                ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">เสร็จงาน (Done)</button>` : ''}
-                                <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-xs transition-all">ลบ</button>
-                            </div>
-                        </div>`;
-                });
+            const walkinListEl = document.getElementById('admin-walkin-list');
+            walkinListEl.innerHTML = '';
+            if(serving && serving.orderType !== 'booking') {
+                 walkinListEl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+            }
+            if(waitingWalkin.length === 0 && (!serving || serving.orderType === 'booking')) {
+                walkinListEl.innerHTML = '<div class="text-gray-500 text-center py-8">ไม่มีคิว Walk-in</div>';
+            } else {
+                waitingWalkin.forEach(q => walkinListEl.innerHTML += createAdminCard(q));
+            }
+
+            const bookingListEl = document.getElementById('admin-booking-list');
+            bookingListEl.innerHTML = '';
+            if(serving && serving.orderType === 'booking') {
+                 bookingListEl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+            }
+            const sortedBookings = waitingBooking.sort((a,b) => {
+                if(a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
+                return a.bookingTime.localeCompare(b.bookingTime);
+            });
+            if(sortedBookings.length === 0 && (!serving || serving.orderType !== 'booking')) {
+                bookingListEl.innerHTML = '<div class="text-gray-500 text-center py-8">ไม่มีรายการ Booking</div>';
+            } else {
+                sortedBookings.forEach(q => bookingListEl.innerHTML += createAdminCard(q));
             }
         }
     }
@@ -402,11 +576,19 @@
     // --- LOGIC ---
     document.getElementById('customer-form').onsubmit = async (e) => {
         e.preventDefault();
+        
+        // ขออนุญาตแจ้งเตือนทันทีที่กดปุ่ม
+        if("Notification" in window && Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+
         const btn = document.getElementById('submit-btn');
         btn.disabled = true;
         btn.innerText = 'กำลังส่งข้อมูล...';
         const fd = new FormData(e.target);
+        
         const nextId = "Q-" + String(db_content.length + 1).padStart(3, '0');
+        
         const newEntry = {
             id: nextId,
             status: 'Waiting',
@@ -415,6 +597,12 @@
         };
         const updatedDB = [...db_content, newEntry];
         if (await saveToGithub(updatedDB)) {
+            // SAVE TO LOCAL STORAGE
+            localStorage.setItem('bloom_my_queue_id', nextId);
+            localStorage.setItem('bloom_my_queue_status', 'Waiting');
+            myQueueId = nextId;
+            lastKnownStatus = 'Waiting';
+
             showToast('ลงทะเบียนสำเร็จ! คิวของคุณคือ ' + nextId, 'success');
             e.target.reset();
             switchCustomerView('queue');
@@ -443,27 +631,36 @@
         }
     }
 
-    // --- SKIP QUEUE FUNCTION (NEW) ---
     async function skipQueue(id) {
-        // หา Item ที่จะลัดคิว
         const itemToSkip = db_content.find(i => i.id === id);
         if (!itemToSkip) return;
-
-        // แยกกลุ่มข้อมูล
         const serving = db_content.filter(i => i.status === 'Serving');
         const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
         const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
-
-        // เรียงใหม่: Serving -> [คนที่ลัดคิว] -> Waiting ที่เหลือ -> อื่นๆ
         const newOrder = [...serving, itemToSkip, ...waiting, ...others];
-
         if (await saveToGithub(newOrder)) {
             showToast(`🚀 ลัดคิว ${id} ขึ้นนำหน้าเรียบร้อย`, 'success');
             refreshData();
         }
     }
 
-    // --- SETTINGS LOGIC ---
+    // --- ADMIN TABS LOGIC ---
+    function switchAdminTab(tab) {
+        activeAdminTab = tab;
+        const tWalkin = document.getElementById('admin-tab-walkin');
+        const tBooking = document.getElementById('admin-tab-booking');
+        const lWalkin = document.getElementById('admin-walkin-list');
+        const lBooking = document.getElementById('admin-booking-list');
+
+        if(tab === 'walkin') {
+            tWalkin.classList.add('active'); tBooking.classList.remove('active');
+            lWalkin.classList.remove('hidden-elm'); lBooking.classList.add('hidden-elm');
+        } else {
+            tBooking.classList.add('active'); tWalkin.classList.remove('active');
+            lBooking.classList.remove('hidden-elm'); lWalkin.classList.add('hidden-elm');
+        }
+    }
+
     function toggleSettings() {
         const p = document.getElementById('settings-panel');
         p.classList.toggle('hidden-elm');
@@ -473,7 +670,6 @@
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');
         if(!dot || !text) return;
-        
         if(state === 'error') {
             dot.className = 'w-2 h-2 rounded-full bg-red-500';
             text.innerText = `Offline (${code})`;
@@ -485,7 +681,6 @@
         }
     }
 
-    // --- NAVIGATION HELPERS ---
     function showPage(page) {
         activePage = page;
         if (page === 'admin') {
