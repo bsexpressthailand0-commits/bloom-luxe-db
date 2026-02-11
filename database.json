@@ -62,5 +62,21 @@
     "massagePressure": "กลาง Medium",
     "headPressure": "กลาง Medium",
     "caution": ""
+  },
+  {
+    "id": "Q-005",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T09:26:51.315Z",
+    "orderType": "booking",
+    "bookingDate": "2026-02-12",
+    "bookingTime": "16:26",
+    "nickname": "น้ำใจ",
+    "gender": "หญิง (Female)",
+    "waterTemp": "เย็น",
+    "oil": "White Tea",
+    "shampoo": "Honey sunset",
+    "massagePressure": "หนัก Strong",
+    "headPressure": "หนัก Strong",
+    "caution": ""
   }
 ]
