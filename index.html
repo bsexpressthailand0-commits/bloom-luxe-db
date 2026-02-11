@@ -10,54 +10,22 @@
     body { box-sizing: border-box; font-family: 'Prompt', sans-serif; }
     
     /* Animation */
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
     
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
-      50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); }
-    }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }
     .queue-active { animation: pulse-glow 2s infinite; border: 1px solid rgba(139, 92, 246, 0.5); }
     
-    @keyframes blink-green {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.4; }
-    }
+    @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .live-dot { animation: blink-green 2s infinite; }
 
     /* Glass Effect */
-    .glass-panel {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255,255,255,0.05);
-    }
-    .glass-input {
-        width: 100%;
-        padding: 12px 16px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(139, 92, 246, 0.3);
-        color: white;
-        outline: none;
-        transition: all 0.3s;
-    }
+    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+    .glass-input { width: 100%; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: white; outline: none; transition: all 0.3s; }
     .glass-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
     
     /* Radio Box */
-    .radio-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+    .radio-box { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s; }
     .radio-box:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(139, 92, 246, 0.4); }
     .radio-box input:checked + span { color: #d8b4fe; font-weight: 600; }
     
@@ -87,8 +55,9 @@
             <div class="flex flex-col">
                 <span class="text-white font-bold tracking-wider hidden md:block leading-tight">BLOOM LUXE</span>
                 <div class="flex items-center gap-1.5" id="live-indicator">
-                    <div class="w-2 h-2 rounded-full bg-green-500 live-dot"></div>
-                    <span class="text-[10px] text-green-400 font-medium uppercase tracking-widest">Live System</span>
+                    <!-- ID แก้ไขแล้วเพื่อป้องกัน Error -->
+                    <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <span id="status-text" class="text-[10px] text-yellow-400 font-medium uppercase tracking-widest">Checking...</span>
                 </div>
             </div>
         </div>
@@ -219,7 +188,7 @@
         <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border border-purple-500/30">
             <div class="flex justify-between items-center mb-4">
                 <h4 class="text-white font-bold text-sm">GitHub Configuration</h4>
-                <button onclick="clearToken()" class="text-[10px] text-red-400">ล้างรหัส Token</button>
+                <div class="text-[10px] text-gray-400">Token Status: <span id="current-token-display">...</span></div>
             </div>
             <div class="space-y-3">
                 <div>
@@ -262,11 +231,12 @@
     // ดึง Token จาก Local Storage
     const getAuthToken = () => localStorage.getItem('bloom_luxe_token') || '';
 
-    const getHeaders = () => ({
-        'Authorization': `token ${getAuthToken()}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-    });
+    const getHeaders = () => {
+        const token = getAuthToken();
+        const headers = { 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+        if(token) headers['Authorization'] = `token ${token}`;
+        return headers;
+    };
 
     let db_sha = '';
     let db_content = [];
@@ -275,23 +245,21 @@
 
     window.onload = () => {
         // เตรียมค่า Token ในช่อง Input
-        document.getElementById('db-token-input').value = getAuthToken();
+        const input = document.getElementById('db-token-input');
+        if(input) input.value = getAuthToken();
         
+        updateTokenDisplay();
         refreshData();
         setInterval(refreshData, 5000); // Auto-refresh ทุก 5 วินาที
     };
 
     async function refreshData() {
         if (isFetching) return;
-        const token = getAuthToken();
-        if (!token) {
-            updateStatusIcon('error');
-            return;
-        }
-
         isFetching = true;
-        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
         
+        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+        console.log("Fetching URL:", url);
+
         try {
             const res = await fetch(`${url}?t=${Date.now()}`, { headers: getHeaders() });
             if (res.ok) {
@@ -302,17 +270,19 @@
                 renderUI();
                 updateStatusIcon('live');
             } else {
-                updateStatusIcon('error');
+                console.error("Fetch Error:", res.status);
+                updateStatusIcon('error', res.status);
             }
         } catch (e) {
             console.error(e);
-            updateStatusIcon('error');
+            updateStatusIcon('error', 'NET');
         } finally {
             isFetching = false;
         }
     }
 
     async function saveToGithub(newContent) {
+        if(!getAuthToken()) { showToast("Missing Token!", "error"); return false; }
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
         try {
             const res = await fetch(url, {
@@ -332,25 +302,29 @@
 
     // --- UI RENDER ---
     function renderUI() {
-        const waiting = db_content.filter(i => i.status === 'Waiting');
         const serving = db_content.find(i => i.status === 'Serving');
+        const waiting = db_content.filter(i => i.status === 'Waiting');
 
         // Customer View
-        document.getElementById('cust-display-queue').innerText = serving ? serving.id : '-';
-        document.getElementById('cust-display-name').innerText = serving ? serving.nickname : 'ยังไม่มีคิวบริการในขณะนี้';
+        const custQ = document.getElementById('cust-display-queue');
+        const custN = document.getElementById('cust-display-name');
+        if(custQ) custQ.innerText = serving ? serving.id : '-';
+        if(custN) custN.innerText = serving ? serving.nickname : 'ยังไม่มีคิวบริการในขณะนี้';
 
         const custWaitingList = document.getElementById('cust-waiting-list');
-        custWaitingList.innerHTML = waiting.length ? '' : '<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">ขณะนี้ไม่มีคิวรอ...</div>';
-        waiting.forEach(q => {
-            custWaitingList.innerHTML += `
-                <div class="flex justify-between items-center p-5 bg-white/5 rounded-2xl animate-slide-in border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="font-mono text-2xl font-bold text-white">${q.id}</div>
-                        <div class="text-gray-300 font-medium">${q.nickname}</div>
-                    </div>
-                    <span class="status-badge status-waiting">Waiting</span>
-                </div>`;
-        });
+        if(custWaitingList) {
+            custWaitingList.innerHTML = waiting.length ? '' : '<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">ขณะนี้ไม่มีคิวรอ...</div>';
+            waiting.forEach(q => {
+                custWaitingList.innerHTML += `
+                    <div class="flex justify-between items-center p-5 bg-white/5 rounded-2xl animate-slide-in border border-white/5">
+                        <div class="flex items-center gap-4">
+                            <div class="font-mono text-2xl font-bold text-white">${q.id}</div>
+                            <div class="text-gray-300 font-medium">${q.nickname}</div>
+                        </div>
+                        <span class="status-badge status-waiting">Waiting</span>
+                    </div>`;
+            });
+        }
 
         // Admin View
         if (activePage === 'admin') {
@@ -361,36 +335,37 @@
             document.getElementById('count-total').innerText = db_content.length;
 
             const adminList = document.getElementById('admin-order-list');
-            adminList.innerHTML = '';
-            
-            // เรียงลำดับ Serving ขึ้นก่อน
-            const sorted = [...db_content].sort((a,b) => (a.status === 'Serving' ? -1 : 1));
-            
-            sorted.forEach(q => {
-                const isServing = q.status === 'Serving';
-                adminList.innerHTML += `
-                    <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
-                        <div class="flex justify-between mb-4">
-                            <div class="flex items-center gap-4">
-                                <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
-                                <div class="text-white font-bold text-lg">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
+            if(adminList) {
+                adminList.innerHTML = '';
+                // เรียงลำดับ Serving ขึ้นก่อน
+                const sorted = [...db_content].sort((a,b) => (a.status === 'Serving' ? -1 : 1));
+                
+                sorted.forEach(q => {
+                    const isServing = q.status === 'Serving';
+                    adminList.innerHTML += `
+                        <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
+                            <div class="flex justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
+                                    <div class="text-white font-bold text-lg">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
+                                </div>
+                                <span class="status-badge ${isServing ? 'status-serving' : 'status-waiting'}">${q.status}</span>
                             </div>
-                            <span class="status-badge ${isServing ? 'status-serving' : 'status-waiting'}">${q.status}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-5 bg-black/20 p-4 rounded-2xl">
-                            <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp}</span></div>
-                            <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil}</span></div>
-                            <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure}</span></div>
-                            <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure}</span></div>
-                            <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
-                        </div>
-                        <div class="flex gap-3 justify-end">
-                            ${q.status === 'Waiting' ? `<button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>` : ''}
-                            ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">เสร็จงาน (Done)</button>` : ''}
-                            <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-xs transition-all">ลบ</button>
-                        </div>
-                    </div>`;
-            });
+                            <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-5 bg-black/20 p-4 rounded-2xl">
+                                <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
+                                <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil || '-'}</span></div>
+                                <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
+                                <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
+                                <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution || 'ไม่มี'}</div>
+                            </div>
+                            <div class="flex gap-3 justify-end">
+                                ${q.status === 'Waiting' ? `<button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">เรียกคิว (Start)</button>` : ''}
+                                ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-5 py-2.5 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">เสร็จงาน (Done)</button>` : ''}
+                                <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2.5 rounded-xl text-xs transition-all">ลบ</button>
+                            </div>
+                        </div>`;
+                });
+            }
         }
     }
 
@@ -457,6 +432,7 @@
         const val = document.getElementById('db-token-input').value.trim();
         if (val) {
             localStorage.setItem('bloom_luxe_token', val);
+            updateTokenDisplay();
             showToast('บันทึกรหัสสำเร็จ', 'success');
             toggleSettings();
             refreshData();
@@ -464,11 +440,26 @@
             showToast('กรุณากรอกรหัส Token', 'error');
         }
     }
+    
+    function updateTokenDisplay() {
+        const t = getAuthToken();
+        const d = document.getElementById('current-token-display');
+        if(d) d.innerText = t ? t.substring(0,6) + '...' : 'None';
+    }
 
-    function clearToken() {
-        if(confirm('ต้องการล้างรหัส Token ใช่หรือไม่?')) {
-            localStorage.removeItem('bloom_luxe_token');
-            location.reload();
+    function updateStatusIcon(state, code = '') {
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        if(!dot || !text) return; // ถ้าหาไม่เจอให้หยุดทำงาน ไม่ต้อง error
+        
+        if(state === 'error') {
+            dot.className = 'w-2 h-2 rounded-full bg-red-500';
+            text.innerText = `Offline (${code})`;
+            text.className = 'text-[10px] text-red-400 uppercase tracking-widest';
+        } else {
+            dot.className = 'w-2 h-2 rounded-full bg-green-500 live-dot';
+            text.innerText = 'Live System';
+            text.className = 'text-[10px] text-green-400 uppercase tracking-widest';
         }
     }
 
@@ -543,19 +534,6 @@
         el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm shadow-2xl pointer-events-auto ${t==='success'?'bg-green-600/90':'bg-red-600/90'}`;
         el.innerText = m; c.appendChild(el);
         setTimeout(() => el.remove(), 4000);
-    }
-
-    function updateStatusIcon(s) {
-        const d = document.querySelector('.live-dot'), t = document.querySelector('#live-indicator span');
-        if (s==='error') { 
-            d.className='w-2 h-2 rounded-full bg-red-500'; 
-            t.innerText='Database Offline'; 
-            t.className='text-[10px] text-red-400 uppercase tracking-widest'; 
-        } else { 
-            d.className='w-2 h-2 rounded-full bg-green-500 live-dot'; 
-            t.innerText='Live System'; 
-            t.className='text-[10px] text-green-400 uppercase tracking-widest'; 
-        }
     }
   </script>
  </body>
