@@ -14,5 +14,21 @@
     "massagePressure": "หนัก Strong",
     "headPressure": "หนัก Strong",
     "caution": ""
+  },
+  {
+    "id": "Q-002",
+    "status": "Waiting",
+    "timestamp": "2026-02-11T09:00:42.161Z",
+    "orderType": "walkin",
+    "bookingDate": "",
+    "bookingTime": "",
+    "nickname": "เจม",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Marigold",
+    "shampoo": "Pink Gold",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
