@@ -1,18 +1,1 @@
-[
-  {
-    "id": "Q-001",
-    "status": "Serving",
-    "timestamp": "2026-02-11T08:22:24.941Z",
-    "orderType": "walkin",
-    "bookingDate": "",
-    "bookingTime": "",
-    "nickname": "แสง",
-    "gender": "ชาย (Male)",
-    "waterTemp": "อุ่น",
-    "oil": "Jasmine Rice",
-    "shampoo": "Pink Gold",
-    "massagePressure": "กลาง Medium",
-    "headPressure": "กลาง Medium",
-    "caution": ""
-  }
-]
+[]
