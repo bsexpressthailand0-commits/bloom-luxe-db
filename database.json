@@ -1,18 +1,1 @@
-[
-  {
-    "id": "Q-003",
-    "status": "Waiting",
-    "timestamp": "2026-02-11T08:58:15.268Z",
-    "orderType": "walkin",
-    "bookingDate": "",
-    "bookingTime": "",
-    "nickname": "น้ำใจ",
-    "gender": "ชาย (Male)",
-    "waterTemp": "เย็น",
-    "oil": "White Tea",
-    "shampoo": "Honey sunset",
-    "massagePressure": "เบา Gentle",
-    "headPressure": "กลาง Medium",
-    "caution": ""
-  }
-]
+[]
