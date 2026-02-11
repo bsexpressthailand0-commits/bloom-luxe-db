@@ -1,17 +1,1 @@
-[
-  {
-    "id": "Q-002",
-    "status": "Serving",
-    "timestamp": "2026-02-11T07:40:39.846Z",
-    "orderType": "walkin",
-    "bookingDate": "",
-    "bookingTime": "",
-    "nickname": "เชน",
-    "gender": "ชาย (Male)",
-    "waterTemp": "อุ่น",
-    "oil": "Orchid",
-    "massagePressure": "กลาง",
-    "headPressure": "หนัก",
-    "caution": ""
-  }
-]
+[]
