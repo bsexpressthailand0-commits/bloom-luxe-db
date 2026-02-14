@@ -81,7 +81,7 @@
   },
   {
     "id": "Q-006",
-    "status": "Waiting",
+    "status": "Serving",
     "timestamp": "2026-02-11T15:25:52.647Z",
     "orderType": "walkin",
     "bookingDate": "",
