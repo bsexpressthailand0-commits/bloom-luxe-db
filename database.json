@@ -37,7 +37,7 @@
   },
   {
     "id": "Q-003",
-    "status": "Serving",
+    "status": "Completed",
     "timestamp": "2026-02-16T06:13:16.563Z",
     "orderType": "booking",
     "lineUserId": "",
