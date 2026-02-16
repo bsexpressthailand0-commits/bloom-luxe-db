@@ -34,5 +34,23 @@
     "massagePressure": "กลาง Medium",
     "headPressure": "กลาง Medium",
     "caution": ""
+  },
+  {
+    "id": "Q-003",
+    "status": "Waiting",
+    "timestamp": "2026-02-16T06:13:16.563Z",
+    "orderType": "booking",
+    "lineUserId": "",
+    "course": "60 min",
+    "bookingDate": "2026-02-17",
+    "bookingTime": "13:00",
+    "nickname": "เก่ง",
+    "gender": "ชาย (Male)",
+    "waterTemp": "เย็น",
+    "oil": "Marigold",
+    "shampoo": "Chance rich",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
