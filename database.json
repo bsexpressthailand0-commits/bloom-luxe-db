@@ -88,5 +88,23 @@
     "massagePressure": "เบา Gentle",
     "headPressure": "เบา Gentle",
     "caution": ""
+  },
+  {
+    "id": "Q-006",
+    "status": "Waiting",
+    "timestamp": "2026-02-16T06:21:19.945Z",
+    "orderType": "booking",
+    "lineUserId": "",
+    "course": "60 min",
+    "bookingDate": "2026-02-17",
+    "bookingTime": "13:30",
+    "nickname": "ดาม",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Jasmine Rice",
+    "shampoo": "Chance rich",
+    "massagePressure": "เบา Gentle",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
