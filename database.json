@@ -91,7 +91,7 @@
   },
   {
     "id": "Q-006",
-    "status": "Waiting",
+    "status": "Serving",
     "timestamp": "2026-02-16T06:21:19.945Z",
     "orderType": "booking",
     "lineUserId": "",
