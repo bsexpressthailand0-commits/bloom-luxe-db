@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="th" class="h-full">
+<html lang="en" class="h-full">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -64,10 +64,10 @@
         <div class="flex gap-2 shrink-0 items-center">
             <!-- Language Switcher -->
             <button onclick="toggleLanguage()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-all">
-                <span id="lang-display">TH</span>
+                <span id="lang-display">EN</span>
             </button>
-            <button onclick="showPage('customer')" id="nav-customer" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap" data-i18n="nav_customer">ลูกค้า</button>
-            <button onclick="showPage('admin')" id="nav-admin" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 hover:text-white whitespace-nowrap" data-i18n="nav_staff">พนักงาน</button>
+            <button onclick="showPage('customer')" id="nav-customer" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap" data-i18n="nav_customer">Customer</button>
+            <button onclick="showPage('admin')" id="nav-admin" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 hover:text-white whitespace-nowrap" data-i18n="nav_staff">Staff</button>
         </div>
     </nav>
 
@@ -77,12 +77,12 @@
       <div class="glass-panel rounded-3xl p-5 md:p-6 mb-6 text-center relative overflow-hidden">
          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
          <h2 class="text-xl font-bold text-white mb-1">BLOOM LUXE SALON</h2>
-         <p class="text-purple-200/70 text-sm" data-i18n="header_subtitle">แบบทดสอบความต้องการ Your Needs Test</p>
+         <p class="text-purple-200/70 text-sm" data-i18n="header_subtitle">Your Needs Test</p>
       </div>
 
       <div class="flex gap-3 md:gap-4 mb-6">
-          <button onclick="switchCustomerView('form')" id="btn-view-form" class="flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base" data-i18n="btn_register">📝 ลงทะเบียน</button>
-          <button onclick="switchCustomerView('queue')" id="btn-view-queue" class="flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base" data-i18n="btn_queue_status">👀 สถานะคิว</button>
+          <button onclick="switchCustomerView('form')" id="btn-view-form" class="flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base" data-i18n="btn_register">📝 Register</button>
+          <button onclick="switchCustomerView('queue')" id="btn-view-queue" class="flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base" data-i18n="btn_queue_status">👀 Queue Status</button>
       </div>
 
       <!-- 1. Form View -->
@@ -90,7 +90,7 @@
         <form id="customer-form" class="space-y-6 md:space-y-8">
             <div class="flex bg-black/20 p-1.5 rounded-2xl">
                 <button type="button" onclick="switchFormTab('walkin')" id="tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">🚶 Walk-in</button>
-                <button type="button" onclick="switchFormTab('booking')" id="tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn" data-i18n="tab_booking">📅 จองคิว</button>
+                <button type="button" onclick="switchFormTab('booking')" id="tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn" data-i18n="tab_booking">📅 Booking</button>
             </div>
             <input type="hidden" id="form-order-type" name="orderType" value="walkin">
 
@@ -101,13 +101,13 @@
                     
                     <div class="flex items-center gap-2 mb-4 text-purple-300">
                         <span class="text-xl">📅</span>
-                        <span class="font-bold text-sm" data-i18n="booking_title">ระบุเวลานัดหมาย (Booking)</span>
+                        <span class="font-bold text-sm" data-i18n="booking_title">Specify Appointment Time</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Date Input -->
                         <div class="relative group w-full">
-                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_date">วันที่ (Date)</label>
+                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_date">Date</label>
                             <div class="relative w-full">
                                 <input type="date" name="bookingDate" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer">
                                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
@@ -118,7 +118,7 @@
 
                         <!-- Time Input -->
                         <div class="relative group w-full">
-                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_time">เวลา (Time)</label>
+                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_time">Time</label>
                             <div class="relative w-full">
                                 <input type="time" name="bookingTime" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer">
                                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
@@ -129,51 +129,51 @@
                     </div>
                     
                     <div class="mt-3 text-[10px] text-gray-400 text-center bg-black/20 rounded-lg py-2 px-3 border border-white/5" data-i18n="booking_note">
-                        *กรุณามาก่อนเวลานัดหมาย 10 นาที
+                        *Please arrive 10 minutes before appointment.
                     </div>
                 </div>
             </div>
 
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-2" data-i18n="label_nickname">ชื่อเล่น / Nickname</label>
-                <input type="text" name="nickname" required class="glass-input w-full" placeholder="กรุณากรอกชื่อเล่น..." data-i18n-placeholder="placeholder_nickname">
+                <label class="block text-purple-200 text-sm mb-2" data-i18n="label_nickname">Nickname</label>
+                <input type="text" name="nickname" required class="glass-input w-full" placeholder="Enter your nickname..." data-i18n-placeholder="placeholder_nickname">
             </div>
 
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-2" data-i18n="label_gender">เพศ (Gender)</label>
+                <label class="block text-purple-200 text-sm mb-2" data-i18n="label_gender">Gender</label>
                 <div class="flex gap-3 w-full">
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="ชาย (Male)" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="gender_male">ชาย</span></label>
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="หญิง (Female)" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="gender_female">หญิง</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="ชาย (Male)" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="gender_male">Male</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="หญิง (Female)" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="gender_female">Female</span></label>
                 </div>
             </div>
 
             <!-- NEW COURSE SECTION -->
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-3" data-i18n="label_course">⏱️ ระยะเวลา (Course)</label>
+                <label class="block text-purple-200 text-sm mb-3" data-i18n="label_course">⏱️ Duration (Course)</label>
                 <div class="flex gap-3 w-full">
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="60 min" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="course_60">60 นาที</span></label>
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="90 min" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="course_90">90 นาที</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="60 min" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="course_60">60 min</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="90 min" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="course_90">90 min</span></label>
                 </div>
             </div>
 
             <div class="space-y-6 w-full">
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_water_temp">🌡️ อุณหภูมิของน้ำ/Water temperature</label>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_water_temp">🌡️ Water Temperature</label>
                     <div class="flex gap-3 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="อุ่น" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="temp_warm">อุ่น</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="เย็น" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="temp_cold">เย็น</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="อุ่น" required class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="temp_warm">Warm</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="เย็น" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="temp_cold">Cold</span></label>
                     </div>
                  </div>
                  
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_oil">🌿 กลิ่นน้ำมันอโรม่า/Signature Oil Massage</label>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_oil">🌿 Signature Oil Massage</label>
                     <div class="grid grid-cols-2 gap-3 w-full">
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_jasmine">น้ำมันข้าว</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="White Tea" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_white_tea">ชาขาว</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Marigold" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_marigold">ดอกดาวเรือง</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_orchid">กล้วยไม้</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_jasmine">Jasmine Rice</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="White Tea" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_white_tea">White Tea</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Marigold" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_marigold">Marigold</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_orchid">Orchid</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_shampoo">🧴 กลิ่นแชมพูสระผม/The scent of shampoo</label>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_shampoo">🧴 The Scent of Shampoo</label>
                     <div class="grid grid-cols-2 gap-3 w-full">
                         <label class="radio-box w-full"><input type="radio" name="shampoo" value="Chance rich" required class="accent-purple-500"><span class="text-gray-300 text-xs">Chance rich</span></label>
                         <label class="radio-box w-full"><input type="radio" name="shampoo" value="Honey sunset" class="accent-purple-500"><span class="text-gray-300 text-xs">Honey sunset</span></label>
@@ -181,29 +181,29 @@
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_massage_pressure">💆 น้ำหนักมือในการนวด/Levels of massage</label>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_massage_pressure">💆 Levels of Massage</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">เบา</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_medium">กลาง</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">หนัก</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_medium">Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">Strong</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_head_pressure">💆‍♀️ น้ำหนักมือในการเกาศีรษะ/Level of pressure hair</label>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_head_pressure">💆‍♀️ Level of Pressure Hair</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">เบา</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_medium">กลาง</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">หนัก</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="กลาง Medium" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_medium">Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">Strong</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-2" data-i18n="label_caution">⚠️ จุดที่ควรระวังเป็นพิเศษ</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="เช่น แผลผ่าตัด, ผิวแพ้ง่าย..." data-i18n-placeholder="placeholder_caution"></textarea></div>
+                 <div class="w-full"><label class="block text-purple-200 text-sm mb-2" data-i18n="label_caution">⚠️ Special Caution Areas</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin..." data-i18n-placeholder="placeholder_caution"></textarea></div>
             </div>
 
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02]">
-                <span id="submit-text" data-i18n="btn_confirm">✅ ยืนยันคิวบริการ (แจ้งเตือนผ่านมือถือ)</span>
+                <span id="submit-text" data-i18n="btn_confirm">✅ Confirm Service</span>
             </button>
-            <div class="text-[10px] text-purple-300 text-center mt-2 opacity-70" data-i18n="consent_text">*ระบบจะขออนุญาตส่งการแจ้งเตือนเพื่อให้คุณทราบเมื่อถึงคิว</div>
+            <div class="text-[10px] text-purple-300 text-center mt-2 opacity-70" data-i18n="consent_text">*Allow notifications to be alerted when it's your queue.</div>
         </form>
       </div>
 
@@ -215,9 +215,9 @@
             <div class="text-xl text-white font-bold" id="cust-display-name">...</div>
           </div>
 
-          <h3 class="text-white font-bold mb-4 flex items-center gap-2"><span>⏳</span> <span data-i18n="waiting_queue_title">คิวที่กำลังรอ</span></h3>
+          <h3 class="text-white font-bold mb-4 flex items-center gap-2"><span>⏳</span> <span data-i18n="waiting_queue_title">Waiting Queue</span></h3>
           <div id="cust-waiting-list" class="space-y-3">
-              <div class="text-center text-gray-500 py-4" data-i18n="loading">กำลังโหลดข้อมูลคิว...</div>
+              <div class="text-center text-gray-500 py-4" data-i18n="loading">Loading queue data...</div>
           </div>
       </div>
     </div>
@@ -238,7 +238,7 @@
 
         <!-- System Settings Section -->
         <div class="mb-4 flex justify-between items-center px-2">
-            <h3 class="text-white font-bold" data-i18n="admin_manage_title">📋 จัดการคิว (Management)</h3>
+            <h3 class="text-white font-bold" data-i18n="admin_manage_title">📋 Queue Management</h3>
             <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ Config</button>
         </div>
 
@@ -265,14 +265,14 @@
                     <div class="grid grid-cols-2 gap-3 mb-2">
                         <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
                             <span class="text-lg">🗑️🚶</span> 
-                            <span data-i18n="reset_walkin">ล้าง Walk-in</span>
+                            <span data-i18n="reset_walkin">Reset Walk-in</span>
                         </button>
                         <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-500/10 text-orange-400 hover:bg-orange-600 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
                             <span class="text-lg">🗑️📅</span> 
-                            <span data-i18n="reset_booking">ล้าง Booking</span>
+                            <span data-i18n="reset_booking">Reset Booking</span>
                         </button>
                     </div>
-                    <div class="text-[10px] text-gray-500 text-center" data-i18n="reset_note">กดเมื่อต้องการเริ่มวันใหม่ (ข้อมูลจะหายไปถาวร)</div>
+                    <div class="text-[10px] text-gray-500 text-center" data-i18n="reset_note">Press to start a new day (Data will be lost)</div>
                 </div>
             </div>
         </div>
@@ -351,14 +351,36 @@
         return headers;
     };
 
-    let db_sha = '';
-    let db_content = [];
-    let activePage = 'customer';
-    let activeAdminTab = 'walkin';
-    let isFetching = false;
-    let myQueueId = localStorage.getItem('bloom_my_queue_id'); // Load saved queue ID
-    let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
-    
+    // ปรับค่าเริ่มต้นเป็น 'en' และใช้ Key ใหม่เพื่อบังคับ Reset ค่า
+    let currentLang = localStorage.getItem('bloom_lang_new') || 'en';
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'th' ? 'en' : 'th';
+        localStorage.setItem('bloom_lang_new', currentLang);
+        applyLanguage();
+        renderUI(); // Re-render to update Admin cards content
+    }
+
+    function applyLanguage() {
+        document.getElementById('lang-display').innerText = currentLang.toUpperCase();
+        
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (TRANSLATIONS[currentLang][key]) {
+                el.innerText = TRANSLATIONS[currentLang][key];
+            }
+        });
+
+        const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+        placeholders.forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (TRANSLATIONS[currentLang][key]) {
+                el.placeholder = TRANSLATIONS[currentLang][key];
+            }
+        });
+    }
+
     // --- LANGUAGE SYSTEM ---
     const TRANSLATIONS = {
         th: {
@@ -406,7 +428,16 @@
             admin_manage_title: "📋 จัดการคิว (Management)",
             reset_walkin: "ล้าง Walk-in",
             reset_booking: "ล้าง Booking",
-            reset_note: "กดเมื่อต้องการเริ่มวันใหม่ (ข้อมูลจะหายไปถาวร)"
+            reset_note: "กดเมื่อต้องการเริ่มวันใหม่ (ข้อมูลจะหายไปถาวร)",
+            
+            // Admin Card Labels
+            admin_label_course: "คอร์ส",
+            admin_label_water: "น้ำ",
+            admin_label_oil: "กลิ่น",
+            admin_label_shampoo: "แชมพู",
+            admin_label_massage: "นวด",
+            admin_label_head: "หัว",
+            admin_label_caution: "จุดระวัง"
         },
         en: {
             nav_customer: "Customer",
@@ -453,40 +484,26 @@
             admin_manage_title: "📋 Queue Management",
             reset_walkin: "Reset Walk-in",
             reset_booking: "Reset Booking",
-            reset_note: "Press to start a new day (Data will be lost)"
+            reset_note: "Press to start a new day (Data will be lost)",
+
+            // Admin Card Labels
+            admin_label_course: "Course",
+            admin_label_water: "Water",
+            admin_label_oil: "Scent",
+            admin_label_shampoo: "Shampoo",
+            admin_label_massage: "Massage",
+            admin_label_head: "Head",
+            admin_label_caution: "Caution"
         }
     };
 
-    let currentLang = localStorage.getItem('bloom_lang') || 'th';
-
-    function toggleLanguage() {
-        currentLang = currentLang === 'th' ? 'en' : 'th';
-        localStorage.setItem('bloom_lang', currentLang);
-        applyLanguage();
-    }
-
-    function applyLanguage() {
-        document.getElementById('lang-display').innerText = currentLang.toUpperCase();
-        
-        const elements = document.querySelectorAll('[data-i18n]');
-        elements.forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (TRANSLATIONS[currentLang][key]) {
-                el.innerText = TRANSLATIONS[currentLang][key];
-            }
-        });
-
-        const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
-        placeholders.forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (TRANSLATIONS[currentLang][key]) {
-                el.placeholder = TRANSLATIONS[currentLang][key];
-            }
-        });
-        
-        // Update dynamic content if necessary (re-render lists)
-        renderUI();
-    }
+    let db_sha = '';
+    let db_content = [];
+    let activePage = 'customer';
+    let activeAdminTab = 'walkin';
+    let isFetching = false;
+    let myQueueId = localStorage.getItem('bloom_my_queue_id'); // Load saved queue ID
+    let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
 
     window.onload = () => {
         const ownerInput = document.getElementById('db-owner-input');
@@ -682,6 +699,9 @@
         const isBooking = q.orderType === 'booking';
         const timeDisplay = isBooking ? `📅 ${q.bookingDate || ''} | ⏰ ${q.bookingTime || '??:??'}` : `🕒 Walk-in (${q.timestamp.split('T')[1].slice(0,5)})`;
         const timeColor = isBooking ? 'text-orange-400' : 'text-gray-400';
+        
+        // Use Dynamic Translations
+        const t = TRANSLATIONS[currentLang];
 
         return `
             <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isServing ? 'border-purple-500/50 bg-purple-500/10' : ''}">
@@ -699,18 +719,18 @@
                 </div>
                 
                 <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl mt-3">
-                    <div>⏱️ คอร์ส: <span class="text-white font-medium">${q.course || '-'}</span></div>
-                    <div>🌡️ น้ำ: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
-                    <div>🌿 กลิ่น: <span class="text-white font-medium">${q.oil || '-'}</span></div>
-                    <div>🧴 แชมพู: <span class="text-white font-medium">${q.shampoo || '-'}</span></div>
-                    <div>💆 นวด: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
-                    <div>💆‍♀️ หัว: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
-                    ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ จุดระวัง: ${q.caution}</div>` : ''}
+                    <div>⏱️ ${t.admin_label_course}: <span class="text-white font-medium">${q.course || '-'}</span></div>
+                    <div>🌡️ ${t.admin_label_water}: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
+                    <div>🌿 ${t.admin_label_oil}: <span class="text-white font-medium">${q.oil || '-'}</span></div>
+                    <div>🧴 ${t.admin_label_shampoo}: <span class="text-white font-medium">${q.shampoo || '-'}</span></div>
+                    <div>💆 ${t.admin_label_massage}: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
+                    <div>💆‍♀️ ${t.admin_label_head}: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
+                    ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ ${t.admin_label_caution}: ${q.caution}</div>` : ''}
                 </div>
 
                 <div class="flex gap-2 justify-end items-center">
                     ${q.status === 'Waiting' ? `
-                        <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-3 py-2 rounded-lg text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 ลัดคิว</button>
+                        <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-3 py-2 rounded-lg text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 ${currentLang==='th'?'ลัดคิว':'Skip'}</button>
                         <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">Start</button>
                     ` : ''}
                     ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">Done</button>` : ''}
