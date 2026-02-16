@@ -16,5 +16,23 @@
     "massagePressure": "เบา Gentle",
     "headPressure": "เบา Gentle",
     "caution": ""
+  },
+  {
+    "id": "Q-002",
+    "status": "Waiting",
+    "timestamp": "2026-02-16T06:12:47.666Z",
+    "orderType": "booking",
+    "lineUserId": "",
+    "course": "60 min",
+    "bookingDate": "2026-02-17",
+    "bookingTime": "19:00",
+    "nickname": "ดาม",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Orchid",
+    "shampoo": "Honey sunset",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
