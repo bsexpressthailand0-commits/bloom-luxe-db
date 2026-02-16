@@ -55,7 +55,7 @@
   },
   {
     "id": "Q-004",
-    "status": "Waiting",
+    "status": "Serving",
     "timestamp": "2026-02-16T06:13:48.890Z",
     "orderType": "walkin",
     "lineUserId": "",
