@@ -478,10 +478,19 @@
         
         if (await saveToGithub(updatedDB)) { 
             showToast('Status Updated', 'success'); 
-            if (newStatus === 'Serving' && item && item.lineUserId) {
-                const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ\nIt's your turn! Please come to the service point.`;
-                sendLineNotification(item.lineUserId, msg);
+            
+            // Notification Logic
+            if (item && item.lineUserId) {
+                if (newStatus === 'Serving') {
+                    const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ\nIt's your turn! Please come to the service point.`;
+                    sendLineNotification(item.lineUserId, msg);
+                } else if (newStatus === 'Done') {
+                    // ✅ NEW: Thank you message
+                    const msg = `🌸 ขอบคุณที่ใช้บริการ BLOOM LUXE SALON ค่ะ (${item.id})\n\nหวังว่าจะได้ดูแลคุณลูกค้าอีกครั้งนะคะ 💖\n\nThank you for visiting us! We look forward to seeing you again. ✨`;
+                    sendLineNotification(item.lineUserId, msg);
+                }
             }
+            
             refreshData(); 
         }
     }
