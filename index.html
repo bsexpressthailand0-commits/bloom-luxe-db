@@ -272,8 +272,9 @@
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
     
+    // 👇👇 ใส่ LIFF ID และ Google Script URL ของคุณตรงนี้ 👇👇
     const LIFF_ID = "2009162443-gCuBKaOD"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwnaqZ3qDhgcYvUwPdIsjLPNhrxrPZL29jz-ApjbxI8OYrsY4n_iRXawzQOPmn7hlFKyw/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzyZ17QpAqQ8txQzxRZ_ZWLJZI-oDr6aiRw17KHYLd31OV_qY4XoAq-ZdwM1fHLKyxSvA/exec"; 
 
     // --- 2. AUTH & HELPERS ---
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
@@ -434,6 +435,10 @@
                 checkMyQueueStatus(db_content);
                 updateStatusIcon('live');
                 document.getElementById('btn-autofix').classList.add('hidden-elm'); 
+                
+                if(!document.getElementById('booking-section').classList.contains('hidden-elm')) {
+                    // re-render logic can be added here if needed
+                }
             } else {
                 if(res.status === 404) document.getElementById('btn-autofix').classList.remove('hidden-elm');
                 updateStatusIcon('error', res.status);
@@ -444,6 +449,7 @@
 
     async function saveToGithub(newContent) {
         try {
+            // Determine whether to include 'sha' in the payload
             const payload = {
                 message: `Update`,
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2))))
