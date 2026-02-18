@@ -1,7 +1,7 @@
 [
   {
     "id": "Q-001",
-    "status": "Waiting",
+    "status": "Serving",
     "timestamp": "2026-02-18T08:22:04.643Z",
     "orderType": "walkin",
     "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
