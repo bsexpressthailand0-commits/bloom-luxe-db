@@ -34,5 +34,23 @@
     "massagePressure": "เบา Gentle",
     "headPressure": "เบา Gentle",
     "caution": ""
+  },
+  {
+    "id": "Q-003",
+    "status": "Waiting",
+    "timestamp": "2026-02-18T08:36:47.432Z",
+    "orderType": "walkin",
+    "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
+    "course": "60 min",
+    "bookingDate": "2026-02-18",
+    "bookingTime": "",
+    "nickname": "เชน",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "Jasmine Rice",
+    "shampoo": "Pink Gold",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
