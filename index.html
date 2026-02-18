@@ -407,23 +407,6 @@
         }
     }
 
-    // Initialize LIFF Function (ADDED BACK)
-    async function initializeLiff() {
-        if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") return;
-        try {
-            await liff.init({ liffId: LIFF_ID });
-            if (liff.isLoggedIn()) {
-                const profile = await liff.getProfile();
-                document.getElementById('input-nickname').value = profile.displayName;
-                document.getElementById('line-user-id').value = profile.userId;
-                document.getElementById('liff-user-info').classList.remove('hidden-elm');
-                document.getElementById('liff-user-img').src = profile.pictureUrl;
-                document.getElementById('liff-user-name').innerText = "Hi, " + profile.displayName;
-                document.getElementById('nav-admin').style.display = 'none'; 
-            }
-        } catch (err) { console.error('LIFF Init failed', err); }
-    }
-
     // --- 6. DATA HANDLING ---
     async function refreshData() {
         if (isFetching) return;
@@ -452,6 +435,7 @@
 
     async function saveToGithub(newContent) {
         try {
+            // Determine whether to include 'sha' in the payload
             const payload = {
                 message: `Update`,
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2))))
@@ -783,15 +767,56 @@
             text.className = 'text-[10px] text-green-400 uppercase tracking-widest';
         }
     }
+    
+    // Initialize LIFF Function (ADDED BACK)
+    async function initializeLiff() {
+        if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") return;
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('input-nickname').value = profile.displayName;
+                document.getElementById('line-user-id').value = profile.userId;
+                document.getElementById('liff-user-info').classList.remove('hidden-elm');
+                document.getElementById('liff-user-img').src = profile.pictureUrl;
+                document.getElementById('liff-user-name').innerText = "Hi, " + profile.displayName;
+                document.getElementById('nav-admin').style.display = 'none'; 
+            }
+        } catch (err) { console.error('LIFF Init failed', err); }
+    }
+
     function checkMyQueueStatus(data) { 
-        if (!myQueueId) { document.getElementById('my-queue-bar').classList.add('hidden-elm'); return; }
+        if (!myQueueId) { 
+            document.getElementById('my-queue-bar').classList.add('hidden-elm'); 
+            return; 
+        }
+        
         const myQueue = data.find(q => q.id === myQueueId);
-        if (myQueue) {
+        
+        // If queue not found OR status is Completed/Delete -> Hide
+        if (!myQueue || myQueue.status === 'Completed' || myQueue.status === 'Delete') {
+             document.getElementById('my-queue-bar').classList.add('hidden-elm');
+             return;
+        }
+
+        if (myQueue && (myQueue.status === 'Waiting' || myQueue.status === 'Serving')) {
             document.getElementById('my-queue-bar').classList.remove('hidden-elm');
             document.getElementById('bar-my-id').innerText = myQueue.id;
-            const statusText = myQueue.status === 'Serving' ? (currentLang === 'th' ? '🎉 ถึงคิวคุณแล้ว!' : '🎉 It\'s your turn!') : 'Waiting...';
+            
+            let statusText = 'Waiting...';
+            if(myQueue.status === 'Serving') {
+                statusText = (currentLang === 'th' ? '🎉 ถึงคิวคุณแล้ว!' : '🎉 It\'s your turn!');
+            }
+            
             document.getElementById('bar-my-status').innerText = statusText;
-            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { triggerAlert(); lastKnownStatus = 'Serving'; localStorage.setItem('bloom_my_queue_status', 'Serving'); }
+            document.getElementById('bar-my-status').className = myQueue.status === 'Serving' ? 'text-green-400 font-bold text-sm animate-pulse' : 'text-white font-bold text-sm';
+            
+            // Alert logic
+            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { 
+                triggerAlert(); 
+                lastKnownStatus = 'Serving'; 
+                localStorage.setItem('bloom_my_queue_status', 'Serving'); 
+            }
         }
     }
     
