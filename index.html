@@ -548,6 +548,9 @@
         btn.disabled = true; btn.innerText = 'Saving...';
         const fd = new FormData(e.target);
         
+        // Calculate queues ahead (count current 'Waiting' status)
+        const queuesAhead = db_content.filter(q => q.status === 'Waiting').length;
+
         const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
         const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
         const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
@@ -562,6 +565,27 @@
             localStorage.setItem('bloom_my_queue_status', 'Waiting');
             myQueueId = nextId;
             showToast('Success! ' + nextId, 'success');
+
+            // --- SEND NOTIFICATION ---
+            const lineUserId = document.getElementById('line-user-id').value;
+            if(lineUserId) {
+                const isTh = currentLang === 'th';
+                let msg = isTh ? `✅ จองคิวสำเร็จ (${nextId})` : `✅ Booking Confirmed (${nextId})`;
+                
+                if (type === 'booking') {
+                   const date = fd.get('bookingDate');
+                   const time = fd.get('bookingTime');
+                   msg += isTh ? `\n📅 วันที่: ${date}\n⏰ เวลา: ${time}` : `\n📅 Date: ${date}\n⏰ Time: ${time}`;
+                } else {
+                   msg += isTh ? `\nประเภท: Walk-in` : `\nType: Walk-in`;
+                }
+
+                msg += isTh ? `\n⏳ มีคิวรอก่อนหน้าคุณ: ${queuesAhead} คิว` : `\n⏳ Queues ahead of you: ${queuesAhead}`;
+                
+                sendLineNotification(lineUserId, msg);
+            }
+            // -------------------------
+
             e.target.reset();
             switchCustomerView('queue');
             refreshData();
