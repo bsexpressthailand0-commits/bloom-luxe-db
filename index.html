@@ -3,13 +3,16 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BLOOM LUXE SALON (Smart Booking)</title>
+  <title>BLOOM LUXE SALON (LINE Booking)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Import LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    body { box-sizing: border-box; font-family: 'Prompt', sans-serif; overflow-x: hidden; }
+    /* Fix Box Sizing Globally */
+    *, ::before, ::after { box-sizing: border-box; }
+    
+    body { font-family: 'Prompt', sans-serif; overflow-x: hidden; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }
@@ -17,7 +20,20 @@
     @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .live-dot { animation: blink-green 2s infinite; }
     .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-    .glass-input { width: 100%; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: white; outline: none; transition: all 0.3s; }
+    
+    /* Updated Glass Input for better mobile fit */
+    .glass-input { 
+        width: 100%; 
+        max-width: 100%;
+        min-width: 0;
+        padding: 12px 16px; 
+        border-radius: 12px; 
+        background: rgba(255, 255, 255, 0.1); 
+        border: 1px solid rgba(139, 92, 246, 0.3); 
+        color: white; 
+        outline: none; 
+        transition: all 0.3s; 
+    }
     .glass-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
     .radio-box { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s; min-width: 0; }
     .radio-box:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(139, 92, 246, 0.4); }
@@ -119,7 +135,7 @@
             <input type="hidden" id="form-order-type" name="orderType" value="walkin">
             <input type="hidden" id="line-user-id" name="lineUserId" value="">
 
-            <!-- COURSE SECTION (Moved up for logic) -->
+            <!-- COURSE SECTION -->
             <div class="w-full">
                 <label class="block text-purple-200 text-sm mb-3" data-i18n="label_course">⏱️ Duration (Course)</label>
                 <div class="flex gap-3 w-full">
@@ -138,27 +154,29 @@
                         <span class="font-bold text-sm" data-i18n="booking_title">Select Date & Time</span>
                     </div>
 
-                    <!-- Step 1: Select Date -->
-                    <div class="mb-4">
-                        <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_date">Select Date</label>
-                        <div class="relative w-full">
-                            <input type="date" id="booking-date-input" name="bookingDate" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer" onchange="renderTimeSlots()">
-                            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Date Input -->
+                        <div class="relative group w-full min-w-0">
+                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_date">Select Date</label>
+                            <div class="relative w-full">
+                                <input type="date" id="booking-date-input" name="bookingDate" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer" onchange="renderTimeSlots()">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Step 2: Time Slots Grid -->
-                    <div>
-                        <label class="block text-purple-200/70 text-xs mb-2 ml-1" data-i18n="label_available_slots">Available Slots (Tap to select)</label>
-                        <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                            <div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">
-                                Please select date and course first...
+                        <!-- Time Input Grid -->
+                        <div class="md:col-span-2">
+                            <label class="block text-purple-200/70 text-xs mb-2 ml-1" data-i18n="label_available_slots">Available Slots (Tap to select)</label>
+                            <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                                <div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">
+                                    Please select date and course first...
+                                </div>
                             </div>
+                            <!-- Hidden Input to store selected time -->
+                            <input type="hidden" name="bookingTime" id="booking-time-input" required>
                         </div>
-                        <!-- Hidden Input to store selected time -->
-                        <input type="hidden" name="bookingTime" id="booking-time-input" required>
                     </div>
                     
                     <div class="mt-4 flex flex-wrap gap-3 justify-center text-[10px] text-gray-400 bg-black/20 p-2 rounded-xl border border-white/5">
@@ -533,7 +551,7 @@
     }
 
     function selectTimeSlot(timeStr, btn) {
-        // Remove active class from all
+        // 1. Remove active class from ALL slots first (Single Selection Logic)
         document.querySelectorAll('.time-slot-btn').forEach(el => {
             if(el.classList.contains('slot-selected')) {
                 el.classList.remove('slot-selected');
@@ -541,11 +559,11 @@
             }
         });
         
-        // Add active to clicked
+        // 2. Add active to the clicked button
         btn.classList.remove('slot-available');
         btn.classList.add('slot-selected');
         
-        // Set value
+        // 3. Update hidden input value
         document.getElementById('booking-time-input').value = timeStr;
     }
 
