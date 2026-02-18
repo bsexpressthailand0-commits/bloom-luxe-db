@@ -272,7 +272,6 @@
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
     
-    // 👇👇 ใส่ LIFF ID และ Google Script URL ของคุณตรงนี้ 👇👇
     const LIFF_ID = "2009162443-gCuBKaOD"; 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzfD5U2M9I3GiQQTQ4l39gpA6BNW4k0S1rJqVEg6M9whIe-hHmGhd_RNtshTSb66ktFYg/exec"; 
 
@@ -385,7 +384,7 @@
             await fetch(GAS_API_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' }, // Avoid CORS preflight
+                headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ userId: userId, message: message })
             });
             console.log("Notification sent to " + userId);
@@ -405,6 +404,22 @@
         }
     }
 
+    async function initializeLiff() {
+        if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") return;
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('input-nickname').value = profile.displayName;
+                document.getElementById('line-user-id').value = profile.userId;
+                document.getElementById('liff-user-info').classList.remove('hidden-elm');
+                document.getElementById('liff-user-img').src = profile.pictureUrl;
+                document.getElementById('liff-user-name').innerText = "Hi, " + profile.displayName;
+                document.getElementById('nav-admin').style.display = 'none'; 
+            }
+        } catch (err) { console.error('LIFF Init failed', err); }
+    }
+
     // --- 6. DATA HANDLING ---
     async function refreshData() {
         if (isFetching) return;
@@ -419,10 +434,6 @@
                 checkMyQueueStatus(db_content);
                 updateStatusIcon('live');
                 document.getElementById('btn-autofix').classList.add('hidden-elm'); 
-                
-                if(!document.getElementById('booking-section').classList.contains('hidden-elm')) {
-                    // re-render logic can be added here if needed
-                }
             } else {
                 if(res.status === 404) document.getElementById('btn-autofix').classList.remove('hidden-elm');
                 updateStatusIcon('error', res.status);
@@ -433,7 +444,6 @@
 
     async function saveToGithub(newContent) {
         try {
-            // Determine whether to include 'sha' in the payload
             const payload = {
                 message: `Update`,
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2))))
@@ -696,8 +706,8 @@
     }
 
     function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
-    function showPage(page) { activePage = page; document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); if(page!=='admin') { document.getElementById('page-customer').classList.remove('hidden-elm'); document.getElementById('page-admin').classList.add('hidden-elm'); toggleNavStyle('customer'); } applyLanguage(); }
-    function checkLogin() { if(document.getElementById('admin-pass').value==='1234') { document.getElementById('login-modal').classList.add('hidden-elm'); document.getElementById('page-admin').classList.remove('hidden-elm'); document.getElementById('page-customer').classList.add('hidden-elm'); toggleNavStyle('admin'); renderUI(); } else showToast('Wrong Password', 'error'); }
+    function showPage(page) { activePage = page; document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); if(page!=='admin') { document.getElementById('page-customer').classList.remove('hidden-elm'); document.getElementById('page-admin').classList.add('hidden-elm'); } applyLanguage(); }
+    function checkLogin() { if(document.getElementById('admin-pass').value==='1234') { document.getElementById('login-modal').classList.add('hidden-elm'); document.getElementById('page-admin').classList.remove('hidden-elm'); document.getElementById('page-customer').classList.add('hidden-elm'); renderUI(); } else showToast('Wrong Password', 'error'); }
     function toggleNavStyle(active) { 
         const c = document.getElementById('nav-customer'), a = document.getElementById('nav-admin');
         const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap';
@@ -735,6 +745,19 @@
             text.className = 'text-[10px] text-green-400 uppercase tracking-widest';
         }
     }
+    function checkMyQueueStatus(data) { 
+        if (!myQueueId) { document.getElementById('my-queue-bar').classList.add('hidden-elm'); return; }
+        const myQueue = data.find(q => q.id === myQueueId);
+        if (myQueue) {
+            document.getElementById('my-queue-bar').classList.remove('hidden-elm');
+            document.getElementById('bar-my-id').innerText = myQueue.id;
+            const statusText = myQueue.status === 'Serving' ? (currentLang === 'th' ? '🎉 ถึงคิวคุณแล้ว!' : '🎉 It\'s your turn!') : 'Waiting...';
+            document.getElementById('bar-my-status').innerText = statusText;
+            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { triggerAlert(); lastKnownStatus = 'Serving'; localStorage.setItem('bloom_my_queue_status', 'Serving'); }
+        }
+    }
+    
+    function triggerAlert() { document.getElementById('notify-sound')?.play().catch(e=>{}); if(navigator.vibrate) navigator.vibrate([200]); }
   </script>
  </body>
 </html>
