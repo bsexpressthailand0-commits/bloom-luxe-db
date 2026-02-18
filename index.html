@@ -3,37 +3,22 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BLOOM LUXE SALON (LINE Booking)</title>
+  <title>BLOOM LUXE SALON (LINE Notify)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Import LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    /* Fix Box Sizing Globally */
     *, ::before, ::after { box-sizing: border-box; }
-    
     body { font-family: 'Prompt', sans-serif; overflow-x: hidden; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
     @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }
     .queue-active { animation: pulse-glow 2s infinite; border: 1px solid rgba(139, 92, 246, 0.5); }
-    @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .live-dot { animation: blink-green 2s infinite; }
+    @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-    
-    /* Updated Glass Input for better mobile fit */
-    .glass-input { 
-        width: 100%; 
-        max-width: 100%;
-        min-width: 0;
-        padding: 12px 16px; 
-        border-radius: 12px; 
-        background: rgba(255, 255, 255, 0.1); 
-        border: 1px solid rgba(139, 92, 246, 0.3); 
-        color: white; 
-        outline: none; 
-        transition: all 0.3s; 
-    }
+    .glass-input { width: 100%; max-width: 100%; min-width: 0; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); color: white; outline: none; transition: all 0.3s; }
     .glass-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
     .radio-box { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s; min-width: 0; }
     .radio-box:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(139, 92, 246, 0.4); }
@@ -46,46 +31,19 @@
     .status-serving { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
     .status-completed { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
     .queue-number { font-family: 'Courier New', monospace; letter-spacing: -1px; }
-    
-    /* UPDATED Time Slot Buttons Styling */
-    .time-slot-btn {
-        @apply py-3 px-2 rounded-xl text-xs font-bold border border-white/10 transition-all duration-200 text-center relative overflow-hidden flex items-center justify-center gap-1;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(4px);
-    }
-    .slot-available {
-        @apply text-white hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.3)] cursor-pointer hover:-translate-y-0.5;
-        border-color: rgba(168, 85, 247, 0.3); /* Purple border hint */
-    }
-    .slot-occupied {
-        @apply text-gray-500 bg-black/30 border-transparent cursor-not-allowed opacity-60;
-        background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.03) 5px, rgba(255,255,255,0.03) 10px);
-    }
-    .slot-selected {
-        @apply text-white border-transparent shadow-lg scale-[1.02] ring-2 ring-purple-300/50 font-extrabold;
-        background: linear-gradient(135deg, #8B5CF6, #EC4899); /* Purple to Pink */
-    }
-    .slot-disabled {
-        @apply bg-gray-500/10 text-gray-500 border-gray-500/20 cursor-not-allowed;
-    }
-
-    /* Input Date/Time Styling for Mobile */
-    input[type="date"], input[type="time"] {
-        color-scheme: dark; /* Forces native picker to be dark mode */
-    }
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator {
-        filter: invert(1);
-        opacity: 0.7;
-        cursor: pointer;
-    }
+    .time-slot-btn { @apply py-3 px-2 rounded-xl text-xs font-bold border border-white/10 transition-all duration-200 text-center relative overflow-hidden flex items-center justify-center gap-1; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(4px); }
+    .slot-available { @apply text-white hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.3)] cursor-pointer hover:-translate-y-0.5; border-color: rgba(168, 85, 247, 0.3); }
+    .slot-occupied { @apply text-gray-500 bg-black/30 border-transparent cursor-not-allowed opacity-60; background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.03) 5px, rgba(255,255,255,0.03) 10px); }
+    .slot-selected { @apply text-white border-transparent shadow-lg scale-[1.02] ring-2 ring-purple-300/50 font-extrabold; background: linear-gradient(135deg, #8B5CF6, #EC4899); }
+    input[type="date"], input[type="time"] { color-scheme: dark; }
+    input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.7; cursor: pointer; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .my-queue-bar { animation: slideUp 0.5s ease-out forwards; }
   </style>
  </head>
  <body class="h-full m-0 p-0 bg-[#0f172a] overflow-x-hidden">
-   
   <div id="app" class="h-full w-full overflow-x-hidden min-h-screen pb-20" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
-     
-    <!-- Navigation -->
+    <!-- Navbar -->
     <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-black/20 backdrop-blur-md sticky top-0 z-50 w-full">
         <div class="flex items-center gap-2 shrink-0">
             <span class="text-2xl">🌸</span>
@@ -98,18 +56,14 @@
             </div>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-            <!-- Language Switcher -->
-            <button onclick="toggleLanguage()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-all">
-                <span id="lang-display">EN</span>
-            </button>
+            <button onclick="toggleLanguage()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-all"><span id="lang-display">EN</span></button>
             <button onclick="showPage('customer')" id="nav-customer" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap" data-i18n="nav_customer">Customer</button>
             <button onclick="showPage('admin')" id="nav-admin" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 hover:text-white whitespace-nowrap" data-i18n="nav_staff">Staff</button>
         </div>
     </nav>
 
-    <!-- ================= CUSTOMER PAGE ================= -->
+    <!-- Customer Page -->
     <div id="page-customer" class="max-w-2xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
-      
       <div class="glass-panel rounded-3xl p-5 md:p-6 mb-6 text-center relative overflow-hidden">
          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
          <h2 class="text-xl font-bold text-white mb-1">BLOOM LUXE SALON</h2>
@@ -119,13 +73,12 @@
              <span id="liff-user-name" class="text-xs text-green-300">Logged in via LINE</span>
          </div>
       </div>
-
       <div class="flex gap-3 md:gap-4 mb-6">
           <button onclick="switchCustomerView('form')" id="btn-view-form" class="flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base" data-i18n="btn_register">📝 Register</button>
           <button onclick="switchCustomerView('queue')" id="btn-view-queue" class="flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base" data-i18n="btn_queue_status">👀 Queue Status</button>
       </div>
-
-      <!-- 1. Form View -->
+      
+      <!-- Form -->
       <div id="customer-form-view" class="glass-panel rounded-3xl p-5 md:p-8 shadow-2xl animate-slide-in w-full">
         <form id="customer-form" class="space-y-6 md:space-y-8">
             <div class="flex bg-black/20 p-1.5 rounded-2xl">
@@ -134,8 +87,7 @@
             </div>
             <input type="hidden" id="form-order-type" name="orderType" value="walkin">
             <input type="hidden" id="line-user-id" name="lineUserId" value="">
-
-            <!-- COURSE SECTION -->
+            
             <div class="w-full">
                 <label class="block text-purple-200 text-sm mb-3" data-i18n="label_course">⏱️ Duration (Course)</label>
                 <div class="flex gap-3 w-full">
@@ -144,41 +96,28 @@
                 </div>
             </div>
 
-            <!-- SMART BOOKING SECTION -->
             <div id="booking-section" class="hidden-elm mt-6 animate-slide-in">
                 <div class="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-5 relative overflow-hidden w-full">
                     <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
-                    
                     <div class="flex items-center gap-2 mb-4 text-purple-300">
-                        <span class="text-xl">📅</span>
-                        <span class="font-bold text-sm" data-i18n="booking_title">Select Date & Time</span>
+                        <span class="text-xl">📅</span><span class="font-bold text-sm" data-i18n="booking_title">Select Date & Time</span>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Date Input -->
                         <div class="relative group w-full min-w-0">
                             <label class="block text-purple-200/70 text-xs mb-1.5 ml-1" data-i18n="label_date">Select Date</label>
                             <div class="relative w-full">
                                 <input type="date" id="booking-date-input" name="bookingDate" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer" onchange="renderTimeSlots()">
-                                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </div>
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                             </div>
                         </div>
-
-                        <!-- Time Input Grid -->
                         <div class="md:col-span-2">
                             <label class="block text-purple-200/70 text-xs mb-2 ml-1" data-i18n="label_available_slots">Available Slots (Tap to select)</label>
                             <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                                <div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">
-                                    Please select date and course first...
-                                </div>
+                                <div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">Please select date and course first...</div>
                             </div>
-                            <!-- Hidden Input to store selected time -->
                             <input type="hidden" name="bookingTime" id="booking-time-input" required>
                         </div>
                     </div>
-                    
                     <div class="mt-4 flex flex-wrap gap-3 justify-center text-[10px] text-gray-400 bg-black/20 p-2 rounded-xl border border-white/5">
                         <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-transparent border border-purple-400"></div>Available</div>
                         <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>Selected</div>
@@ -191,7 +130,6 @@
                 <label class="block text-purple-200 text-sm mb-2" data-i18n="label_nickname">Nickname</label>
                 <input type="text" id="input-nickname" name="nickname" required class="glass-input w-full" placeholder="Enter your nickname..." data-i18n-placeholder="placeholder_nickname">
             </div>
-
             <div class="w-full">
                 <label class="block text-purple-200 text-sm mb-2" data-i18n="label_gender">Gender</label>
                 <div class="flex gap-3 w-full">
@@ -199,7 +137,6 @@
                     <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="หญิง (Female)" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="gender_female">Female</span></label>
                 </div>
             </div>
-
             <div class="space-y-6 w-full">
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_water_temp">🌡️ Water Temperature</label>
                     <div class="flex gap-3 w-full">
@@ -207,7 +144,6 @@
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="เย็น" class="accent-purple-500"><span class="text-gray-300 text-sm" data-i18n="temp_cold">Cold</span></label>
                     </div>
                  </div>
-                 
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_oil">🌿 Signature Oil Massage</label>
                     <div class="grid grid-cols-2 gap-3 w-full">
                         <label class="radio-box w-full"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_jasmine">Jasmine Rice</span></label>
@@ -216,7 +152,6 @@
                         <label class="radio-box w-full"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="oil_orchid">Orchid</span></label>
                     </div>
                  </div>
-
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_shampoo">🧴 The Scent of Shampoo</label>
                     <div class="grid grid-cols-2 gap-3 w-full">
                         <label class="radio-box w-full"><input type="radio" name="shampoo" value="Chance rich" required class="accent-purple-500"><span class="text-gray-300 text-xs">Chance rich</span></label>
@@ -224,7 +159,6 @@
                         <label class="radio-box w-full"><input type="radio" name="shampoo" value="Pink Gold" class="accent-purple-500"><span class="text-gray-300 text-xs">Pink Gold</span></label>
                     </div>
                  </div>
-
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_massage_pressure">💆 Levels of Massage</label>
                     <div class="flex gap-2 w-full">
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">Gentle</span></label>
@@ -232,7 +166,6 @@
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">Strong</span></label>
                     </div>
                  </div>
-
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-3" data-i18n="label_head_pressure">💆‍♀️ Level of Pressure Hair</label>
                     <div class="flex gap-2 w-full">
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="เบา Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_gentle">Gentle</span></label>
@@ -240,116 +173,77 @@
                         <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="หนัก Strong" class="accent-purple-500"><span class="text-gray-300 text-xs" data-i18n="pressure_strong">Strong</span></label>
                     </div>
                  </div>
-
                  <div class="w-full"><label class="block text-purple-200 text-sm mb-2" data-i18n="label_caution">⚠️ Special Caution Areas</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin..." data-i18n-placeholder="placeholder_caution"></textarea></div>
             </div>
-
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02]">
                 <span id="submit-text" data-i18n="btn_confirm">✅ Confirm Service</span>
             </button>
             <div class="text-[10px] text-purple-300 text-center mt-2 opacity-70" data-i18n="consent_text">*Allow notifications to be alerted when it's your queue.</div>
         </form>
       </div>
-
-      <!-- 2. Live Queue View -->
+      <!-- Queue View -->
       <div id="customer-queue-view" class="hidden-elm animate-slide-in">
-          <!-- Same as previous -->
           <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative overflow-hidden bg-gradient-to-br from-purple-900/40 to-black/40">
             <div class="text-purple-200 text-sm uppercase tracking-widest mb-2 animate-pulse" data-i18n="now_serving">Now Serving</div>
             <div class="text-6xl md:text-8xl font-bold text-green-400 queue-number mb-2" id="cust-display-queue">-</div>
             <div class="text-xl text-white font-bold" id="cust-display-name">...</div>
           </div>
-
           <h3 class="text-white font-bold mb-4 flex items-center gap-2"><span>⏳</span> <span data-i18n="waiting_queue_title">Waiting Queue</span></h3>
-          <div id="cust-waiting-list" class="space-y-3">
-              <div class="text-center text-gray-500 py-4" data-i18n="loading">Loading queue data...</div>
-          </div>
+          <div id="cust-waiting-list" class="space-y-3"><div class="text-center text-gray-500 py-4" data-i18n="loading">Loading queue data...</div></div>
       </div>
     </div>
 
-    <!-- ADMIN PAGE (Same structure) -->
+    <!-- Admin Page -->
     <div id="page-admin" class="hidden-elm max-w-4xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
-        <!-- ... Admin content same as before ... -->
         <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative">
             <div class="text-purple-200 text-sm uppercase tracking-widest mb-2" data-i18n="admin_now_serving">Now Serving (Staff View)</div>
             <div class="text-6xl md:text-8xl font-bold text-white queue-number mb-2" id="admin-display-queue">-</div>
             <div class="text-xl text-purple-300" id="admin-display-name">Waiting...</div>
         </div>
-
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-yellow-400" id="count-waiting">0</div><div class="text-xs text-gray-400">Total Waiting</div></div>
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-green-400" id="count-serving">0</div><div class="text-xs text-gray-400">Serving</div></div>
             <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-blue-400" id="count-total">0</div><div class="text-xs text-gray-400">Today</div></div>
         </div>
-
-        <!-- System Settings Section -->
         <div class="mb-4 flex justify-between items-center px-2">
             <h3 class="text-white font-bold" data-i18n="admin_manage_title">📋 Queue Management</h3>
             <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ Config</button>
         </div>
-
         <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border border-purple-500/30">
-            <!-- Settings content -->
             <h4 class="text-white font-bold text-sm mb-3">GitHub Configuration (Hardcoded)</h4>
             <div class="text-[10px] text-gray-400 mb-2">Using configuration from code.</div>
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] text-gray-400 block mb-1">GitHub Username</label>
-                        <input type="text" id="db-owner-input" class="glass-input text-xs" readonly>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 block mb-1">Repository Name</label>
-                        <input type="text" id="db-repo-input" class="glass-input text-xs" readonly>
-                    </div>
+                    <div><label class="text-[10px] text-gray-400 block mb-1">GitHub Username</label><input type="text" id="db-owner-input" class="glass-input text-xs" readonly></div>
+                    <div><label class="text-[10px] text-gray-400 block mb-1">Repository Name</label><input type="text" id="db-repo-input" class="glass-input text-xs" readonly></div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ กดปุ่มนี้เพื่อสร้างไฟล์ database.json (แก้ Error 404)</button>
-                </div>
+                <div class="flex gap-2"><button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ กดปุ่มนี้เพื่อสร้างไฟล์ database.json (แก้ Error 404)</button></div>
                 <div class="pt-4 mt-2 border-t border-white/10">
                     <div class="grid grid-cols-2 gap-3 mb-2">
-                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
-                            <span class="text-lg">🗑️🚶</span> 
-                            <span data-i18n="reset_walkin">Reset Walk-in</span>
-                        </button>
-                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-500/10 text-orange-400 hover:bg-orange-600 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
-                            <span class="text-lg">🗑️📅</span> 
-                            <span data-i18n="reset_booking">Reset Booking</span>
-                        </button>
+                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"><span class="text-lg">🗑️🚶</span> <span data-i18n="reset_walkin">Reset Walk-in</span></button>
+                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-500/10 text-orange-400 hover:bg-orange-600 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"><span class="text-lg">🗑️📅</span> <span data-i18n="reset_booking">Reset Booking</span></button>
                     </div>
                     <div class="text-[10px] text-gray-500 text-center" data-i18n="reset_note">Press to start a new day (Data will be lost)</div>
                 </div>
             </div>
         </div>
-
-        <!-- Admin Tabs -->
         <div class="flex bg-black/20 p-1.5 rounded-2xl mb-4">
-            <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">
-                🚶 Walk-in (<span id="badge-walkin">0</span>)
-            </button>
-            <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn">
-                📅 Booking (<span id="badge-booking">0</span>)
-            </button>
+            <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">🚶 Walk-in (<span id="badge-walkin">0</span>)</button>
+            <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn">📅 Booking (<span id="badge-booking">0</span>)</button>
         </div>
-
         <div id="admin-walkin-list" class="space-y-4"></div>
         <div id="admin-booking-list" class="space-y-4 hidden-elm"></div>
     </div>
     
-    <!-- CUSTOMER BOTTOM BAR (MY QUEUE) -->
+    <!-- Bottom Bar -->
     <div id="my-queue-bar" class="fixed bottom-0 left-0 w-full z-40 p-4 hidden-elm my-queue-bar">
         <div class="glass-panel p-4 rounded-2xl bg-[#0f172a]/95 border-purple-500/50 shadow-[0_-10px_40px_rgba(139,92,246,0.3)] flex justify-between items-center relative overflow-hidden">
             <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse"></div>
             <div class="relative z-10 flex items-center gap-3">
                 <div class="bg-purple-600 px-3 py-1 rounded-lg text-white font-bold text-lg shadow-lg" id="bar-my-id">Q-001</div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] text-purple-200 uppercase tracking-widest" data-i18n="your_queue">Your Queue</span>
-                    <span class="text-white font-bold text-sm" id="bar-my-status">Waiting...</span>
-                </div>
+                <div class="flex flex-col"><span class="text-[10px] text-purple-200 uppercase tracking-widest" data-i18n="your_queue">Your Queue</span><span class="text-white font-bold text-sm" id="bar-my-status">Waiting...</span></div>
             </div>
-            <button onclick="switchCustomerView('queue')" class="relative z-10 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs text-white transition-all">
-                View
-            </button>
+            <button onclick="switchCustomerView('queue')" class="relative z-10 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs text-white transition-all">View</button>
         </div>
     </div>
 
@@ -362,13 +256,10 @@
             <button onclick="showPage('customer')" class="mt-4 text-sm text-gray-400 underline">Back</button>
         </div>
     </div>
-
-    <div id="toast-container" class="fixed top-4 right-4 z-[70] space-y-2 pointer-events-none"></div>
-    <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
   </div>
 
   <script>
-    // --- CONFIG & UTILS ---
+    // --- 1. CONFIGURATION ---
     const CONFIG = {
         owner: 'bsexpressthailand0-commits', 
         repo: 'bloom-luxe-db',
@@ -376,14 +267,15 @@
         token_part_1: 'ghp_',  
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
+    
+    // 👇👇 ใส่ LIFF ID และ Google Script URL ของคุณตรงนี้ 👇👇
     const LIFF_ID = "2009162443-gCuBKaOD"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzfD5U2M9I3GiQQTQ4l39gpA6BNW4k0S1rJqVEg6M9whIe-hHmGhd_RNtshTSb66ktFYg/exec
+"; 
+
+    // --- 2. AUTH & HELPERS ---
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
-    const getHeaders = () => {
-        const token = getAuthToken();
-        const headers = { 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
-        if(token) headers['Authorization'] = `token ${token}`;
-        return headers;
-    };
+    const getHeaders = () => ({ 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json', 'Authorization': `token ${getAuthToken()}` });
 
     let currentLang = localStorage.getItem('bloom_lang_new') || 'en';
     let db_sha = '';
@@ -394,7 +286,7 @@
     let myQueueId = localStorage.getItem('bloom_my_queue_id'); 
     let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
 
-    // --- TRANSLATIONS ---
+    // --- 3. TRANSLATIONS ---
     const TRANSLATIONS = {
         th: {
             nav_customer: "ลูกค้า", nav_staff: "พนักงาน", header_subtitle: "จองคิวใช้บริการ",
@@ -444,37 +336,23 @@
         }
     };
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'th' ? 'en' : 'th';
-        localStorage.setItem('bloom_lang_new', currentLang);
-        applyLanguage();
-        renderUI();
-        renderTimeSlots(); // Re-render slots text
-    }
-
+    function toggleLanguage() { currentLang = currentLang === 'th' ? 'en' : 'th'; localStorage.setItem('bloom_lang_new', currentLang); applyLanguage(); renderUI(); renderTimeSlots(); }
     function applyLanguage() {
         document.getElementById('lang-display').innerText = currentLang.toUpperCase();
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (TRANSLATIONS[currentLang][key]) el.innerText = TRANSLATIONS[currentLang][key];
-        });
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            const key = el.getAttribute('data-i18n-placeholder');
-            if (TRANSLATIONS[currentLang][key]) el.placeholder = TRANSLATIONS[currentLang][key];
-        });
+        document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (TRANSLATIONS[currentLang][key]) el.innerText = TRANSLATIONS[currentLang][key]; });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const key = el.getAttribute('data-i18n-placeholder'); if (TRANSLATIONS[currentLang][key]) el.placeholder = TRANSLATIONS[currentLang][key]; });
     }
 
-    // --- MAIN LOGIC ---
+    // --- 4. MAIN LOGIC ---
     window.onload = () => {
         const ownerInput = document.getElementById('db-owner-input');
         const repoInput = document.getElementById('db-repo-input');
         if(ownerInput) ownerInput.value = CONFIG.owner;
         if(repoInput) repoInput.value = CONFIG.repo;
         
-        // Set default date to today
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('booking-date-input').value = today;
-        document.getElementById('booking-date-input').min = today;
+        const dateInput = document.getElementById('booking-date-input');
+        dateInput.value = today; dateInput.min = today;
 
         applyLanguage();
         initializeLiff();
@@ -482,12 +360,155 @@
         setInterval(refreshData, 5000); 
     };
 
-    // --- TIME SLOT LOGIC ---
+    // --- 5. NOTIFICATION LOGIC (GAS) ---
+    async function sendLineNotification(userId, message) {
+        if (!GAS_API_URL || GAS_API_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE" || !userId) return;
+        try {
+            await fetch(GAS_API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' }, // Avoid CORS preflight
+                body: JSON.stringify({ userId: userId, message: message })
+            });
+            console.log("Notification sent to " + userId);
+        } catch (e) { console.error("Notify failed", e); }
+    }
+    
+    // Manual Notify Function (Fixed)
+    async function manualNotify(id) {
+        const item = db_content.find(i => i.id === id);
+        if(item && item.lineUserId) {
+            if(confirm("Send notification to this customer?")) {
+                const msg = `🔔 เรียกคิว: ถึงคิวของคุณแล้วค่ะ (${item.id})\nกรุณามาที่จุดให้บริการ\nIt's your turn!`;
+                sendLineNotification(item.lineUserId, msg);
+                showToast("Sending notification...", "success");
+            }
+        } else {
+            alert("No LINE User ID found for this customer.");
+        }
+    }
+
+    // --- 6. DATA HANDLING ---
+    async function refreshData() {
+        if (isFetching) return;
+        isFetching = true;
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                db_sha = data.sha;
+                db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                renderUI();
+                checkMyQueueStatus(db_content);
+                document.getElementById('btn-autofix').classList.add('hidden-elm'); 
+            } else if(res.status === 404) document.getElementById('btn-autofix').classList.remove('hidden-elm');
+        } catch (e) { console.error(e); } 
+        finally { isFetching = false; }
+    }
+
+    async function saveToGithub(newContent) {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+                method: 'PUT',
+                headers: getHeaders(),
+                body: JSON.stringify({ message: `Update`, content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2)))), sha: db_sha })
+            });
+            return res.ok;
+        } catch (e) { return false; }
+    }
+
+    // --- 7. ADMIN ACTIONS ---
+    async function updateStatus(id, newStatus) {
+        let updatedDB;
+        const item = db_content.find(i => i.id === id);
+        
+        if (newStatus === 'Delete') updatedDB = db_content.filter(i => i.id !== id);
+        else if (newStatus === 'Done') updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Completed' } : i);
+        else updatedDB = db_content.map(i => { if(i.id===id) return {...i, status: newStatus}; if(newStatus==='Serving'&&i.status==='Serving') return null; return i; }).filter(Boolean);
+        
+        if (await saveToGithub(updatedDB)) { 
+            showToast('Status Updated', 'success'); 
+            if (newStatus === 'Serving' && item && item.lineUserId) {
+                const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ\nIt's your turn! Please come to the service point.`;
+                sendLineNotification(item.lineUserId, msg);
+            }
+            refreshData(); 
+        }
+    }
+
+    async function skipQueue(id) {
+        const item = db_content.find(i => i.id === id); if(!item) return;
+        const serving = db_content.filter(i => i.status === 'Serving');
+        const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
+        const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
+        const newOrder = [...serving, item, ...waiting, ...others];
+        if (await saveToGithub(newOrder)) { showToast('Queue Skipped', 'success'); refreshData(); }
+    }
+
+    // Fixed Reset Function
+    async function resetQueueByType(type) {
+        if(!confirm("Confirm Reset?")) return;
+        let newContent;
+        if (type === 'walkin') {
+            newContent = db_content.filter(item => item.orderType === 'booking');
+        } else {
+            newContent = db_content.filter(item => item.orderType !== 'booking');
+        }
+        if (await saveToGithub(newContent)) { showToast(`Reset ${type} success`, 'success'); refreshData(); }
+    }
+
+    async function autoFix404() {
+        try {
+            await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+                method: 'PUT', headers: getHeaders(),
+                body: JSON.stringify({ message: "Init DB", content: "W10=" }) // []
+            });
+            refreshData();
+        } catch(e) {}
+    }
+
+    // --- 8. CUSTOMER ACTIONS ---
+    document.getElementById('customer-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const type = document.getElementById('form-order-type').value;
+        
+        if (type === 'booking' && !document.getElementById('booking-time-input').value) {
+            alert(currentLang === 'th' ? "กรุณาเลือกเวลา" : "Please select time."); return;
+        }
+
+        btn.disabled = true; btn.innerText = 'Saving...';
+        const fd = new FormData(e.target);
+        
+        const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
+        const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
+        const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
+        
+        const newEntry = {
+            id: nextId, status: 'Waiting', timestamp: new Date().toISOString(),
+            ...Object.fromEntries(fd.entries())
+        };
+        
+        if (await saveToGithub([...db_content, newEntry])) {
+            localStorage.setItem('bloom_my_queue_id', nextId);
+            localStorage.setItem('bloom_my_queue_status', 'Waiting');
+            myQueueId = nextId;
+            showToast('Success! ' + nextId, 'success');
+            e.target.reset();
+            switchCustomerView('queue');
+            refreshData();
+        } else {
+            showToast('Failed', 'error');
+        }
+        btn.disabled = false; btn.innerText = '✅ Confirm';
+        applyLanguage();
+    };
+
+    // --- 9. VIEW & RENDER LOGIC ---
     function renderTimeSlots() {
         const dateInput = document.getElementById('booking-date-input').value;
         const courseInput = document.querySelector('input[name="course"]:checked');
         const grid = document.getElementById('time-slots-grid');
-        const hiddenInput = document.getElementById('booking-time-input');
         
         if (!dateInput || !courseInput) {
             grid.innerHTML = `<div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">${TRANSLATIONS[currentLang].msg_select_date_course}</div>`;
@@ -495,90 +516,90 @@
         }
 
         const duration = courseInput.value === '90 min' ? 90 : 60;
-        const occupied = getOccupiedSlots(dateInput);
-        const shopOpen = 10 * 60; // 10:00 in minutes
-        const shopClose = 20 * 60; // 20:00 in minutes
-        const interval = 30; // 30 min steps
-
-        let html = '';
-        let hasSlots = false;
-
-        for (let time = shopOpen; time <= shopClose - duration; time += interval) {
-            const start = time;
-            const end = time + duration;
-            
-            // Check Collision
-            let isOverlap = false;
-            for (let slot of occupied) {
-                // Logic: New Start < Old End AND New End > Old Start
-                if (start < slot.end && end > slot.start) {
-                    isOverlap = true;
-                    break;
-                }
-            }
-
-            const timeStr = minutesToTime(start);
-            const endTimeStr = minutesToTime(end);
-            
-            if (isOverlap) {
-                html += `<div class="time-slot-btn slot-occupied" title="Booked"><span class="text-[10px] line-through">${timeStr}</span></div>`;
-            } else {
-                hasSlots = true;
-                html += `<div onclick="selectTimeSlot('${timeStr}', this)" class="time-slot-btn slot-available group" data-time="${timeStr}">
-                    <span>${timeStr}</span>
-                    <div class="hidden group-[.slot-selected]:block absolute right-1 top-1 w-1.5 h-1.5 bg-white rounded-full"></div>
-                </div>`;
-            }
-        }
-
-        if (!hasSlots) {
-            html = `<div class="col-span-3 sm:col-span-4 text-center text-red-400 text-xs py-6 bg-red-500/10 rounded-xl border border-red-500/20">${TRANSLATIONS[currentLang].msg_no_slots}</div>`;
-        }
-        
-        grid.innerHTML = html;
-        hiddenInput.value = ''; // Reset selection
-    }
-
-    function getOccupiedSlots(dateStr) {
-        // Filter bookings for the specific date
-        return db_content
-            .filter(b => b.orderType === 'booking' && b.bookingDate === dateStr && b.status !== 'Completed' && b.status !== 'Delete')
-            .map(b => {
-                const startMin = timeToMinutes(b.bookingTime);
-                const duration = (b.course === '90 min') ? 90 : 60;
-                return { start: startMin, end: startMin + duration };
-            });
-    }
-
-    function selectTimeSlot(timeStr, btn) {
-        // 1. Remove active class from ALL slots first (Single Selection Logic)
-        document.querySelectorAll('.time-slot-btn').forEach(el => {
-            if(el.classList.contains('slot-selected')) {
-                el.classList.remove('slot-selected');
-                el.classList.add('slot-available');
-            }
+        const occupied = db_content.filter(b => b.orderType === 'booking' && b.bookingDate === dateInput && b.status !== 'Completed' && b.status !== 'Delete').map(b => {
+            const start = parseInt(b.bookingTime.split(':')[0])*60 + parseInt(b.bookingTime.split(':')[1]);
+            return { start: start, end: start + (b.course==='90 min'?90:60) };
         });
+
+        let html = '', hasSlots = false;
+        for (let time = 600; time <= 1200 - duration; time += 30) { // 10:00 - 20:00
+            const end = time + duration;
+            const isOverlap = occupied.some(s => time < s.end && end > s.start);
+            const timeStr = `${String(Math.floor(time/60)).padStart(2,'0')}:${String(time%60).padStart(2,'0')}`;
+            
+            if (isOverlap) html += `<div class="time-slot-btn slot-occupied"><span class="text-[10px] line-through">${timeStr}</span></div>`;
+            else {
+                hasSlots = true;
+                html += `<div onclick="selectTimeSlot('${timeStr}', this)" class="time-slot-btn slot-available group">${timeStr}</div>`;
+            }
+        }
+        if (!hasSlots) html = `<div class="col-span-3 sm:col-span-4 text-center text-red-400 text-xs py-6">${TRANSLATIONS[currentLang].msg_no_slots}</div>`;
+        grid.innerHTML = html;
+        document.getElementById('booking-time-input').value = '';
+    }
+
+    function selectTimeSlot(time, btn) {
+        document.querySelectorAll('.time-slot-btn').forEach(el => { el.classList.remove('slot-selected'); el.classList.add('slot-available'); });
+        btn.classList.remove('slot-available'); btn.classList.add('slot-selected');
+        document.getElementById('booking-time-input').value = time;
+    }
+
+    function renderUI() {
+        const serving = db_content.find(i => i.status === 'Serving');
+        const waiting = db_content.filter(i => i.status === 'Waiting');
+        const waitingWalkin = waiting.filter(i => i.orderType !== 'booking'); 
+        const waitingBooking = waiting.filter(i => i.orderType === 'booking');
+
+        document.getElementById('cust-display-queue').innerText = serving ? serving.id : '-';
+        document.getElementById('cust-display-name').innerText = serving ? serving.nickname : (currentLang === 'th' ? 'ยังไม่มีคิวบริการ' : 'No queue');
         
-        // 2. Add active to the clicked button
-        btn.classList.remove('slot-available');
-        btn.classList.add('slot-selected');
-        
-        // 3. Update hidden input value
-        document.getElementById('booking-time-input').value = timeStr;
+        const clist = document.getElementById('cust-waiting-list');
+        if(clist) {
+            clist.innerHTML = waiting.length ? '' : `<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">${currentLang==='th'?'ไม่มีคิวรอ':'No waiting queue'}</div>`;
+            waiting.forEach(q => {
+                const isMe = q.id === myQueueId;
+                const note = q.orderType === 'booking' ? `📅 ${q.bookingTime}` : '';
+                clist.innerHTML += `<div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl border ${isMe?'border-purple-500 bg-purple-900/20':'border-white/5'}"><div class="flex items-center gap-4"><div class="font-mono text-2xl font-bold ${isMe?'text-purple-400':'text-white'}">${q.id}</div><div><div class="text-gray-300 font-medium text-sm">${q.nickname} ${isMe?(currentLang==='th'?'(คุณ)':'(You)'):''}</div><div class="text-orange-400 text-[10px] font-bold">${note}</div></div></div><span class="status-badge ${q.orderType==='booking'?'bg-orange-500/10 text-orange-300':'status-waiting'}">${q.orderType==='booking'?'Booking':'Waiting'}</span></div>`;
+            });
+        }
+
+        // Admin Render
+        if (activePage === 'admin') {
+            document.getElementById('admin-display-queue').innerText = serving ? serving.id : '-';
+            document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'No Serving';
+            document.getElementById('count-waiting').innerText = waiting.length;
+            document.getElementById('count-serving').innerText = serving ? 1 : 0;
+            document.getElementById('count-total').innerText = db_content.length;
+            document.getElementById('badge-walkin').innerText = waitingWalkin.length;
+            document.getElementById('badge-booking').innerText = waitingBooking.length;
+
+            const t = TRANSLATIONS[currentLang];
+            const renderCard = (q, s) => `
+            <div class="glass-panel p-5 rounded-3xl animate-slide-in ${s?'border-purple-500/50 bg-purple-500/10':''}">
+                <div class="flex justify-between mb-2"><div class="flex items-center gap-3"><div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white">${q.id}</div><div><div class="text-white font-bold text-lg leading-tight">${q.nickname}</div><div class="text-xs text-gray-400 font-bold">${q.orderType==='booking' ? `📅 ${q.bookingTime}` : 'Walk-in'}</div></div></div><span class="status-badge ${s?'status-serving':'status-waiting'}">${s?'Serving':'Waiting'}</span></div>
+                <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl">
+                    <div>⏱️ ${q.course}</div><div>🌡️ ${q.waterTemp}</div><div>🌿 ${q.oil}</div><div>🧴 ${q.shampoo}</div>
+                    <div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ ${q.caution || '-'}</div>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    ${q.status==='Waiting' ? `<button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 px-3 py-2 rounded-lg text-xs font-bold mr-auto">Skip</button><button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 px-4 py-2 rounded-lg text-xs font-bold text-white">Start</button>` : ''}
+                    ${q.status==='Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold text-white">Done</button>` : ''}
+                    <button onclick="manualNotify('${q.id}')" class="bg-white/10 text-white px-3 py-2 rounded-lg text-xs">🔔</button>
+                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 px-3 py-2 rounded-lg text-xs">Del</button>
+                </div>
+            </div>`;
+
+            const wl = document.getElementById('admin-walkin-list'); wl.innerHTML = '';
+            if(serving && serving.orderType !== 'booking') wl.innerHTML += renderCard(serving, true);
+            waitingWalkin.forEach(q => wl.innerHTML += renderCard(q, false));
+
+            const bl = document.getElementById('admin-booking-list'); bl.innerHTML = '';
+            if(serving && serving.orderType === 'booking') bl.innerHTML += renderCard(serving, true);
+            waitingBooking.sort((a,b)=>a.bookingTime.localeCompare(b.bookingTime)).forEach(q => bl.innerHTML += renderCard(q, false));
+        }
     }
 
-    function timeToMinutes(timeStr) {
-        const [h, m] = timeStr.split(':').map(Number);
-        return h * 60 + m;
-    }
-
-    function minutesToTime(minutes) {
-        const h = Math.floor(minutes / 60);
-        const m = minutes % 60;
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    }
-
-    // --- LIFF & CORE LOGIC ---
+    // --- LIFF & INIT ---
     async function initializeLiff() {
         if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID_HERE") return;
         try {
@@ -590,335 +611,45 @@
                 document.getElementById('liff-user-info').classList.remove('hidden-elm');
                 document.getElementById('liff-user-img').src = profile.pictureUrl;
                 document.getElementById('liff-user-name').innerText = "Hi, " + profile.displayName;
-                document.getElementById('nav-admin').style.display = 'none';
+                document.getElementById('nav-admin').style.display = 'none'; // Hide staff btn for customers
             }
-        } catch (err) { console.error('LIFF Init failed', err); }
+        } catch (e) { console.log('LIFF Error', e); }
     }
 
-    async function refreshData() {
-        if (isFetching) return;
-        isFetching = true;
-        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-        try {
-            const res = await fetch(`${url}?t=${Date.now()}`, { headers: getHeaders() });
-            if (res.ok) {
-                const data = await res.json();
-                db_sha = data.sha;
-                db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-                renderUI();
-                checkMyQueueStatus(db_content);
-                updateStatusIcon('live');
-                document.getElementById('btn-autofix').classList.add('hidden-elm'); 
-                
-                // If in booking mode, refresh slots to reflect real-time changes
-                if(!document.getElementById('booking-section').classList.contains('hidden-elm')) {
-                    // Only refresh if user hasn't selected a slot yet to avoid disruption? 
-                    // Better to re-render to prevent double booking race condition visuals
-                    // But retain selection if valid. For simplicity, we just leave it or re-render if needed.
-                    // Let's not auto-re-render slots every 5s to avoid UI flickering while user clicks.
-                }
-            } else {
-                if(res.status === 404) document.getElementById('btn-autofix').classList.remove('hidden-elm');
-                updateStatusIcon('error', res.status);
-            }
-        } catch (e) { updateStatusIcon('error', 'NET'); } 
-        finally { isFetching = false; }
-    }
-
-    async function autoFix404() {
-        const btn = document.getElementById('btn-autofix');
-        btn.innerText = "กำลังสร้างไฟล์...";
-        btn.disabled = true;
-        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-        try {
-            const res = await fetch(url, {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify({
-                    message: "Create database.json (Auto Fix)",
-                    content: "W10=", 
-                })
-            });
-            if(res.ok) {
-                showToast("สร้างไฟล์สำเร็จ! ระบบพร้อมใช้งาน", "success");
-                btn.classList.add('hidden-elm');
-                refreshData();
-            } else {
-                const err = await res.json();
-                showToast(`สร้างไม่สำเร็จ: ${err.message}`, "error");
-                btn.innerText = "ลองอีกครั้ง";
-                btn.disabled = false;
-            }
-        } catch(e) {
-            showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
-            btn.innerText = "ลองอีกครั้ง";
-            btn.disabled = false;
-        }
-    }
-
-    async function saveToGithub(newContent) {
-        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
-        try {
-            const res = await fetch(url, {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify({
-                    message: `Update`,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2)))),
-                    sha: db_sha
-                })
-            });
-            return res.ok;
-        } catch (e) { return false; }
-    }
-
-    async function resetQueueByType(type) {
-        let confirmMsg = "";
-        if (type === 'walkin') confirmMsg = currentLang === 'th' ? "⚠️ ยืนยัน: ต้องการล้างข้อมูลคิว 'Walk-in' ทั้งหมดใช่หรือไม่?\n(ข้อมูล Booking จะยังคงอยู่)" : "⚠️ Confirm: Reset all 'Walk-in' queues?\n(Booking data will remain)";
-        if (type === 'booking') confirmMsg = currentLang === 'th' ? "⚠️ ยืนยัน: ต้องการล้างข้อมูลคิว 'Booking' ทั้งหมดใช่หรือไม่?\n(ข้อมูล Walk-in จะยังคงอยู่)" : "⚠️ Confirm: Reset all 'Booking' queues?\n(Walk-in data will remain)";
-
-        if(!confirm(confirmMsg)) return;
-
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerText = "Wait...";
-        btn.disabled = true;
-
-        let newContent = [];
-        if (type === 'walkin') {
-            newContent = db_content.filter(item => item.orderType === 'booking');
-        } else if (type === 'booking') {
-            newContent = db_content.filter(item => item.orderType !== 'booking');
-        }
-
-        if (await saveToGithub(newContent)) {
-            showToast(currentLang === 'th' ? `ล้างคิว ${type} เรียบร้อยแล้ว` : `Reset ${type} queue successfully`, 'success');
-            refreshData();
-        } else {
-            showToast(currentLang === 'th' ? 'เกิดข้อผิดพลาดในการล้างข้อมูล' : 'Error resetting data', 'error');
-        }
-        
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-
-    function checkMyQueueStatus(data) { 
-        if (!myQueueId) { document.getElementById('my-queue-bar').classList.add('hidden-elm'); return; }
-        const myQueue = data.find(q => q.id === myQueueId);
-        if (myQueue) {
+    function checkMyQueueStatus(data) {
+        if(!myQueueId) { document.getElementById('my-queue-bar').classList.add('hidden-elm'); return; }
+        const q = data.find(i => i.id === myQueueId);
+        if(q) {
             document.getElementById('my-queue-bar').classList.remove('hidden-elm');
-            document.getElementById('bar-my-id').innerText = myQueue.id;
-            const statusText = myQueue.status === 'Serving' ? (currentLang === 'th' ? '🎉 ถึงคิวคุณแล้ว!' : '🎉 It\'s your turn!') : 'Waiting...';
-            document.getElementById('bar-my-status').innerText = statusText;
-            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { triggerAlert(); lastKnownStatus = 'Serving'; localStorage.setItem('bloom_my_queue_status', 'Serving'); }
-        }
-    }
-    
-    function triggerAlert() { document.getElementById('notify-sound')?.play().catch(e=>{}); if(navigator.vibrate) navigator.vibrate([200]); }
-    function updateStatusIcon(state, code='') { 
-        const dot = document.getElementById('status-dot');
-        const text = document.getElementById('status-text');
-        if(!dot || !text) return;
-        if(state === 'error') {
-            dot.className = 'w-2 h-2 rounded-full bg-red-500';
-            text.innerText = `Offline (${code})`;
-            text.className = 'text-[10px] text-red-400 uppercase tracking-widest';
-        } else {
-            dot.className = 'w-2 h-2 rounded-full bg-green-500 live-dot';
-            text.innerText = 'Live System';
-            text.className = 'text-[10px] text-green-400 uppercase tracking-widest';
-        }
-    }
-
-    // --- UI RENDER ---
-    function renderUI() { 
-        const serving = db_content.find(i => i.status === 'Serving');
-        const waiting = db_content.filter(i => i.status === 'Waiting');
-        const waitingWalkin = waiting.filter(i => i.orderType !== 'booking'); 
-        const waitingBooking = waiting.filter(i => i.orderType === 'booking');
-
-        const custQ = document.getElementById('cust-display-queue');
-        const custN = document.getElementById('cust-display-name');
-        if(custQ) custQ.innerText = serving ? serving.id : '-';
-        if(custN) custN.innerText = serving ? serving.nickname : (currentLang === 'th' ? 'ยังไม่มีคิวบริการในขณะนี้' : 'No queue at the moment');
-
-        const custWaitingList = document.getElementById('cust-waiting-list');
-        if(custWaitingList) {
-            const noQ = currentLang==='th'?'ไม่มีคิวรอ':'No waiting queue';
-            custWaitingList.innerHTML = waiting.length ? '' : `<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">${noQ}</div>`;
-            waiting.forEach(q => {
-                const isMe = q.id === myQueueId;
-                const isBook = q.orderType === 'booking';
-                const youText = currentLang === 'th' ? '(คุณ)' : '(You)';
-                custWaitingList.innerHTML += `
-                    <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl animate-slide-in border ${isMe ? 'border-purple-500 bg-purple-900/20' : 'border-white/5'}">
-                        <div class="flex items-center gap-4">
-                            <div class="font-mono text-2xl font-bold ${isMe ? 'text-purple-400' : 'text-white'}">${q.id}</div>
-                            <div>
-                                <div class="text-gray-300 font-medium text-sm">${q.nickname} ${isMe ? youText : ''}</div>
-                                ${isBook ? `<div class="text-orange-400 text-[10px] font-bold">Booking: ${q.bookingTime}</div>` : ''}
-                            </div>
-                        </div>
-                        <span class="status-badge ${isBook ? 'bg-orange-500/10 text-orange-300 border-orange-500/20' : 'status-waiting'}">${isBook ? 'Booking' : 'Waiting'}</span>
-                    </div>`;
-            });
-        }
-        
-        if (activePage === 'admin') {
-            document.getElementById('admin-display-queue').innerText = serving ? serving.id : '-';
-            document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'No Serving';
-            document.getElementById('count-waiting').innerText = waiting.length;
-            document.getElementById('count-serving').innerText = serving ? 1 : 0;
-            document.getElementById('count-total').innerText = db_content.length;
-            document.getElementById('badge-walkin').innerText = waitingWalkin.length;
-            document.getElementById('badge-booking').innerText = waitingBooking.length;
-
-            const t = TRANSLATIONS[currentLang];
-            const createCard = (q, isS) => `
-            <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isS ? 'border-purple-500/50 bg-purple-500/10' : ''}">
-                <div class="flex justify-between mb-2">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
-                        <div>
-                            <div class="text-white font-bold text-lg leading-tight">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
-                            <div class="text-xs ${q.orderType==='booking'?'text-orange-400':'text-gray-400'} font-bold mt-0.5">${q.orderType==='booking' ? `📅 ${q.bookingDate} | ${q.bookingTime}` : '🕒 Walk-in'}</div>
-                        </div>
-                    </div>
-                    <span class="status-badge ${isS ? 'status-serving' : (q.orderType==='booking' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'status-waiting')}">
-                        ${isS ? 'Serving' : (q.orderType==='booking' ? 'Booking' : 'Walk-in')}
-                    </span>
-                </div>
-                <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl mt-3">
-                    <div>⏱️ ${t.admin_label_course}: <span class="text-white font-medium">${q.course || '-'}</span></div>
-                    <div>🌡️ ${t.admin_label_water}: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
-                    <div>🌿 ${t.admin_label_oil}: <span class="text-white font-medium">${q.oil || '-'}</span></div>
-                    <div>🧴 ${t.admin_label_shampoo}: <span class="text-white font-medium">${q.shampoo || '-'}</span></div>
-                    <div>💆 ${t.admin_label_massage}: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
-                    <div>💆‍♀️ ${t.admin_label_head}: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
-                    ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ ${t.admin_label_caution}: ${q.caution}</div>` : ''}
-                </div>
-                <div class="flex gap-2 justify-end items-center">
-                    ${q.status === 'Waiting' ? `
-                        <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-3 py-2 rounded-lg text-xs font-bold transition-all border border-amber-500/30 mr-auto">🚀 Skip</button>
-                        <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">Start</button>
-                    ` : ''}
-                    ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">Done</button>` : ''}
-                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-3 py-2 rounded-lg text-xs transition-all">Del</button>
-                </div>
-            </div>`;
-
-            const wl = document.getElementById('admin-walkin-list'); wl.innerHTML = '';
-            if(serving && serving.orderType !== 'booking') wl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createCard(serving, true);
-            waitingWalkin.forEach(q => wl.innerHTML += createCard(q, false));
-            if(!waitingWalkin.length && (!serving || serving.orderType === 'booking')) wl.innerHTML = '<div class="text-gray-500 text-center py-8">No Walk-in</div>';
-
-            const bl = document.getElementById('admin-booking-list'); bl.innerHTML = '';
-            if(serving && serving.orderType === 'booking') bl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createCard(serving, true);
-            const sortedB = waitingBooking.sort((a,b) => (a.bookingDate+a.bookingTime).localeCompare(b.bookingDate+b.bookingTime));
-            sortedB.forEach(q => bl.innerHTML += createCard(q, false));
-            if(!sortedB.length && (!serving || serving.orderType !== 'booking')) bl.innerHTML = '<div class="text-gray-500 text-center py-8">No Booking</div>';
-        }
-    }
-
-    // --- FORM SUBMIT ---
-    document.getElementById('customer-form').onsubmit = async (e) => {
-        e.preventDefault();
-        const type = document.getElementById('form-order-type').value;
-        const btn = document.getElementById('submit-btn');
-        
-        // VALIDATION FOR BOOKING
-        if (type === 'booking') {
-            const time = document.getElementById('booking-time-input').value;
-            if (!time) {
-                alert(currentLang === 'th' ? "กรุณาเลือกเวลาที่ว่าง" : "Please select an available time slot.");
-                return;
+            document.getElementById('bar-my-id').innerText = q.id;
+            document.getElementById('bar-my-status').innerText = q.status === 'Serving' ? 'Serving!' : 'Waiting...';
+            if(q.status === 'Serving' && lastKnownStatus !== 'Serving') {
+                document.getElementById('notify-sound')?.play().catch(e=>{});
+                if(navigator.vibrate) navigator.vibrate([200]);
+                lastKnownStatus = 'Serving'; localStorage.setItem('bloom_my_queue_status', 'Serving');
             }
         }
-
-        btn.disabled = true;
-        btn.innerText = 'Saving...';
-        
-        const fd = new FormData(e.target);
-        const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
-        const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
-        const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
-        
-        const newEntry = {
-            id: nextId,
-            status: 'Waiting',
-            timestamp: new Date().toISOString(),
-            ...Object.fromEntries(fd.entries())
-        };
-        const updatedDB = [...db_content, newEntry];
-        if (await saveToGithub(updatedDB)) {
-            localStorage.setItem('bloom_my_queue_id', nextId);
-            localStorage.setItem('bloom_my_queue_status', 'Waiting');
-            myQueueId = nextId;
-            lastKnownStatus = 'Waiting';
-            showToast('Success! Your Queue is ' + nextId, 'success');
-            e.target.reset();
-            switchCustomerView('queue');
-            refreshData();
-        } else {
-            showToast('Connection Failed', 'error');
-        }
-        btn.disabled = false;
-        btn.innerText = '✅ Confirm Service';
-        applyLanguage();
-    };
-
-    // --- UTILS ---
-    async function updateStatus(id, newStatus) { 
-        let updatedDB;
-        if (newStatus === 'Delete') updatedDB = db_content.filter(i => i.id !== id);
-        else if (newStatus === 'Done') updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Completed' } : i);
-        else updatedDB = db_content.map(i => { if(i.id===id) return {...i, status: newStatus}; if(newStatus==='Serving'&&i.status==='Serving') return null; return i; }).filter(Boolean);
-        if (await saveToGithub(updatedDB)) { showToast('Status Updated', 'success'); refreshData(); }
-    }
-    
-    async function skipQueue(id) { 
-        const item = db_content.find(i => i.id === id); if(!item) return;
-        const serving = db_content.filter(i => i.status === 'Serving');
-        const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
-        const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
-        const newOrder = [...serving, item, ...waiting, ...others];
-        if (await saveToGithub(newOrder)) { showToast('Queue Skipped', 'success'); refreshData(); }
     }
 
-    function switchAdminTab(tab) {
-        activeAdminTab = tab;
-        const tW = document.getElementById('admin-tab-walkin'), tB = document.getElementById('admin-tab-booking');
-        const lW = document.getElementById('admin-walkin-list'), lB = document.getElementById('admin-booking-list');
-        if(tab==='walkin') { tW.classList.add('active'); tB.classList.remove('active'); lW.classList.remove('hidden-elm'); lB.classList.add('hidden-elm'); }
-        else { tB.classList.add('active'); tW.classList.remove('active'); lB.classList.remove('hidden-elm'); lW.classList.add('hidden-elm'); }
-    }
-
-    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
-    function showPage(page) { activePage = page; document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); if(page!=='admin') { document.getElementById('page-customer').classList.remove('hidden-elm'); document.getElementById('page-admin').classList.add('hidden-elm'); toggleNavStyle('customer'); } applyLanguage(); }
-    function checkLogin() { if(document.getElementById('admin-pass').value==='1234') { document.getElementById('login-modal').classList.add('hidden-elm'); document.getElementById('page-admin').classList.remove('hidden-elm'); document.getElementById('page-customer').classList.add('hidden-elm'); toggleNavStyle('admin'); renderUI(); } else showToast('Wrong Password', 'error'); }
-    function toggleNavStyle(active) { 
-        const c = document.getElementById('nav-customer'), a = document.getElementById('nav-admin');
-        const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap';
-        const inactiveClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 whitespace-nowrap';
-        c.className = active === 'customer' ? activeClass : inactiveClass;
-        a.className = active === 'admin' ? activeClass : inactiveClass;
-    }
     function switchCustomerView(view) {
         const f = document.getElementById('customer-form-view'), q = document.getElementById('customer-queue-view');
         const bf = document.getElementById('btn-view-form'), bq = document.getElementById('btn-view-queue');
-        const active = 'flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base';
-        const inactive = 'flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base';
-        if(view==='form') { f.classList.remove('hidden-elm'); q.classList.add('hidden-elm'); bf.className=active; bq.className=inactive; }
-        else { q.classList.remove('hidden-elm'); f.classList.add('hidden-elm'); bq.className=active; bf.className=inactive; refreshData(); }
+        if(view==='form') { f.classList.remove('hidden-elm'); q.classList.add('hidden-elm'); bf.className='flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base'; bq.className='flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base'; }
+        else { q.classList.remove('hidden-elm'); f.classList.add('hidden-elm'); bq.className='flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base'; bf.className='flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base'; refreshData(); }
     }
+    
     function switchFormTab(type) {
         document.getElementById('form-order-type').value = type;
         document.getElementById('booking-section').className = type === 'booking' ? 'mt-6 animate-slide-in' : 'hidden-elm';
         document.getElementById('tab-walkin').className = type==='walkin' ? 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
         document.getElementById('tab-booking').className = type==='booking' ? 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
-        if(type === 'booking') renderTimeSlots(); // Re-calc slots when switching tab
+        if(type === 'booking') renderTimeSlots();
     }
+
     function showToast(m, t) { const c = document.getElementById('toast-container'), el = document.createElement('div'); el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm shadow-2xl pointer-events-auto ${t==='success'?'bg-green-600/90':'bg-red-600/90'}`; el.innerText = m; c.appendChild(el); setTimeout(() => el.remove(), 4000); }
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
+    function showPage(page) { activePage = page; document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); if(page!=='admin') { document.getElementById('page-customer').classList.remove('hidden-elm'); document.getElementById('page-admin').classList.add('hidden-elm'); } applyLanguage(); }
+    function checkLogin() { if(document.getElementById('admin-pass').value==='1234') { document.getElementById('login-modal').classList.add('hidden-elm'); document.getElementById('page-admin').classList.remove('hidden-elm'); document.getElementById('page-customer').classList.add('hidden-elm'); renderUI(); } else showToast('Wrong Password', 'error'); }
   </script>
  </body>
 </html>
