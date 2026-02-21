@@ -16,5 +16,23 @@
     "massagePressure": "กลาง Medium",
     "headPressure": "กลาง Medium",
     "caution": ""
+  },
+  {
+    "id": "Q-002",
+    "status": "Waiting",
+    "timestamp": "2026-02-21T07:01:07.837Z",
+    "orderType": "walkin",
+    "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
+    "course": "60 min",
+    "oil": "Jasmine Rice",
+    "bookingDate": "2026-02-21",
+    "bookingTime": "",
+    "nickname": "เชน",
+    "gender": "ชาย (Male)",
+    "waterTemp": "เย็น",
+    "shampoo": "Chance rich",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
