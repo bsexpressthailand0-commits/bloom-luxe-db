@@ -93,5 +93,24 @@
     "massagePressure": "เบา Gentle",
     "headPressure": "เบา Gentle",
     "caution": ""
+  },
+  {
+    "id": "Q-006",
+    "status": "Waiting",
+    "timestamp": "2026-02-23T06:01:58.955Z",
+    "isPaid": false,
+    "orderType": "walkin",
+    "lineUserId": "",
+    "nickname": "โจ",
+    "course": "60 min",
+    "bookingDate": "",
+    "bookingTime": "",
+    "gender": "ชาย (Male)",
+    "waterTemp": "อุ่น",
+    "oil": "เลือกกลิ่นที่ร้าน",
+    "shampoo": "เลือกกลิ่นที่ร้าน",
+    "massagePressure": "กลาง Medium",
+    "headPressure": "กลาง Medium",
+    "caution": ""
   }
 ]
