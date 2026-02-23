@@ -9,96 +9,73 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    /* Fix Box Sizing Globally */
     *, ::before, ::after { box-sizing: border-box; }
-    
-    body { font-family: 'Prompt', sans-serif; overflow-x: hidden; }
+    body { font-family: 'Prompt', sans-serif; overflow-x: hidden; background-color: #F4EFE6; color: #4A3B32; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
-    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); } 50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); } }
-    .queue-active { animation: pulse-glow 2s infinite; border: 1px solid rgba(139, 92, 246, 0.5); }
-    @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .live-dot { animation: blink-green 2s infinite; }
-    .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
     
-    .glass-input { 
-        width: 100%; 
-        max-width: 100%;
-        min-width: 0;
-        padding: 12px 16px; 
-        border-radius: 12px; 
-        background: rgba(255, 255, 255, 0.1); 
-        border: 1px solid rgba(139, 92, 246, 0.3); 
-        color: white; 
-        outline: none; 
-        transition: all 0.3s; 
-    }
-    .glass-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
-    .radio-box { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: all 0.2s; min-width: 0; }
-    .radio-box:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(139, 92, 246, 0.4); }
-    .radio-box input:checked + span { color: #d8b4fe; font-weight: 600; }
-    .tab-btn { background: rgba(139, 92, 246, 0.1); color: #a78bfa; transition: all 0.3s; }
-    .tab-btn.active { background: linear-gradient(135deg, #8B5CF6, #6D28D9); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); }
-    .hidden-elm { display: none !important; }
-    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .status-waiting { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); }
-    .status-serving { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
-    .status-completed { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
-    .queue-number { font-family: 'Courier New', monospace; letter-spacing: -1px; }
-    
-    .time-slot-btn {
-        @apply py-3 px-2 rounded-xl text-xs font-bold border border-white/10 transition-all duration-200 text-center relative overflow-hidden flex items-center justify-center gap-1;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(4px);
-    }
-    .slot-available {
-        @apply text-white hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.3)] cursor-pointer hover:-translate-y-0.5;
-        border-color: rgba(168, 85, 247, 0.3); 
-    }
-    .slot-occupied {
-        @apply text-gray-500 bg-black/30 border-transparent cursor-not-allowed opacity-60;
-        background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.03) 5px, rgba(255,255,255,0.03) 10px);
-    }
-    .slot-selected {
-        @apply text-white border-transparent shadow-lg scale-[1.02] ring-2 ring-purple-300/50 font-extrabold;
-        background: linear-gradient(135deg, #8B5CF6, #EC4899); 
-    }
-    .slot-disabled {
-        @apply bg-gray-500/10 text-gray-500 border-gray-500/20 cursor-not-allowed;
+    /* Theme Colors */
+    :root {
+        --primary-brown: #8C7462;
+        --dark-brown: #4A3B32;
+        --light-brown: #D4C4B7;
+        --bg-cream: #F4EFE6;
     }
 
-    input[type="date"], input[type="time"] {
-        color-scheme: dark; 
-    }
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator {
-        filter: invert(1);
-        opacity: 0.7;
-        cursor: pointer;
-    }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 10px rgba(140, 116, 98, 0.2); } 50% { box-shadow: 0 0 20px rgba(140, 116, 98, 0.6); } }
+    .queue-active { animation: pulse-glow 2s infinite; border: 1px solid rgba(140, 116, 98, 0.5); }
+    .live-dot { animation: blink-green 2s infinite; }
+    @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    
+    /* Glassmorphism for Light Theme */
+    .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 15px rgba(74, 59, 50, 0.05); }
+    .glass-input { width: 100%; max-width: 100%; min-width: 0; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--light-brown); color: var(--dark-brown); outline: none; transition: all 0.3s; }
+    .glass-input:focus { border-color: var(--primary-brown); box-shadow: 0 0 0 2px rgba(140, 116, 98, 0.2); }
+    .glass-input::placeholder { color: #A09388; }
+    
+    .radio-box { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--light-brown); cursor: pointer; transition: all 0.2s; min-width: 0; }
+    .radio-box:hover { background: rgba(255, 255, 255, 0.9); border-color: var(--primary-brown); }
+    .radio-box input:checked + span { color: var(--primary-brown); font-weight: 600; }
+    
+    .tab-btn { background: rgba(255, 255, 255, 0.5); color: #847568; transition: all 0.3s; border: 1px solid transparent; }
+    .tab-btn.active { background: linear-gradient(135deg, var(--primary-brown), #705C4D); color: white; box-shadow: 0 4px 10px rgba(140, 116, 98, 0.3); border: 1px solid transparent; }
+    
+    .hidden-elm { display: none !important; }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-waiting { background: rgba(234, 179, 8, 0.15); color: #B45309; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .status-serving { background: rgba(34, 197, 94, 0.15); color: #15803D; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status-completed { background: rgba(148, 163, 184, 0.15); color: #475569; border: 1px solid rgba(148, 163, 184, 0.3); }
+    
+    .queue-number { font-family: 'Courier New', monospace; letter-spacing: -1px; }
+    
+    .time-slot-btn { @apply py-3 px-2 rounded-xl text-xs font-bold border transition-all duration-200 text-center relative overflow-hidden flex items-center justify-center gap-1; background: rgba(255, 255, 255, 0.6); border-color: var(--light-brown); color: var(--dark-brown); }
+    .slot-available { hover:border-[var(--primary-brown)]; hover:shadow-[0_0_10px_rgba(140,116,98,0.2)] cursor-pointer hover:-translate-y-0.5; }
+    .slot-occupied { color: #A09388; background: rgba(0,0,0,0.04); border-color: transparent; cursor-not-allowed; opacity: 0.6; }
+    .slot-selected { color: white; border-transparent shadow-lg scale-[1.02] ring-2 ring-[#D4C4B7]/50 font-extrabold; background: linear-gradient(135deg, var(--primary-brown), #705C4D); border-color: transparent; }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .my-queue-bar { animation: slideUp 0.5s ease-out forwards; }
   </style>
  </head>
- <body class="h-full m-0 p-0 bg-[#0f172a] overflow-x-hidden">
-   
-  <div id="app" class="h-full w-full overflow-x-hidden min-h-screen pb-20" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
-     
-    <!-- Navigation -->
-    <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-black/20 backdrop-blur-md sticky top-0 z-50 w-full">
+ <body class="h-full m-0 p-0 overflow-x-hidden">
+  <div id="app" class="h-full w-full overflow-x-hidden min-h-screen pb-20" style="background: linear-gradient(135deg, #F4EFE6 0%, #E8DFD3 100%);">
+    
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-6 py-4 bg-white/60 backdrop-blur-md sticky top-0 z-50 w-full border-b border-white/40">
         <div class="flex items-center gap-2 shrink-0">
             <span class="text-2xl">🌸</span>
             <div class="flex flex-col">
-                <span class="text-white font-bold tracking-wider hidden md:block leading-tight">BLOOM LUXE</span>
+                <span class="font-bold tracking-wider hidden md:block leading-tight text-[#4A3B32]">BLOOM LUXE</span>
                 <div class="flex items-center gap-1.5" id="live-indicator">
                     <div id="status-dot" class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                    <span id="status-text" class="text-[10px] text-yellow-400 font-medium uppercase tracking-widest">Checking...</span>
+                    <span id="status-text" class="text-[10px] text-yellow-600 font-medium uppercase tracking-widest">Checking...</span>
                 </div>
             </div>
         </div>
         <div class="flex gap-2 shrink-0 items-center">
-            <button onclick="showPage('customer')" id="nav-customer" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap">Customer</button>
-            <button onclick="showPage('admin')" id="nav-admin" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 hover:text-white whitespace-nowrap">Staff</button>
+            <button onclick="showPage('customer')" id="nav-customer" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-[#8C7462] text-white shadow-md whitespace-nowrap">Customer</button>
+            <button onclick="showPage('admin')" id="nav-admin" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-[#847568] hover:text-[#4A3B32] whitespace-nowrap">Staff</button>
         </div>
     </nav>
 
@@ -106,24 +83,24 @@
     <div id="page-customer" class="max-w-2xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
       
       <div class="glass-panel rounded-3xl p-5 md:p-6 mb-6 text-center relative overflow-hidden">
-         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500"></div>
-         <h2 class="text-xl font-bold text-white mb-1">BLOOM LUXE SALON</h2>
-         <p class="text-purple-200/70 text-sm">Service Booking</p>
+         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#8C7462] to-[#D4C4B7]"></div>
+         <h2 class="text-xl font-bold text-[#4A3B32] mb-1">BLOOM LUXE SALON</h2>
+         <p class="text-[#847568] text-sm">Service Booking</p>
          <div id="liff-user-info" class="hidden-elm mt-2 flex items-center justify-center gap-2">
-             <img id="liff-user-img" src="" class="w-6 h-6 rounded-full border border-white/50">
-             <span id="liff-user-name" class="text-xs text-green-300">Logged in via LINE</span>
+             <img id="liff-user-img" src="" class="w-6 h-6 rounded-full border border-[#D4C4B7]">
+             <span id="liff-user-name" class="text-xs text-[#6B5C50] font-medium">Logged in via LINE</span>
          </div>
       </div>
 
       <div class="flex gap-3 md:gap-4 mb-6">
-          <button onclick="switchCustomerView('form')" id="btn-view-form" class="flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base">📝 Register</button>
-          <button onclick="switchCustomerView('queue')" id="btn-view-queue" class="flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base">👀 Queue Status</button>
+          <button onclick="switchCustomerView('form')" id="btn-view-form" class="flex-1 py-3 rounded-2xl font-bold bg-white text-[#8C7462] shadow-lg border border-[#D4C4B7]/50 scale-105 text-sm md:text-base transition-all">📝 Register</button>
+          <button onclick="switchCustomerView('queue')" id="btn-view-queue" class="flex-1 py-3 rounded-2xl font-bold bg-white/40 text-[#847568] border border-transparent text-sm md:text-base transition-all">👀 Queue Status</button>
       </div>
-
+      
       <!-- 1. Form View -->
-      <div id="customer-form-view" class="glass-panel rounded-3xl p-5 md:p-8 shadow-2xl animate-slide-in w-full">
+      <div id="customer-form-view" class="glass-panel rounded-3xl p-5 md:p-8 shadow-xl animate-slide-in w-full">
         <form id="customer-form" class="space-y-6 md:space-y-8">
-            <div class="flex bg-black/20 p-1.5 rounded-2xl">
+            <div class="flex bg-[#E8DFD3]/50 p-1.5 rounded-2xl border border-[#D4C4B7]/50">
                 <button type="button" onclick="switchFormTab('walkin')" id="tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">🚶 Walk-in</button>
                 <button type="button" onclick="switchFormTab('booking')" id="tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn">📅 Booking</button>
             </div>
@@ -131,25 +108,25 @@
             <input type="hidden" id="line-user-id" name="lineUserId" value="">
 
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-2">Nickname</label>
+                <label class="block text-[#5A4A3D] font-medium text-sm mb-2">Nickname</label>
                 <input type="text" id="input-nickname" name="nickname" required class="glass-input w-full" placeholder="Enter your nickname...">
             </div>
 
             <!-- COURSE SECTION -->
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-3">⏱️ Duration (Course)</label>
+                <label class="block text-[#5A4A3D] font-medium text-sm mb-3">⏱️ Duration (Course)</label>
                 <div class="flex gap-3 w-full">
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="60 min" required class="accent-purple-500" onchange="renderTimeSlots()"><span class="text-gray-300 text-xs font-medium">Origin course 60 min</span></label>
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="90 min" class="accent-purple-500" onchange="renderTimeSlots()"><span class="text-gray-300 text-xs font-medium">Premium course 90 min</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="60 min" required class="accent-[#8C7462]" onchange="renderTimeSlots()"><span class="text-xs font-medium">Origin course 60 min</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="course" value="90 min" class="accent-[#8C7462]" onchange="renderTimeSlots()"><span class="text-xs font-medium">Premium course 90 min</span></label>
                 </div>
             </div>
 
             <!-- SMART BOOKING SECTION -->
             <div id="booking-section" class="hidden-elm mt-6 animate-slide-in">
-                <div class="bg-white/5 border border-white/10 rounded-2xl p-4 md:p-5 relative overflow-hidden w-full">
-                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="bg-white/40 border border-[#D4C4B7] rounded-2xl p-4 md:p-5 relative overflow-hidden w-full shadow-sm">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#D4C4B7]/20 rounded-full blur-3xl pointer-events-none"></div>
                     
-                    <div class="flex items-center gap-2 mb-4 text-purple-300">
+                    <div class="flex items-center gap-2 mb-4 text-[#8C7462]">
                         <span class="text-xl">📅</span>
                         <span class="font-bold text-sm">Select Date & Time</span>
                     </div>
@@ -157,10 +134,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Date Input -->
                         <div class="relative group w-full min-w-0">
-                            <label class="block text-purple-200/70 text-xs mb-1.5 ml-1">Date</label>
+                            <label class="block text-[#847568] text-xs mb-1.5 ml-1">Date</label>
                             <div class="relative w-full">
-                                <input type="date" id="booking-date-input" name="bookingDate" class="glass-input w-full pl-10 h-12 text-white bg-white/10 border-purple-500/30 focus:border-purple-400 focus:bg-white/20 transition-all rounded-xl cursor-pointer" onchange="renderTimeSlots()">
-                                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-purple-300 pointer-events-none">
+                                <input type="date" id="booking-date-input" name="bookingDate" class="glass-input w-full pl-10 h-12 bg-white/60 border-[#D4C4B7] focus:border-[#8C7462] transition-all rounded-xl cursor-pointer" onchange="renderTimeSlots()">
+                                <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8C7462] pointer-events-none">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 </div>
                             </div>
@@ -168,169 +145,168 @@
 
                         <!-- Time Input Grid -->
                         <div class="md:col-span-2">
-                            <label class="block text-purple-200/70 text-xs mb-2 ml-1">Available Slots (Tap to select)</label>
+                            <label class="block text-[#847568] text-xs mb-2 ml-1">Available Slots (Tap to select)</label>
                             <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                                <div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">
+                                <div class="col-span-3 sm:col-span-4 text-center text-[#847568] text-xs py-6 bg-white/40 rounded-xl border border-[#D4C4B7] border-dashed">
                                     Please select date and course first...
                                 </div>
                             </div>
-                            <!-- Hidden Input to store selected time -->
                             <input type="hidden" name="bookingTime" id="booking-time-input" required>
                         </div>
                     </div>
                     
-                    <div class="mt-4 flex flex-wrap gap-3 justify-center text-[10px] text-gray-400 bg-black/20 p-2 rounded-xl border border-white/5">
-                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-transparent border border-purple-400"></div>Available</div>
-                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>Selected</div>
-                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-white/10 border border-white/10"></div>Booked</div>
+                    <div class="mt-4 flex flex-wrap gap-3 justify-center text-[10px] text-[#847568] bg-[#E8DFD3]/30 p-2 rounded-xl border border-[#D4C4B7]/50">
+                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-white border border-[#D4C4B7]"></div>Available</div>
+                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#8C7462] to-[#705C4D]"></div>Selected</div>
+                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#E8DFD3] border border-transparent"></div>Booked</div>
                     </div>
                     
-                    <div class="mt-3 text-[10px] text-gray-400 text-center bg-black/20 rounded-lg py-2 px-3 border border-white/5">
+                    <div class="mt-3 text-[10px] text-[#8C7462] font-medium text-center bg-[#8C7462]/10 rounded-lg py-2 px-3 border border-[#8C7462]/20">
                         *Please arrive 10 minutes before appointment.
                     </div>
                 </div>
             </div>
 
             <div class="w-full">
-                <label class="block text-purple-200 text-sm mb-2">Gender</label>
+                <label class="block text-[#5A4A3D] font-medium text-sm mb-2">Gender</label>
                 <div class="flex gap-3 w-full">
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="Male" required class="accent-purple-500"><span class="text-gray-300 text-sm">Male</span></label>
-                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="Female" class="accent-purple-500"><span class="text-gray-300 text-sm">Female</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="Male" required class="accent-[#8C7462]"><span class="text-sm">Male</span></label>
+                    <label class="radio-box flex-1 justify-center"><input type="radio" name="gender" value="Female" class="accent-[#8C7462]"><span class="text-sm">Female</span></label>
                 </div>
             </div>
 
             <div class="space-y-6 w-full">
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3">🌡️ Water Temperature</label>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">🌡️ Water Temperature</label>
                     <div class="flex gap-3 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="Warm" required class="accent-purple-500"><span class="text-gray-300 text-sm">Warm</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="Cold" class="accent-purple-500"><span class="text-gray-300 text-sm">Cold</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="Warm" required class="accent-[#8C7462]"><span class="text-sm">Warm</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="waterTemp" value="Cold" class="accent-[#8C7462]"><span class="text-sm">Cold</span></label>
                     </div>
                  </div>
                  
                  <div class="w-full">
-                    <label class="block text-purple-200 text-sm mb-3 flex flex-wrap items-center gap-2">
+                    <label class="block text-[#5A4A3D] font-medium text-sm mb-3 flex flex-wrap items-center gap-2">
                         <span>🌿 Signature Oil Massage</span> 
-                        <span class="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">(*Can choose at shop)</span>
+                        <span class="text-[10px] text-[#8C7462] bg-[#8C7462]/10 px-2 py-0.5 rounded-full border border-[#8C7462]/20">(*Can choose at shop)</span>
                     </label>
                     <div class="grid grid-cols-2 gap-3 w-full">
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-purple-500"><span class="text-gray-300 text-xs">Jasmine Rice</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="White Tea" class="accent-purple-500"><span class="text-gray-300 text-xs">White Tea</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Marigold" class="accent-purple-500"><span class="text-gray-300 text-xs">Marigold</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="oil" value="Orchid" class="accent-purple-500"><span class="text-gray-300 text-xs">Orchid</span></label>
-                        <label class="radio-box w-full col-span-2 justify-center border-dashed bg-white/5 hover:bg-white/10"><input type="radio" name="oil" value="Choose at shop" class="accent-purple-500"><span class="text-purple-300 text-xs font-semibold">❓ Choose at shop</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Jasmine Rice" required class="accent-[#8C7462]"><span class="text-xs">Jasmine Rice</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="White Tea" class="accent-[#8C7462]"><span class="text-xs">White Tea</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Marigold" class="accent-[#8C7462]"><span class="text-xs">Marigold</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="oil" value="Orchid" class="accent-[#8C7462]"><span class="text-xs">Orchid</span></label>
+                        <label class="radio-box w-full col-span-2 justify-center border-dashed bg-white/40 hover:bg-white/80"><input type="radio" name="oil" value="Choose at shop" class="accent-[#8C7462]"><span class="text-[#8C7462] text-xs font-semibold">❓ Choose at shop</span></label>
                     </div>
                  </div>
 
                  <div class="w-full">
-                    <label class="block text-purple-200 text-sm mb-3 flex flex-wrap items-center gap-2">
+                    <label class="block text-[#5A4A3D] font-medium text-sm mb-3 flex flex-wrap items-center gap-2">
                         <span>🧴 The Scent of Shampoo</span> 
-                        <span class="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full border border-purple-500/30">(*Can choose at shop)</span>
+                        <span class="text-[10px] text-[#8C7462] bg-[#8C7462]/10 px-2 py-0.5 rounded-full border border-[#8C7462]/20">(*Can choose at shop)</span>
                     </label>
                     <div class="grid grid-cols-2 gap-3 w-full">
-                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Chance rich" required class="accent-purple-500"><span class="text-gray-300 text-xs">Chance rich</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Honey sunset" class="accent-purple-500"><span class="text-gray-300 text-xs">Honey sunset</span></label>
-                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Pink Gold" class="accent-purple-500"><span class="text-gray-300 text-xs">Pink Gold</span></label>
-                        <label class="radio-box w-full border-dashed bg-white/5 hover:bg-white/10"><input type="radio" name="shampoo" value="Choose at shop" class="accent-purple-500"><span class="text-purple-300 text-xs font-semibold">❓ Choose at shop</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Chance rich" required class="accent-[#8C7462]"><span class="text-xs">Chance rich</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Honey sunset" class="accent-[#8C7462]"><span class="text-xs">Honey sunset</span></label>
+                        <label class="radio-box w-full"><input type="radio" name="shampoo" value="Pink Gold" class="accent-[#8C7462]"><span class="text-xs">Pink Gold</span></label>
+                        <label class="radio-box w-full border-dashed bg-white/40 hover:bg-white/80"><input type="radio" name="shampoo" value="Choose at shop" class="accent-[#8C7462]"><span class="text-[#8C7462] text-xs font-semibold">❓ Choose at shop</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3">💆 Levels of Massage</label>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆 Levels of Massage</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs">Gentle</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Medium" class="accent-purple-500"><span class="text-gray-300 text-xs">Medium</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Strong" class="accent-purple-500"><span class="text-gray-300 text-xs">Strong</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Gentle" class="accent-[#8C7462]"><span class="text-xs">Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Medium" class="accent-[#8C7462]"><span class="text-xs">Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Strong" class="accent-[#8C7462]"><span class="text-xs">Strong</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-3">💆‍♀️ Level of Pressure Hair</label>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆‍♀️ Level of Pressure Hair</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Gentle" class="accent-purple-500"><span class="text-gray-300 text-xs">Gentle</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Medium" class="accent-purple-500"><span class="text-gray-300 text-xs">Medium</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Strong" class="accent-purple-500"><span class="text-gray-300 text-xs">Strong</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Gentle" class="accent-[#8C7462]"><span class="text-xs">Gentle</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Medium" class="accent-[#8C7462]"><span class="text-xs">Medium</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Strong" class="accent-[#8C7462]"><span class="text-xs">Strong</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-purple-200 text-sm mb-2">⚠️ Special Caution Areas</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin..."></textarea></div>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-2">⚠️ Special Caution Areas</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin..."></textarea></div>
             </div>
 
-            <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg shadow-purple-500/30 transition-all hover:scale-[1.02]">
+            <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-[#8C7462] to-[#705C4D] shadow-lg shadow-[#8C7462]/30 transition-all hover:scale-[1.02]">
                 <span id="submit-text">✅ Confirm Service</span>
             </button>
-            <div class="text-[10px] text-purple-300 text-center mt-2 opacity-70">*Notifications enabled to alert you when it's your queue.</div>
+            <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">*Notifications enabled to alert you when it's your queue.</div>
         </form>
       </div>
 
       <!-- 2. Live Queue View -->
       <div id="customer-queue-view" class="hidden-elm animate-slide-in">
-          <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative overflow-hidden bg-gradient-to-br from-purple-900/40 to-black/40">
-            <div class="text-purple-200 text-sm uppercase tracking-widest mb-2 animate-pulse">Now Serving</div>
-            <div class="text-6xl md:text-8xl font-bold text-green-400 queue-number mb-2" id="cust-display-queue">-</div>
-            <div class="text-xl text-white font-bold" id="cust-display-name">...</div>
+          <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative overflow-hidden bg-gradient-to-br from-[#8C7462]/10 to-white/50 border-[#D4C4B7]">
+            <div class="text-[#847568] text-sm font-bold uppercase tracking-widest mb-2 animate-pulse">Now Serving</div>
+            <div class="text-6xl md:text-8xl font-bold text-[#15803D] queue-number mb-2" id="cust-display-queue">-</div>
+            <div class="text-xl text-[#4A3B32] font-bold" id="cust-display-name">...</div>
           </div>
 
-          <h3 class="text-white font-bold mb-4 flex items-center gap-2"><span>⏳</span> Waiting Queue</h3>
+          <h3 class="text-[#4A3B32] font-bold mb-4 flex items-center gap-2"><span>⏳</span> Waiting Queue</h3>
           <div id="cust-waiting-list" class="space-y-3">
-              <div class="text-center text-gray-500 py-4">Loading queue data...</div>
+              <div class="text-center text-[#847568] py-4">Loading queue data...</div>
           </div>
       </div>
     </div>
 
     <!-- ================= ADMIN PAGE ================= -->
     <div id="page-admin" class="hidden-elm max-w-4xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
-        <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative">
-            <div class="text-purple-200 text-sm uppercase tracking-widest mb-2">Now Serving (Staff View)</div>
-            <div class="text-6xl md:text-8xl font-bold text-white queue-number mb-2" id="admin-display-queue">-</div>
-            <div class="text-xl text-purple-300" id="admin-display-name">Waiting...</div>
+        <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative border-[#D4C4B7]">
+            <div class="text-[#847568] text-sm font-bold uppercase tracking-widest mb-2">Now Serving (Staff View)</div>
+            <div class="text-6xl md:text-8xl font-bold text-[#4A3B32] queue-number mb-2" id="admin-display-queue">-</div>
+            <div class="text-xl text-[#8C7462] font-medium" id="admin-display-name">Waiting...</div>
         </div>
 
         <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-yellow-400" id="count-waiting">0</div><div class="text-xs text-gray-400">Total Waiting</div></div>
-            <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-green-400" id="count-serving">0</div><div class="text-xs text-gray-400">Serving</div></div>
-            <div class="glass-panel p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-blue-400" id="count-total">0</div><div class="text-xs text-gray-400">Today</div></div>
+            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#D97706]" id="count-waiting">0</div><div class="text-xs text-[#847568] font-medium mt-1">Waiting</div></div>
+            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#15803D]" id="count-serving">0</div><div class="text-xs text-[#847568] font-medium mt-1">Serving</div></div>
+            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#4A3B32]" id="count-total">0</div><div class="text-xs text-[#847568] font-medium mt-1">Total Today</div></div>
         </div>
 
         <!-- System Settings Section -->
         <div class="mb-4 flex justify-between items-center px-2">
-            <h3 class="text-white font-bold">📋 Queue Management</h3>
-            <button onclick="toggleSettings()" class="text-xs text-purple-400 hover:text-white transition-all bg-white/5 px-3 py-1.5 rounded-lg">⚙️ Config</button>
+            <h3 class="text-[#4A3B32] font-bold">📋 Queue Management</h3>
+            <button onclick="toggleSettings()" class="text-xs text-[#8C7462] font-bold hover:text-[#4A3B32] transition-all bg-white/50 px-3 py-1.5 rounded-lg border border-[#D4C4B7]">⚙️ Config</button>
         </div>
 
-        <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border border-purple-500/30">
-            <h4 class="text-white font-bold text-sm mb-3">GitHub Configuration (Hardcoded)</h4>
-            <div class="text-[10px] text-gray-400 mb-2">Using configuration from code.</div>
+        <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border-[#D4C4B7]">
+            <h4 class="text-[#4A3B32] font-bold text-sm mb-3">GitHub Configuration (Hardcoded)</h4>
+            <div class="text-[10px] text-[#847568] mb-2">Using configuration from code.</div>
             <div class="space-y-3">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-[10px] text-gray-400 block mb-1">GitHub Username</label>
+                        <label class="text-[10px] text-[#847568] block mb-1">GitHub Username</label>
                         <input type="text" id="db-owner-input" class="glass-input text-xs" readonly>
                     </div>
                     <div>
-                        <label class="text-[10px] text-gray-400 block mb-1">Repository Name</label>
+                        <label class="text-[10px] text-[#847568] block mb-1">Repository Name</label>
                         <input type="text" id="db-repo-input" class="glass-input text-xs" readonly>
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-green-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ Press to create database.json (Fix 404 Error)</button>
+                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-[#15803D] text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ Press to create database.json (Fix 404 Error)</button>
                 </div>
 
-                <div class="pt-4 mt-2 border-t border-white/10">
+                <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
                     <div class="grid grid-cols-2 gap-3 mb-2">
-                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
                             <span class="text-lg">🗑️🚶</span> 
                             <span>Reset Walk-in</span>
                         </button>
-                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-500/10 text-orange-400 hover:bg-orange-600 hover:text-white border border-orange-500/30 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white border border-orange-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
                             <span class="text-lg">🗑️📅</span> 
                             <span>Reset Booking</span>
                         </button>
                     </div>
-                    <div class="text-[10px] text-gray-500 text-center">Press to start a new day (Data will be lost)</div>
+                    <div class="text-[10px] text-[#847568] text-center mt-2">Press to start a new day (Data will be lost)</div>
                 </div>
             </div>
         </div>
 
         <!-- Admin Tabs -->
-        <div class="flex bg-black/20 p-1.5 rounded-2xl mb-4 gap-1 overflow-x-auto">
+        <div class="flex bg-white/40 border border-[#D4C4B7]/50 p-1.5 rounded-2xl mb-4 gap-1 overflow-x-auto">
             <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-xs sm:text-sm transition-all tab-btn active whitespace-nowrap px-2">
                 🚶 Walk-in (<span id="badge-walkin">0</span>)
             </button>
@@ -351,28 +327,28 @@
     
     <!-- CUSTOMER BOTTOM BAR (MY QUEUE) -->
     <div id="my-queue-bar" class="fixed bottom-0 left-0 w-full z-40 p-4 hidden-elm my-queue-bar">
-        <div class="glass-panel p-4 rounded-2xl bg-[#0f172a]/95 border-purple-500/50 shadow-[0_-10px_40px_rgba(139,92,246,0.3)] flex justify-between items-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 animate-pulse"></div>
+        <div class="glass-panel p-4 rounded-2xl bg-[#F4EFE6]/95 border-[#8C7462]/30 shadow-[0_-10px_40px_rgba(74,59,50,0.15)] flex justify-between items-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-[#8C7462]/10 to-[#D4C4B7]/10 animate-pulse"></div>
             <div class="relative z-10 flex items-center gap-3">
-                <div class="bg-purple-600 px-3 py-1 rounded-lg text-white font-bold text-lg shadow-lg" id="bar-my-id">Q-001</div>
+                <div class="bg-gradient-to-br from-[#8C7462] to-[#705C4D] px-3 py-1 rounded-lg text-white font-bold text-lg shadow-md" id="bar-my-id">Q-001</div>
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-purple-200 uppercase tracking-widest">Your Queue</span>
-                    <span class="text-white font-bold text-sm" id="bar-my-status">Waiting...</span>
+                    <span class="text-[10px] text-[#847568] uppercase tracking-widest font-bold">Your Queue</span>
+                    <span class="text-[#4A3B32] font-bold text-sm" id="bar-my-status">Waiting...</span>
                 </div>
             </div>
-            <button onclick="switchCustomerView('queue')" class="relative z-10 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs text-white transition-all">
+            <button onclick="switchCustomerView('queue')" class="relative z-10 bg-white/60 hover:bg-white/90 border border-[#D4C4B7] px-3 py-1.5 rounded-lg text-xs text-[#4A3B32] font-bold transition-all shadow-sm">
                 View
             </button>
         </div>
     </div>
 
     <!-- Login Modal -->
-    <div id="login-modal" class="hidden-elm fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel p-8 rounded-2xl w-80 text-center">
-            <h3 class="text-xl font-bold text-white mb-4">🔐 Staff Login</h3>
-            <input type="password" id="admin-pass" class="glass-input text-center mb-4" placeholder="Password">
-            <button onclick="checkLogin()" class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold">Login</button>
-            <button onclick="showPage('customer')" class="mt-4 text-sm text-gray-400 underline">Back</button>
+    <div id="login-modal" class="hidden-elm fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="glass-panel p-8 rounded-2xl w-80 text-center bg-[#F4EFE6]">
+            <h3 class="text-xl font-bold text-[#4A3B32] mb-4">🔐 Staff Login</h3>
+            <input type="password" id="admin-pass" class="glass-input text-center mb-4 bg-white" placeholder="Password">
+            <button onclick="checkLogin()" class="w-full py-3 bg-[#8C7462] text-white rounded-xl font-bold shadow-md">Login</button>
+            <button onclick="showPage('customer')" class="mt-4 text-sm text-[#847568] hover:text-[#4A3B32] underline font-medium">Back to Customer</button>
         </div>
     </div>
 
@@ -427,8 +403,6 @@
         initializeLiff();
         refreshData();
         setInterval(refreshData, 5000); 
-
-        // Start local timer loop
         setInterval(updateTimers, 1000);
     };
 
@@ -440,7 +414,7 @@
         const hiddenInput = document.getElementById('booking-time-input');
         
         if (!dateInput || !courseInput) {
-            grid.innerHTML = `<div class="col-span-3 sm:col-span-4 text-center text-gray-500 text-xs py-6 bg-white/5 rounded-xl border border-white/5 border-dashed">Please select date and course first...</div>`;
+            grid.innerHTML = `<div class="col-span-3 sm:col-span-4 text-center text-[#847568] text-xs py-6 bg-white/40 rounded-xl border border-[#D4C4B7] border-dashed">Please select date and course first...</div>`;
             return;
         }
 
@@ -460,7 +434,6 @@
             // Check Collision
             let isOverlap = false;
             for (let slot of occupied) {
-                // Logic: New Start < Old End AND New End > Old Start
                 if (start < slot.end && end > slot.start) {
                     isOverlap = true;
                     break;
@@ -475,13 +448,13 @@
                 hasSlots = true;
                 html += `<div onclick="selectTimeSlot('${timeStr}', this)" class="time-slot-btn slot-available group" data-time="${timeStr}">
                     <span>${timeStr}</span>
-                    <div class="hidden group-[.slot-selected]:block absolute right-1 top-1 w-1.5 h-1.5 bg-white rounded-full"></div>
+                    <div class="hidden group-[.slot-selected]:block absolute right-1 top-1 w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>
                 </div>`;
             }
         }
 
         if (!hasSlots) {
-            html = `<div class="col-span-3 sm:col-span-4 text-center text-red-400 text-xs py-6 bg-red-500/10 rounded-xl border border-red-500/20">No slots available today</div>`;
+            html = `<div class="col-span-3 sm:col-span-4 text-center text-red-600 font-medium text-xs py-6 bg-red-50 rounded-xl border border-red-200">No slots available today</div>`;
         }
         
         grid.innerHTML = html;
@@ -558,7 +531,7 @@
             if(confirm("Send notification to this customer?")) {
                 const msg = `🔔 เรียกคิว: ถึงคิวของคุณแล้วค่ะ (${item.id})\nกรุณามาที่จุดให้บริการ\nIt's your turn!`;
                 sendLineNotification(item.lineUserId, msg);
-                showToast("Sending notification...", "success");
+                showToast("Notification Sent", "success");
             }
         } else {
             alert("No LINE User ID found for this customer.");
@@ -679,9 +652,7 @@
     }
 
     async function resetQueueByType(type) {
-        let confirmMsg = "";
-        if (type === 'walkin') confirmMsg = "⚠️ Confirm: Reset all 'Walk-in' queues?\n(Booking data will remain)";
-        if (type === 'booking') confirmMsg = "⚠️ Confirm: Reset all 'Booking' queues?\n(Walk-in data will remain)";
+        const confirmMsg = `⚠️ Confirm: Reset all '${type === 'walkin' ? 'Walk-in' : 'Booking'}' queues?\n(Other data will remain)`;
 
         if(!confirm(confirmMsg)) return;
 
@@ -712,7 +683,7 @@
         const itemIndex = db_content.findIndex(i => i.id === id);
         if (itemIndex > -1) {
             db_content[itemIndex].isPaid = isPaid;
-            renderUI();
+            renderUI(); // Optimistic UI
             if (await saveToGithub(db_content)) {
                 showToast('Payment status updated', 'success');
             } else {
@@ -754,14 +725,15 @@
                 const s = Math.floor((remaining % 60000) / 1000);
                 el.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
                 
+                // 5-minute warning
                 if (remaining <= 300000 && el.dataset.notified === 'false') {
                     el.dataset.notified = 'true'; 
                     triggerNextQueueWarning(el.dataset.id);
                 }
             } else {
                 el.innerText = `00:00 (Time Up)`;
-                el.classList.remove('text-yellow-400');
-                el.classList.add('text-red-400', 'animate-pulse');
+                el.classList.remove('text-[#D97706]'); // Yellow-ish
+                el.classList.add('text-red-600', 'animate-pulse', 'font-bold');
             }
         });
     }
@@ -791,53 +763,6 @@
                 renderUI(); 
             }
         } catch (e) { console.error("Failed to notify next queue", e); }
-    }
-
-    function checkMyQueueStatus(data) { 
-        if (!myQueueId) { 
-            document.getElementById('my-queue-bar').classList.add('hidden-elm'); 
-            return; 
-        }
-        
-        const myQueue = data.find(q => q.id === myQueueId);
-        
-        if (!myQueue || myQueue.status === 'Completed' || myQueue.status === 'Delete') {
-             document.getElementById('my-queue-bar').classList.add('hidden-elm');
-             return;
-        }
-
-        if (myQueue && (myQueue.status === 'Waiting' || myQueue.status === 'Serving')) {
-            document.getElementById('my-queue-bar').classList.remove('hidden-elm');
-            document.getElementById('bar-my-id').innerText = myQueue.id;
-            
-            let statusText = 'Waiting...';
-            if(myQueue.status === 'Serving') {
-                statusText = '🎉 It\'s your turn!';
-            }
-            
-            document.getElementById('bar-my-status').innerText = statusText;
-            document.getElementById('bar-my-status').className = myQueue.status === 'Serving' ? 'text-green-400 font-bold text-sm animate-pulse' : 'text-white font-bold text-sm';
-            
-            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { 
-                triggerAlert(); 
-                lastKnownStatus = 'Serving'; 
-                localStorage.setItem('bloom_my_queue_status', 'Serving'); 
-            }
-        }
-    }
-    
-    function triggerAlert() { 
-        const audio = document.getElementById('notify-sound');
-        if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]); 
-        
-        if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("🎉 It's your turn!", {
-                body: "Please come to the service point.",
-                icon: "https://cdn-icons-png.flaticon.com/512/3756/3756353.png"
-            });
-        }
-        showToast("🔔 It's your turn! Please come to the service point.", "success");
     }
 
     // --- FORM SUBMIT ---
@@ -912,72 +837,83 @@
     function createAdminCard(q, isS) {
         const isCompleted = q.status === 'Completed';
         const isBooking = q.orderType === 'booking';
-        const badgeClass = isS ? 'status-serving' : (isCompleted ? 'status-completed' : (isBooking ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'status-waiting'));
-        const badgeText = isS ? 'Serving' : (isCompleted ? 'Completed' : (isBooking ? 'Booking' : 'Walk-in'));
+        
+        let badgeClass, badgeText;
+        if (isS) {
+            badgeClass = 'bg-[#15803D]/10 text-[#15803D] border-[#15803D]/30';
+            badgeText = 'Serving';
+        } else if (isCompleted) {
+            badgeClass = 'bg-gray-200 text-gray-600 border-gray-300';
+            badgeText = 'Completed';
+        } else {
+            badgeClass = isBooking ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' : 'bg-yellow-500/10 text-yellow-700 border-yellow-500/30';
+            badgeText = isBooking ? 'Booking' : 'Walk-in';
+        }
         
         const timeDisplay = isBooking ? `📅 ${q.bookingDate || ''} | ⏰ ${q.bookingTime || '??:??'}` : `🕒 Walk-in (${q.timestamp.split('T')[1].slice(0,5)})`;
-        const timeColor = isBooking ? 'text-orange-400' : 'text-gray-400';
+        const timeColor = isBooking ? 'text-orange-600' : 'text-[#847568]';
 
         const paidText = q.isPaid ? '✅ Paid' : '⏳ Unpaid';
-        const paidBorderClass = q.isPaid ? 'border-green-500/50 bg-green-500/10' : 'border-white/10 bg-black/20';
-        const paidTextClass = q.isPaid ? 'text-green-400 font-bold' : 'text-gray-400';
+        const paidBorderClass = q.isPaid ? 'border-[#15803D]/50 bg-[#15803D]/10' : 'border-[#D4C4B7] bg-white/50';
+        const paidTextClass = q.isPaid ? 'text-[#15803D] font-bold' : 'text-[#847568] font-medium';
 
         let timerUI = '';
         if (isS) {
             if (q.serviceStartTime) {
                 timerUI = `
-                <div class="mt-3 flex items-center justify-between bg-black/30 p-3 rounded-xl border border-yellow-500/30">
+                <div class="mt-3 flex items-center justify-between bg-white/60 p-3 rounded-xl border border-[#D97706]/30 shadow-sm">
                     <div class="flex items-center gap-2">
                         <span class="text-xl">⏳</span>
-                        <span class="text-xs text-purple-200 uppercase tracking-widest">Time Left</span>
+                        <span class="text-xs text-[#5A4A3D] uppercase font-bold tracking-widest">Time Left</span>
                     </div>
-                    <div class="font-mono text-xl font-bold text-yellow-400 timer-display" data-start="${q.serviceStartTime}" data-course="${q.course}" data-id="${q.id}" data-notified="${q.notifiedNext || false}">--:--</div>
+                    <div class="font-mono text-xl font-bold text-[#D97706] timer-display" data-start="${q.serviceStartTime}" data-course="${q.course}" data-id="${q.id}" data-notified="${q.notifiedNext || false}">--:--</div>
                 </div>`;
             } else {
                 timerUI = `
-                <div class="mt-3 bg-black/30 p-3 rounded-xl border border-white/10 flex justify-between items-center">
-                    <span class="text-xs text-gray-400">⏱️ Service Timer</span>
-                    <button onclick="startServiceTimer('${q.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-500/20">Start Timer</button>
+                <div class="mt-3 bg-white/60 p-3 rounded-xl border border-[#D4C4B7] shadow-sm flex justify-between items-center">
+                    <span class="text-xs text-[#5A4A3D] font-medium">⏱️ Service Timer</span>
+                    <button onclick="startServiceTimer('${q.id}')" class="bg-[#15803D] hover:bg-green-800 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md">Start Timer</button>
                 </div>`;
             }
         }
 
         return `
-        <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isS ? 'border-purple-500/50 bg-purple-500/10' : (isCompleted ? 'opacity-70' : '')}">
-            <div class="flex justify-between mb-2">
+        <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isS ? 'border-[#8C7462]/50 bg-[#8C7462]/10' : (isCompleted ? 'opacity-70 bg-white/40' : 'bg-white/80')}">
+            <div class="flex justify-between mb-2 border-b border-[#D4C4B7]/50 pb-3">
                 <div class="flex items-center gap-3">
-                    <div class="bg-white/10 px-3 py-1.5 rounded-lg text-lg font-mono text-white border border-white/10">${q.id}</div>
+                    <div class="bg-white px-3 py-1.5 rounded-lg text-lg font-mono text-[#4A3B32] font-bold border border-[#D4C4B7] shadow-sm">${q.id}</div>
                     <div>
-                        <div class="text-white font-bold text-lg leading-tight">${q.nickname} <span class="font-normal text-xs opacity-50">(${q.gender})</span></div>
+                        <div class="text-[#4A3B32] font-bold text-lg leading-tight">${q.nickname} <span class="font-normal text-xs text-[#847568]">(${q.gender})</span></div>
                         <div class="text-xs ${timeColor} font-bold mt-0.5">${timeDisplay}</div>
                     </div>
                 </div>
                 <span class="status-badge ${badgeClass}">${badgeText}</span>
             </div>
-            <div class="grid grid-cols-2 gap-3 text-xs text-gray-300 mb-4 bg-black/20 p-3 rounded-xl mt-3">
-                <div>⏱️ Course: <span class="text-white font-medium">${q.course || '-'}</span></div>
-                <div>🌡️ Water: <span class="text-white font-medium">${q.waterTemp || '-'}</span></div>
-                <div>🌿 Scent: <span class="text-white font-medium">${q.oil || '-'}</span></div>
-                <div>🧴 Shampoo: <span class="text-white font-medium">${q.shampoo || '-'}</span></div>
-                <div>💆 Massage: <span class="text-white font-medium">${q.massagePressure || '-'}</span></div>
-                <div>💆‍♀️ Head: <span class="text-white font-medium">${q.headPressure || '-'}</span></div>
-                ${q.caution ? `<div class="col-span-2 pt-2 border-t border-white/5 text-pink-300">⚠️ Caution: ${q.caution}</div>` : ''}
+            
+            <div class="grid grid-cols-2 gap-3 text-xs text-[#5A4A3D] mb-4 bg-[#F4EFE6]/50 p-3 rounded-xl mt-3 border border-[#D4C4B7]/30">
+                <div>⏱️ Course: <span class="text-[#4A3B32] font-bold">${q.course || '-'}</span></div>
+                <div>🌡️ Water: <span class="text-[#4A3B32] font-bold">${q.waterTemp || '-'}</span></div>
+                <div>🌿 Scent: <span class="text-[#4A3B32] font-bold">${q.oil || '-'}</span></div>
+                <div>🧴 Shampoo: <span class="text-[#4A3B32] font-bold">${q.shampoo || '-'}</span></div>
+                <div>💆 Massage: <span class="text-[#4A3B32] font-bold">${q.massagePressure || '-'}</span></div>
+                <div>💆‍♀️ Head: <span class="text-[#4A3B32] font-bold">${q.headPressure || '-'}</span></div>
+                ${q.caution ? `<div class="col-span-2 pt-2 border-t border-[#D4C4B7]/50 text-red-500 font-medium">⚠️ Caution: ${q.caution}</div>` : ''}
             </div>
             
             ${timerUI}
 
-            <div class="flex flex-wrap justify-between items-center mt-2 pt-4 border-t border-white/10 gap-2">
-                <label class="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border ${paidBorderClass} transition-all hover:bg-black/40">
-                    <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-green-500 rounded cursor-pointer">
+            <div class="flex flex-wrap justify-between items-center mt-3 pt-3 border-t border-[#D4C4B7]/50 gap-2">
+                <label class="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border ${paidBorderClass} transition-all hover:bg-white/80">
+                    <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer">
                     <span class="text-xs ${paidTextClass}">${paidText}</span>
                 </label>
                 <div class="flex gap-2 items-center">
                     ${q.status === 'Waiting' ? `
-                        <button onclick="skipQueue('${q.id}')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-black px-3 py-2 rounded-lg text-xs font-bold transition-all border border-amber-500/30">🚀 Skip</button>
-                        <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-green-600/20">Start</button>
+                        <button onclick="skipQueue('${q.id}')" class="bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">🚀 Skip</button>
+                        <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
                     ` : ''}
-                    ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-blue-600/20">Done</button>` : ''}
-                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white px-3 py-2 rounded-lg text-xs transition-all">Del</button>
+                    ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>` : ''}
+                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Del</button>
                 </div>
             </div>
         </div>`;
@@ -998,20 +934,20 @@
 
         const custWaitingList = document.getElementById('cust-waiting-list');
         if(custWaitingList) {
-            custWaitingList.innerHTML = waiting.length ? '' : `<div class="text-gray-500 text-center py-6 bg-white/5 rounded-2xl border border-white/5">No waiting queue...</div>`;
+            custWaitingList.innerHTML = waiting.length ? '' : `<div class="text-[#847568] text-center py-6 bg-white/60 rounded-2xl border border-[#D4C4B7]">No waiting queue...</div>`;
             waiting.forEach(q => {
                 const isMe = q.id === myQueueId;
                 const isBook = q.orderType === 'booking';
                 custWaitingList.innerHTML += `
-                    <div class="flex justify-between items-center p-4 bg-white/5 rounded-2xl animate-slide-in border ${isMe ? 'border-purple-500 bg-purple-900/20' : 'border-white/5'}">
+                    <div class="flex justify-between items-center p-4 rounded-2xl animate-slide-in border shadow-sm ${isMe ? 'bg-[#8C7462]/10 border-[#8C7462]' : 'bg-white/80 border-[#D4C4B7]'}">
                         <div class="flex items-center gap-4">
-                            <div class="font-mono text-2xl font-bold ${isMe ? 'text-purple-400' : 'text-white'}">${q.id}</div>
+                            <div class="font-mono text-2xl font-bold ${isMe ? 'text-[#8C7462]' : 'text-[#4A3B32]'}">${q.id}</div>
                             <div>
-                                <div class="text-gray-300 font-medium text-sm">${q.nickname} ${isMe ? '(You)' : ''}</div>
-                                ${isBook ? `<div class="text-orange-400 text-[10px] font-bold">Booking: ${q.bookingTime}</div>` : ''}
+                                <div class="text-[#4A3B32] font-bold text-sm">${q.nickname} ${isMe ? '(You)' : ''}</div>
+                                ${isBook ? `<div class="text-orange-600 text-[10px] font-bold">Booking: ${q.bookingTime}</div>` : `<div class="text-[#847568] text-[10px]">Walk-in</div>`}
                             </div>
                         </div>
-                        <span class="status-badge ${isBook ? 'bg-orange-500/10 text-orange-300 border-orange-500/20' : 'status-waiting'}">${isBook ? 'Booking' : 'Waiting'}</span>
+                        <span class="status-badge ${isBook ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' : 'status-waiting'}">${isBook ? 'Booking' : 'Waiting'}</span>
                     </div>`;
             });
         }
@@ -1030,10 +966,10 @@
             const walkinListEl = document.getElementById('admin-walkin-list');
             walkinListEl.innerHTML = '';
             if(serving && serving.orderType !== 'booking') {
-                 walkinListEl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+                 walkinListEl.innerHTML += `<div class="text-xs text-[#15803D] font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
             }
             if(!waitingWalkin.length && (!serving || serving.orderType === 'booking')) {
-                walkinListEl.innerHTML = '<div class="text-gray-500 text-center py-8">No Walk-in</div>';
+                walkinListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Walk-in</div>';
             } else {
                 waitingWalkin.forEach(q => walkinListEl.innerHTML += createAdminCard(q, false));
             }
@@ -1041,17 +977,17 @@
             const bookingListEl = document.getElementById('admin-booking-list');
             bookingListEl.innerHTML = '';
             if(serving && serving.orderType === 'booking') {
-                 bookingListEl.innerHTML += `<div class="text-xs text-green-400 font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+                 bookingListEl.innerHTML += `<div class="text-xs text-[#15803D] font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
             }
             const sortedBookings = waitingBooking.sort((a,b) => (a.bookingDate+a.bookingTime).localeCompare(b.bookingDate+b.bookingTime));
             if(!sortedBookings.length && (!serving || serving.orderType !== 'booking')) {
-                bookingListEl.innerHTML = '<div class="text-gray-500 text-center py-8">No Booking</div>';
+                bookingListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Booking</div>';
             } else {
                 sortedBookings.forEach(q => bookingListEl.innerHTML += createAdminCard(q, false));
             }
 
             const tl = document.getElementById('admin-today-list'); tl.innerHTML = '';
-            if(completed.length === 0) tl.innerHTML = '<div class="text-gray-500 text-center py-8">No completed queues</div>';
+            if(completed.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">No completed queues</div>';
             else completed.slice().reverse().forEach(q => tl.innerHTML += createAdminCard(q, false));
         }
     }
@@ -1091,6 +1027,7 @@
             document.getElementById('page-customer').classList.add('hidden-elm'); 
             toggleNavStyle('admin'); 
             renderUI(); 
+            document.getElementById('admin-pass').value = '';
         } else {
             showToast('Wrong Password', 'error'); 
         }
@@ -1098,8 +1035,8 @@
 
     function toggleNavStyle(active) { 
         const c = document.getElementById('nav-customer'), a = document.getElementById('nav-admin');
-        const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium bg-purple-600 text-white shadow-lg whitespace-nowrap';
-        const inactiveClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-gray-400 whitespace-nowrap';
+        const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold bg-[#8C7462] text-white shadow-md whitespace-nowrap';
+        const inactiveClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-[#847568] hover:text-[#4A3B32] whitespace-nowrap';
         c.className = active === 'customer' ? activeClass : inactiveClass;
         a.className = active === 'admin' ? activeClass : inactiveClass;
     }
@@ -1107,8 +1044,8 @@
     function switchCustomerView(view) {
         const f = document.getElementById('customer-form-view'), q = document.getElementById('customer-queue-view');
         const bf = document.getElementById('btn-view-form'), bq = document.getElementById('btn-view-queue');
-        const active = 'flex-1 py-3 rounded-2xl font-bold bg-white text-purple-900 shadow-lg scale-105 text-sm md:text-base';
-        const inactive = 'flex-1 py-3 rounded-2xl font-bold bg-white/10 text-purple-300 text-sm md:text-base';
+        const active = 'flex-1 py-3 rounded-2xl font-bold bg-white text-[#8C7462] shadow-lg border border-[#D4C4B7]/50 scale-105 text-sm md:text-base transition-all';
+        const inactive = 'flex-1 py-3 rounded-2xl font-bold bg-white/40 text-[#847568] border border-transparent text-sm md:text-base transition-all';
         if(view==='form') { f.classList.remove('hidden-elm'); q.classList.add('hidden-elm'); bf.className=active; bq.className=inactive; }
         else { q.classList.remove('hidden-elm'); f.classList.add('hidden-elm'); bq.className=active; bf.className=inactive; refreshData(); }
     }
@@ -1116,8 +1053,8 @@
     function switchFormTab(type) {
         document.getElementById('form-order-type').value = type;
         document.getElementById('booking-section').className = type === 'booking' ? 'mt-6 animate-slide-in' : 'hidden-elm';
-        document.getElementById('tab-walkin').className = type==='walkin' ? 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
-        document.getElementById('tab-booking').className = type==='booking' ? 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
+        document.getElementById('tab-walkin').className = type==='walkin' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
+        document.getElementById('tab-booking').className = type==='booking' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
         if(type === 'booking') renderTimeSlots();
     }
 
@@ -1128,20 +1065,67 @@
         if(state === 'error') {
             dot.className = 'w-2 h-2 rounded-full bg-red-500';
             text.innerText = `Offline (${code})`;
-            text.className = 'text-[10px] text-red-400 uppercase tracking-widest';
+            text.className = 'text-[10px] text-red-500 font-bold uppercase tracking-widest';
         } else {
             dot.className = 'w-2 h-2 rounded-full bg-green-500 live-dot';
             text.innerText = 'Live System';
-            text.className = 'text-[10px] text-green-400 uppercase tracking-widest';
+            text.className = 'text-[10px] text-green-600 font-bold uppercase tracking-widest';
         }
     }
 
     function showToast(m, t) { 
         const c = document.getElementById('toast-container'), el = document.createElement('div'); 
-        el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm shadow-2xl pointer-events-auto ${t==='success'?'bg-green-600/90':'bg-red-600/90'}`; 
+        el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm font-bold shadow-xl pointer-events-auto border border-white/20 ${t==='success'?'bg-[#15803D]/95':'bg-red-600/95'}`; 
         el.innerText = m; 
         c.appendChild(el); 
         setTimeout(() => el.remove(), 4000); 
+    }
+
+    function checkMyQueueStatus(data) { 
+        if (!myQueueId) { 
+            document.getElementById('my-queue-bar').classList.add('hidden-elm'); 
+            return; 
+        }
+        
+        const myQueue = data.find(q => q.id === myQueueId);
+        
+        if (!myQueue || myQueue.status === 'Completed' || myQueue.status === 'Delete') {
+             document.getElementById('my-queue-bar').classList.add('hidden-elm');
+             return;
+        }
+
+        if (myQueue && (myQueue.status === 'Waiting' || myQueue.status === 'Serving')) {
+            document.getElementById('my-queue-bar').classList.remove('hidden-elm');
+            document.getElementById('bar-my-id').innerText = myQueue.id;
+            
+            let statusText = 'Waiting...';
+            if(myQueue.status === 'Serving') {
+                statusText = '🎉 It\'s your turn!';
+            }
+            
+            document.getElementById('bar-my-status').innerText = statusText;
+            document.getElementById('bar-my-status').className = myQueue.status === 'Serving' ? 'text-[#15803D] font-bold text-sm animate-pulse' : 'text-[#4A3B32] font-bold text-sm';
+            
+            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { 
+                triggerAlert(); 
+                lastKnownStatus = 'Serving'; 
+                localStorage.setItem('bloom_my_queue_status', 'Serving'); 
+            }
+        }
+    }
+    
+    function triggerAlert() { 
+        const audio = document.getElementById('notify-sound');
+        if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
+        if(navigator.vibrate) navigator.vibrate([200, 100, 200]); 
+        
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("🎉 It's your turn!", {
+                body: "Please come to the service point.",
+                icon: "https://cdn-icons-png.flaticon.com/512/3756/3756353.png"
+            });
+        }
+        showToast("🔔 It's your turn! Please come to the service point.", "success");
     }
 
   </script>
