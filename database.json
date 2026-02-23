@@ -34,6 +34,7 @@
     "shampoo": "Chance rich",
     "massagePressure": "กลาง Medium",
     "headPressure": "กลาง Medium",
-    "caution": ""
+    "caution": "",
+    "isPaid": true
   }
 ]
