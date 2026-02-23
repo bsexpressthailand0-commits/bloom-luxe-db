@@ -100,7 +100,7 @@
     "id": "Q-006",
     "status": "Completed",
     "timestamp": "2026-02-23T06:01:58.955Z",
-    "isPaid": false,
+    "isPaid": true,
     "orderType": "walkin",
     "lineUserId": "",
     "nickname": "โจ",
