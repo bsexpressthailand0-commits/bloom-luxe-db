@@ -131,6 +131,7 @@
     "shampoo": "Chance rich",
     "massagePressure": "เบา Gentle",
     "headPressure": "เบา Gentle",
-    "caution": ""
+    "caution": "",
+    "isPaid": true
   }
 ]
