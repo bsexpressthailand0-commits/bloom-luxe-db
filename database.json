@@ -60,7 +60,7 @@
     "id": "Q-004",
     "status": "Waiting",
     "timestamp": "2026-02-23T05:48:22.318Z",
-    "isPaid": false,
+    "isPaid": true,
     "orderType": "walkin",
     "lineUserId": "",
     "nickname": "ดาม",
