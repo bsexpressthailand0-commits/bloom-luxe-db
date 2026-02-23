@@ -133,5 +133,22 @@
     "headPressure": "เบา Gentle",
     "caution": "",
     "isPaid": true
+  },
+  {
+    "id": "Q-008",
+    "status": "Waiting",
+    "timestamp": "2026-02-23T06:30:28.396Z",
+    "isPaid": false,
+    "orderType": "walkin",
+    "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
+    "nickname": "เชน",
+    "course": "60 min",
+    "bookingDate": "2026-02-23",
+    "bookingTime": "",
+    "gender": "Male",
+    "waterTemp": "Cold",
+    "oil": "Jasmine Rice",
+    "shampoo": "Choose at shop",
+    "caution": ""
   }
 ]
