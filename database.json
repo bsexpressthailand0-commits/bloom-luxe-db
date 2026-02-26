@@ -22,7 +22,7 @@
     "id": "Q-002",
     "status": "Completed",
     "timestamp": "2026-02-26T09:30:24.432Z",
-    "isPaid": false,
+    "isPaid": true,
     "orderType": "walkin",
     "lineUserId": "",
     "nickname": "เชน",
