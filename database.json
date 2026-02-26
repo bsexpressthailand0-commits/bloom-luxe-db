@@ -17,5 +17,24 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": ""
+  },
+  {
+    "id": "Q-002",
+    "status": "Waiting",
+    "timestamp": "2026-02-26T09:30:24.432Z",
+    "isPaid": false,
+    "orderType": "walkin",
+    "lineUserId": "",
+    "nickname": "เชน",
+    "course": "60 min",
+    "bookingDate": "2026-02-26",
+    "bookingTime": "",
+    "gender": "Male",
+    "waterTemp": "Warm",
+    "oil": "Marigold",
+    "shampoo": "Chance rich",
+    "massagePressure": "Gentle",
+    "headPressure": "Gentle",
+    "caution": ""
   }
 ]
