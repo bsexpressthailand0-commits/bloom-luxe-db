@@ -3,13 +3,15 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BLOOM LUXE SALON (LINE Booking)</title>
+  <title>BLOOM LUXE SALON (Store Management)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Import LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
+    /* Fix Box Sizing Globally */
     *, ::before, ::after { box-sizing: border-box; }
+    
     body { font-family: 'Prompt', sans-serif; overflow-x: hidden; background-color: #F4EFE6; color: #4A3B32; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
@@ -27,7 +29,7 @@
     .live-dot { animation: blink-green 2s infinite; }
     @keyframes blink-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     
-    /* Glassmorphism for Light Theme */
+    /* Glassmorphism */
     .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 4px 15px rgba(74, 59, 50, 0.05); }
     .glass-input { width: 100%; max-width: 100%; min-width: 0; padding: 12px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.9); border: 1px solid var(--light-brown); color: var(--dark-brown); outline: none; transition: all 0.3s; }
     .glass-input:focus { border-color: var(--primary-brown); box-shadow: 0 0 0 2px rgba(140, 116, 98, 0.2); }
@@ -132,7 +134,6 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Date Input -->
                         <div class="relative group w-full min-w-0">
                             <label class="block text-[#847568] text-xs mb-1.5 ml-1">Date</label>
                             <div class="relative w-full">
@@ -143,7 +144,6 @@
                             </div>
                         </div>
 
-                        <!-- Time Input Grid -->
                         <div class="md:col-span-2">
                             <label class="block text-[#847568] text-xs mb-2 ml-1">Available Slots (Tap to select)</label>
                             <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
@@ -251,78 +251,150 @@
       </div>
     </div>
 
-    <!-- ================= ADMIN PAGE ================= -->
-    <div id="page-admin" class="hidden-elm max-w-4xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
-        <div class="glass-panel p-6 rounded-3xl text-center mb-6 relative border-[#D4C4B7]">
-            <div class="text-[#847568] text-sm font-bold uppercase tracking-widest mb-2">Now Serving (Staff View)</div>
-            <div class="text-6xl md:text-8xl font-bold text-[#4A3B32] queue-number mb-2" id="admin-display-queue">-</div>
-            <div class="text-xl text-[#8C7462] font-medium" id="admin-display-name">Waiting...</div>
+    <!-- ================= ADMIN PAGE (STORE MANAGEMENT SYSTEM) ================= -->
+    <div id="page-admin" class="hidden-elm max-w-6xl mx-auto px-4 pb-12 pt-6 animate-slide-in w-full">
+        
+        <!-- Header & Config -->
+        <div class="flex flex-wrap justify-between items-end mb-6 border-b border-[#D4C4B7] pb-4">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-[#4A3B32]">Store Management</h2>
+                <p class="text-[#847568] text-sm font-medium mt-1">ระบบจัดการคิวและยอดขายร้าน</p>
+            </div>
+            <button onclick="toggleSettings()" class="text-xs text-[#8C7462] font-bold hover:text-[#4A3B32] transition-all bg-white px-4 py-2 rounded-xl border border-[#D4C4B7] shadow-sm mt-3 md:mt-0 flex items-center gap-2">
+                <span>⚙️</span> การตั้งค่าระบบ
+            </button>
         </div>
 
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#D97706]" id="count-waiting">0</div><div class="text-xs text-[#847568] font-medium mt-1">Waiting</div></div>
-            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#15803D]" id="count-serving">0</div><div class="text-xs text-[#847568] font-medium mt-1">Serving</div></div>
-            <div class="glass-panel p-4 rounded-2xl text-center border-[#D4C4B7]"><div class="text-3xl font-bold text-[#4A3B32]" id="count-total">0</div><div class="text-xs text-[#847568] font-medium mt-1">Total Today</div></div>
-        </div>
-
-        <!-- System Settings Section -->
-        <div class="mb-4 flex justify-between items-center px-2">
-            <h3 class="text-[#4A3B32] font-bold">📋 Queue Management</h3>
-            <button onclick="toggleSettings()" class="text-xs text-[#8C7462] font-bold hover:text-[#4A3B32] transition-all bg-white/50 px-3 py-1.5 rounded-lg border border-[#D4C4B7]">⚙️ Config</button>
-        </div>
-
-        <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border-[#D4C4B7]">
-            <h4 class="text-[#4A3B32] font-bold text-sm mb-3">GitHub Configuration (Hardcoded)</h4>
-            <div class="text-[10px] text-[#847568] mb-2">Using configuration from code.</div>
+        <!-- Hidden Settings Panel -->
+        <div id="settings-panel" class="hidden-elm glass-panel p-5 rounded-2xl mb-6 border-[#D4C4B7] shadow-sm">
+            <h4 class="text-[#4A3B32] font-bold text-sm mb-3">System Configuration</h4>
             <div class="space-y-3">
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] text-[#847568] block mb-1">GitHub Username</label>
+                        <label class="text-[10px] text-[#847568] block mb-1 font-bold">GitHub Username</label>
                         <input type="text" id="db-owner-input" class="glass-input text-xs" readonly>
                     </div>
                     <div>
-                        <label class="text-[10px] text-[#847568] block mb-1">Repository Name</label>
+                        <label class="text-[10px] text-[#847568] block mb-1 font-bold">Repository Name</label>
                         <input type="text" id="db-repo-input" class="glass-input text-xs" readonly>
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-[#15803D] text-white rounded-xl text-xs font-bold shadow-lg shadow-green-600/20">🛠️ Press to create database.json (Fix 404 Error)</button>
+                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-[#15803D] text-white rounded-xl text-xs font-bold shadow-md hover:bg-green-800 transition-all">🛠️ สร้างไฟล์ Database (Fix 404)</button>
                 </div>
 
                 <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
                     <div class="grid grid-cols-2 gap-3 mb-2">
-                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
                             <span class="text-lg">🗑️🚶</span> 
-                            <span>Reset Walk-in</span>
+                            <span>ปิดรอบ Walk-in</span>
                         </button>
-                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white border border-orange-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1">
+                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white border border-orange-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
                             <span class="text-lg">🗑️📅</span> 
-                            <span>Reset Booking</span>
+                            <span>ปิดรอบ Booking</span>
                         </button>
                     </div>
-                    <div class="text-[10px] text-[#847568] text-center mt-2">Press to start a new day (Data will be lost)</div>
+                    <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">กดเมื่อต้องการปิดรอบวัน (ระบบจะซ่อนคิวที่กดลบไปไว้ในประวัติเพื่อคำนวณสถิติ)</div>
                 </div>
             </div>
         </div>
 
-        <!-- Admin Tabs -->
-        <div class="flex bg-white/40 border border-[#D4C4B7]/50 p-1.5 rounded-2xl mb-4 gap-1 overflow-x-auto">
-            <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-xs sm:text-sm transition-all tab-btn active whitespace-nowrap px-2">
-                🚶 Walk-in (<span id="badge-walkin">0</span>)
-            </button>
-            <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-3 rounded-xl font-medium text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                📅 Booking (<span id="badge-booking">0</span>)
-            </button>
-            <button type="button" onclick="switchAdminTab('today')" id="admin-tab-today" class="flex-1 py-3 rounded-xl font-medium text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                ✅ Done (<span id="badge-today">0</span>)
-            </button>
+        <!-- Dashboard Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT PANEL: Quick Stats & Now Serving -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Overview Stats -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Today's Revenue</div>
+                        <div class="text-2xl font-bold text-[#15803D]" id="stat-today-revenue">฿0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Completed</div>
+                        <div class="text-2xl font-bold text-[#4A3B32]" id="stat-today-completed">0 <span class="text-xs text-[#847568] font-normal">คิว</span></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Serving</div>
+                        <div class="text-2xl font-bold text-[#D97706]" id="count-serving">0</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Waiting</div>
+                        <div class="text-2xl font-bold text-[#B45309]" id="count-waiting">0</div>
+                    </div>
+                </div>
+
+                <!-- Now Serving Prominent Box -->
+                <div class="bg-gradient-to-br from-[#8C7462] to-[#4A3B32] p-6 rounded-3xl text-center shadow-lg relative overflow-hidden border border-[#D4C4B7]">
+                    <div class="absolute inset-0 bg-white/5 animate-pulse"></div>
+                    <div class="relative z-10">
+                        <div class="text-white/80 text-xs font-bold uppercase tracking-widest mb-3">NOW SERVING</div>
+                        <div class="text-6xl font-bold text-white queue-number mb-2 drop-shadow-md" id="admin-display-queue">-</div>
+                        <div class="text-lg text-[#D4C4B7] font-medium" id="admin-display-name">รอเรียกคิว...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Queues Management -->
+            <div class="lg:col-span-8">
+                <!-- Admin Tabs -->
+                <div class="flex bg-white border border-[#D4C4B7] p-1.5 rounded-2xl mb-5 gap-1 overflow-x-auto shadow-sm">
+                    <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn active whitespace-nowrap px-2">
+                        🚶 Walk-in (<span id="badge-walkin">0</span>)
+                    </button>
+                    <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
+                        📅 Booking (<span id="badge-booking">0</span>)
+                    </button>
+                    <button type="button" onclick="switchAdminTab('today')" id="admin-tab-today" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
+                        ✅ ประวัติวันนี้ (<span id="badge-today">0</span>)
+                    </button>
+                    <button type="button" onclick="switchAdminTab('stats')" id="admin-tab-stats" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
+                        📊 สรุปยอด
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="admin-walkin-list" class="space-y-4"></div>
+                <div id="admin-booking-list" class="space-y-4 hidden-elm"></div>
+                <div id="admin-today-list" class="space-y-4 hidden-elm"></div>
+                
+                <!-- STATS DASHBOARD CONTENT -->
+                <div id="admin-stats-list" class="space-y-5 hidden-elm">
+                    <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
+                        <h3 class="text-[#4A3B32] font-bold mb-4 text-lg flex items-center gap-2">📈 ยอดขายสัปดาห์นี้ <span class="text-sm font-normal text-[#847568]">(This Week)</span></h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                <div class="text-xs text-[#847568] font-bold mb-1">จำนวนลูกค้า (คน)</div>
+                                <div class="text-3xl font-bold text-[#8C7462]" id="stat-week-count">0</div>
+                            </div>
+                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                <div class="text-xs text-[#847568] font-bold mb-1">ยอดเงิน (บาท)</div>
+                                <div class="text-3xl font-bold text-[#15803D]" id="stat-week-rev">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
+                        <h3 class="text-[#4A3B32] font-bold mb-4 text-lg flex items-center gap-2">📊 ยอดขายเดือนนี้ <span class="text-sm font-normal text-[#847568]">(This Month)</span></h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                <div class="text-xs text-[#847568] font-bold mb-1">จำนวนลูกค้า (คน)</div>
+                                <div class="text-3xl font-bold text-[#8C7462]" id="stat-month-count">0</div>
+                            </div>
+                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                <div class="text-xs text-[#847568] font-bold mb-1">ยอดเงิน (บาท)</div>
+                                <div class="text-3xl font-bold text-[#15803D]" id="stat-month-rev">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center text-xs text-[#847568] mt-2 font-medium bg-white py-3 rounded-xl border border-[#D4C4B7] shadow-sm">
+                        💡 หมายเหตุ: ระบบคำนวณยอดขายจากคิวที่ให้บริการเสร็จสิ้นและพนักงานกดติ๊ก <span class="font-bold text-[#15803D]">✅ Paid</span> แล้วเท่านั้น
+                    </div>
+                </div>
+
+            </div>
         </div>
-
-        <!-- Tab Content -->
-        <div id="admin-walkin-list" class="space-y-4"></div>
-        <div id="admin-booking-list" class="space-y-4 hidden-elm"></div>
-        <div id="admin-today-list" class="space-y-4 hidden-elm"></div>
-
     </div>
     
     <!-- CUSTOMER BOTTOM BAR (MY QUEUE) -->
@@ -357,7 +429,9 @@
   </div>
 
   <script>
-    // --- CONFIG & UTILS ---
+    // ==========================================
+    // 🔗 CONFIGURATION & PRICING
+    // ==========================================
     const CONFIG = {
         owner: 'bsexpressthailand0-commits', 
         repo: 'bloom-luxe-db',
@@ -367,6 +441,12 @@
     };
     const LIFF_ID = "2009162443-gCuBKaOD"; 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzyZ17QpAqQ8txQzxRZ_ZWLJZI-oDr6aiRw17KHYLd31OV_qY4XoAq-ZdwM1fHLKyxSvA/exec";
+
+    // 💰 การตั้งราคาคอร์ส (สำหรับคำนวณยอดขาย)
+    const SERVICE_PRICES = {
+        "60 min": 590, // <--- เปลี่ยนราคา 60 นาทีตรงนี้
+        "90 min": 890  // <--- เปลี่ยนราคา 90 นาทีตรงนี้
+    };
 
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
     const getHeaders = () => {
@@ -463,7 +543,7 @@
 
     function getOccupiedSlots(dateStr) {
         return db_content
-            .filter(b => b.orderType === 'booking' && b.bookingDate === dateStr && b.status !== 'Completed' && b.status !== 'Delete')
+            .filter(b => b.orderType === 'booking' && b.bookingDate === dateStr && b.status !== 'Completed' && b.status !== 'Delete' && b.status !== 'Archived')
             .map(b => {
                 const startMin = timeToMinutes(b.bookingTime);
                 const duration = (b.course && b.course.includes('90')) ? 90 : 60;
@@ -524,19 +604,6 @@
             console.log("Notification sent to " + userId);
         } catch (e) { console.error("Notify failed", e); }
     }
-    
-    async function manualNotify(id) {
-        const item = db_content.find(i => i.id === id);
-        if(item && item.lineUserId) {
-            if(confirm("Send notification to this customer?")) {
-                const msg = `🔔 เรียกคิว: ถึงคิวของคุณแล้วค่ะ (${item.id})\nกรุณามาที่จุดให้บริการ\nIt's your turn!`;
-                sendLineNotification(item.lineUserId, msg);
-                showToast("Notification Sent", "success");
-            }
-        } else {
-            alert("No LINE User ID found for this customer.");
-        }
-    }
 
     async function refreshData() {
         if (isFetching) return;
@@ -581,7 +648,7 @@
                 })
             });
             if(res.ok) {
-                showToast("File created successfully!", "success");
+                showToast("สร้างไฟล์สำเร็จ! ระบบพร้อมใช้งาน", "success");
                 btn.classList.add('hidden-elm');
                 refreshData();
             } else {
@@ -627,7 +694,7 @@
         }).filter(Boolean);
         
         if (await saveToGithub(updatedDB)) { 
-            showToast('Status Updated', 'success'); 
+            showToast('อัปเดตสถานะสำเร็จ', 'success'); 
             if (item && item.lineUserId) {
                 if (newStatus === 'Serving') {
                     const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ\nIt's your turn! Please come to the service point.`;
@@ -648,11 +715,11 @@
         const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
         const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
         const newOrder = [...serving, itemToSkip, ...waiting, ...others];
-        if (await saveToGithub(newOrder)) { showToast('Queue Skipped', 'success'); refreshData(); }
+        if (await saveToGithub(newOrder)) { showToast('ลัดคิวเรียบร้อย', 'success'); refreshData(); }
     }
 
     async function resetQueueByType(type) {
-        const confirmMsg = `⚠️ Confirm: Reset all '${type === 'walkin' ? 'Walk-in' : 'Booking'}' queues?\n(Other data will remain)`;
+        const confirmMsg = `⚠️ คำเตือน: ยืนยันการปิดรอบ ${type === 'walkin' ? 'Walk-in' : 'Booking'} ใช่หรือไม่?\n(คิวจะถูกซ่อนจากหน้ารอคิว แต่ยังคงนำไปคำนวณในหน้าสถิติ)`;
 
         if(!confirm(confirmMsg)) return;
 
@@ -661,18 +728,21 @@
         btn.innerText = "Wait...";
         btn.disabled = true;
 
-        let newContent = [];
-        if (type === 'walkin') {
-            newContent = db_content.filter(item => item.orderType === 'booking');
-        } else if (type === 'booking') {
-            newContent = db_content.filter(item => item.orderType !== 'booking');
-        }
+        let newContent = db_content.map(item => {
+            if (type === 'walkin' && item.orderType !== 'booking') {
+                return { ...item, status: 'Archived' };
+            }
+            if (type === 'booking' && item.orderType === 'booking') {
+                return { ...item, status: 'Archived' };
+            }
+            return item;
+        });
 
         if (await saveToGithub(newContent)) {
-            showToast(`Reset ${type} queue successfully`, 'success');
+            showToast(`ปิดรอบคิวเรียบร้อยแล้ว`, 'success');
             refreshData();
         } else {
-            showToast('Error resetting data', 'error');
+            showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
         }
         
         btn.innerHTML = originalText;
@@ -685,9 +755,9 @@
             db_content[itemIndex].isPaid = isPaid;
             renderUI(); // Optimistic UI
             if (await saveToGithub(db_content)) {
-                showToast('Payment status updated', 'success');
+                showToast('อัปเดตสถานะการชำระเงินแล้ว', 'success');
             } else {
-                showToast('Failed to update payment', 'error');
+                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
                 refreshData();
             }
         }
@@ -701,9 +771,9 @@
             renderUI();
             
             if (await saveToGithub(db_content)) {
-                showToast('Timer started', 'success');
+                showToast('เริ่มจับเวลาแล้ว', 'success');
             } else {
-                showToast('Error starting timer', 'error');
+                showToast('เกิดข้อผิดพลาด', 'error');
                 refreshData();
             }
         }
@@ -788,9 +858,8 @@
         btn.innerText = 'Saving...';
         
         const fd = new FormData(e.target);
-        
-        const queuesAhead = db_content.filter(q => q.status === 'Waiting').length;
 
+        // Get absolute max ID number to prevent duplicates even after archive
         const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
         const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
         const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
@@ -818,7 +887,6 @@
                 } else {
                    msg += `\nประเภท/Type: Walk-in`;
                 }
-                msg += `\n⏳ มีคิวรอก่อนหน้าคุณ / Queues ahead of you: ${queuesAhead} คิว`;
                 sendLineNotification(lineUserId, msg);
             }
 
@@ -827,26 +895,87 @@
             switchCustomerView('queue');
             refreshData();
         } else {
-            showToast('Connection Failed', 'error');
+            showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
         }
         btn.disabled = false;
         btn.innerText = '✅ Confirm Service';
     };
 
+    // --- CALCULATE STATS (NEW!) ---
+    function calculateStats() {
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        
+        // Start of Week (Monday)
+        const dayOfWeek = now.getDay() || 7; 
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - dayOfWeek + 1);
+        startOfWeek.setHours(0,0,0,0);
+        
+        // Start of Month
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        startOfMonth.setHours(0,0,0,0);
+        
+        let weekCount = 0, weekRev = 0;
+        let monthCount = 0, monthRev = 0;
+        let todayRev = 0;
+        let todayCompletedCount = 0;
+        
+        db_content.forEach(q => {
+            // นับเฉพาะรายการที่ Completed หรือถูกย้ายไป Archived แล้ว แต่ต้องมีการชำระเงินแล้วเท่านั้น
+            if((q.status === 'Completed' || q.status === 'Archived') && q.isPaid) {
+                const qDate = new Date(q.timestamp);
+                let price = 0;
+                
+                // หา ราคาตามคอร์ส
+                if(q.course && q.course.includes('60')) price = SERVICE_PRICES["60 min"] || 0;
+                if(q.course && q.course.includes('90')) price = SERVICE_PRICES["90 min"] || 0;
+                
+                if(qDate >= startOfMonth) {
+                    monthCount++;
+                    monthRev += price;
+                }
+                if(qDate >= startOfWeek) {
+                    weekCount++;
+                    weekRev += price;
+                }
+                if(q.timestamp.startsWith(todayStr)) {
+                    todayRev += price;
+                    todayCompletedCount++;
+                }
+            }
+        });
+        
+        // อัปเดต UI หน้าสถิติ
+        const elWC = document.getElementById('stat-week-count');
+        const elWR = document.getElementById('stat-week-rev');
+        const elMC = document.getElementById('stat-month-count');
+        const elMR = document.getElementById('stat-month-rev');
+        const elTR = document.getElementById('stat-today-revenue');
+        const elTC = document.getElementById('stat-today-completed');
+        
+        if(elWC) elWC.innerText = weekCount;
+        if(elWR) elWR.innerText = "฿" + weekRev.toLocaleString();
+        if(elMC) elMC.innerText = monthCount;
+        if(elMR) elMR.innerText = "฿" + monthRev.toLocaleString();
+        if(elTR) elTR.innerText = "฿" + todayRev.toLocaleString();
+        if(elTC) elTC.innerHTML = todayCompletedCount + ' <span class="text-xs text-[#847568] font-normal">คิว</span>';
+    }
+
     // --- UI RENDER FUNCTIONS ---
-    function createAdminCard(q, isS) {
+    function createAdminCard(q, isServing = false) {
         const isCompleted = q.status === 'Completed';
         const isBooking = q.orderType === 'booking';
         
         let badgeClass, badgeText;
-        if (isS) {
-            badgeClass = 'bg-[#15803D]/10 text-[#15803D] border-[#15803D]/30';
+        if (isServing) {
+            badgeClass = 'bg-[#15803D]/10 text-[#15803D] border border-[#15803D]/30';
             badgeText = 'Serving';
         } else if (isCompleted) {
-            badgeClass = 'bg-gray-200 text-gray-600 border-gray-300';
+            badgeClass = 'bg-gray-200 text-gray-600 border border-gray-300';
             badgeText = 'Completed';
         } else {
-            badgeClass = isBooking ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' : 'bg-yellow-500/10 text-yellow-700 border-yellow-500/30';
+            badgeClass = isBooking ? 'bg-orange-500/10 text-orange-600 border border-orange-500/30' : 'bg-yellow-500/10 text-yellow-700 border border-yellow-500/30';
             badgeText = isBooking ? 'Booking' : 'Walk-in';
         }
         
@@ -858,75 +987,87 @@
         const paidTextClass = q.isPaid ? 'text-[#15803D] font-bold' : 'text-[#847568] font-medium';
 
         let timerUI = '';
-        if (isS) {
+        if (isServing) {
             if (q.serviceStartTime) {
                 timerUI = `
-                <div class="mt-3 flex items-center justify-between bg-white/60 p-3 rounded-xl border border-[#D97706]/30 shadow-sm">
+                <div class="mt-4 flex items-center justify-between bg-white/80 p-3 rounded-xl border border-[#D97706]/30 shadow-sm">
                     <div class="flex items-center gap-2">
                         <span class="text-xl">⏳</span>
                         <span class="text-xs text-[#5A4A3D] uppercase font-bold tracking-widest">Time Left</span>
                     </div>
-                    <div class="font-mono text-xl font-bold text-[#D97706] timer-display" data-start="${q.serviceStartTime}" data-course="${q.course}" data-id="${q.id}" data-notified="${q.notifiedNext || false}">--:--</div>
+                    <div class="font-mono text-2xl font-bold text-[#D97706] timer-display" data-start="${q.serviceStartTime}" data-course="${q.course}" data-id="${q.id}" data-notified="${q.notifiedNext || false}">--:--</div>
                 </div>`;
             } else {
                 timerUI = `
-                <div class="mt-3 bg-white/60 p-3 rounded-xl border border-[#D4C4B7] shadow-sm flex justify-between items-center">
+                <div class="mt-4 bg-white/80 p-3 rounded-xl border border-[#D4C4B7] shadow-sm flex justify-between items-center">
                     <span class="text-xs text-[#5A4A3D] font-medium">⏱️ Service Timer</span>
-                    <button onclick="startServiceTimer('${q.id}')" class="bg-[#15803D] hover:bg-green-800 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md">Start Timer</button>
+                    <button onclick="startServiceTimer('${q.id}')" class="bg-[#15803D] hover:bg-green-800 text-white px-5 py-2 rounded-lg text-xs font-bold transition-all shadow-md">Start Timer</button>
                 </div>`;
             }
         }
 
         return `
-        <div class="glass-panel p-5 rounded-3xl animate-slide-in ${isS ? 'border-[#8C7462]/50 bg-[#8C7462]/10' : (isCompleted ? 'opacity-70 bg-white/40' : 'bg-white/80')}">
-            <div class="flex justify-between mb-2 border-b border-[#D4C4B7]/50 pb-3">
+        <div class="bg-white rounded-2xl shadow-sm border border-[#D4C4B7] overflow-hidden mb-4 animate-slide-in ${isCompleted ? 'opacity-70' : ''}">
+            <!-- Header Ticket -->
+            <div class="${isServing ? 'bg-[#8C7462]/10' : 'bg-[#F4EFE6]'} px-5 py-3 flex justify-between items-center border-b border-[#D4C4B7]">
                 <div class="flex items-center gap-3">
-                    <div class="bg-white px-3 py-1.5 rounded-lg text-lg font-mono text-[#4A3B32] font-bold border border-[#D4C4B7] shadow-sm">${q.id}</div>
+                    <span class="bg-white px-3 py-1 rounded-lg text-[#4A3B32] font-mono font-bold border border-[#D4C4B7] shadow-sm">${q.id}</span>
                     <div>
-                        <div class="text-[#4A3B32] font-bold text-lg leading-tight">${q.nickname} <span class="font-normal text-xs text-[#847568]">(${q.gender})</span></div>
-                        <div class="text-xs ${timeColor} font-bold mt-0.5">${timeDisplay}</div>
+                        <div class="font-bold text-[#4A3B32]">${q.nickname} <span class="text-xs text-[#847568] font-normal">(${q.gender})</span></div>
+                        <div class="text-[10px] font-medium ${timeColor}">${timeDisplay}</div>
                     </div>
                 </div>
-                <span class="status-badge ${badgeClass}">${badgeText}</span>
+                <span class="status-badge ${badgeClass} shadow-sm">${badgeText}</span>
             </div>
             
-            <div class="grid grid-cols-2 gap-3 text-xs text-[#5A4A3D] mb-4 bg-[#F4EFE6]/50 p-3 rounded-xl mt-3 border border-[#D4C4B7]/30">
-                <div>⏱️ Course: <span class="text-[#4A3B32] font-bold">${q.course || '-'}</span></div>
-                <div>🌡️ Water: <span class="text-[#4A3B32] font-bold">${q.waterTemp || '-'}</span></div>
-                <div>🌿 Scent: <span class="text-[#4A3B32] font-bold">${q.oil || '-'}</span></div>
-                <div>🧴 Shampoo: <span class="text-[#4A3B32] font-bold">${q.shampoo || '-'}</span></div>
-                <div>💆 Massage: <span class="text-[#4A3B32] font-bold">${q.massagePressure || '-'}</span></div>
-                <div>💆‍♀️ Head: <span class="text-[#4A3B32] font-bold">${q.headPressure || '-'}</span></div>
-                ${q.caution ? `<div class="col-span-2 pt-2 border-t border-[#D4C4B7]/50 text-red-500 font-medium">⚠️ Caution: ${q.caution}</div>` : ''}
-            </div>
-            
-            ${timerUI}
+            <!-- Body Ticket -->
+            <div class="p-5">
+                <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs text-[#5A4A3D]">
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Course</span><span class="text-[#4A3B32] font-bold">${q.course || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Water</span><span class="text-[#4A3B32] font-bold">${q.waterTemp || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Scent</span><span class="text-[#4A3B32] font-bold">${q.oil || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Shampoo</span><span class="text-[#4A3B32] font-bold">${q.shampoo || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Massage</span><span class="text-[#4A3B32] font-bold">${q.massagePressure || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Head</span><span class="text-[#4A3B32] font-bold">${q.headPressure || '-'}</span></div>
+                </div>
+                ${q.caution ? `<div class="mt-3 pt-3 border-t border-dashed border-[#D4C4B7] text-red-600 font-medium text-xs">⚠️ Caution: ${q.caution}</div>` : ''}
+                
+                ${timerUI}
 
-            <div class="flex flex-wrap justify-between items-center mt-3 pt-3 border-t border-[#D4C4B7]/50 gap-2">
-                <label class="flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg border ${paidBorderClass} transition-all hover:bg-white/80">
-                    <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer">
-                    <span class="text-xs ${paidTextClass}">${paidText}</span>
-                </label>
-                <div class="flex gap-2 items-center">
-                    ${q.status === 'Waiting' ? `
-                        <button onclick="skipQueue('${q.id}')" class="bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">🚀 Skip</button>
-                        <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
-                    ` : ''}
-                    ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>` : ''}
-                    <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Del</button>
+                <!-- Footer Ticket (Actions) -->
+                <div class="flex flex-wrap justify-between items-center mt-5 pt-4 border-t border-[#D4C4B7] gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border ${paidBorderClass} transition-all hover:bg-[#F4EFE6]">
+                        <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer">
+                        <span class="text-xs ${paidTextClass}">${paidText}</span>
+                    </label>
+                    <div class="flex gap-2 items-center">
+                        ${q.status === 'Waiting' ? `
+                            <button onclick="skipQueue('${q.id}')" class="bg-white text-amber-600 hover:bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">🚀 Skip</button>
+                            <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
+                        ` : ''}
+                        ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-[#4A3B32] hover:bg-[#2c231e] px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>` : ''}
+                        <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">Del</button>
+                    </div>
                 </div>
             </div>
         </div>`;
     }
 
     function renderUI() {
+        // Calculate Stats immediately
+        calculateStats();
+
         const serving = db_content.find(i => i.status === 'Serving');
         const waiting = db_content.filter(i => i.status === 'Waiting');
-        const completed = db_content.filter(i => i.status === 'Completed');
+        
+        // กรอง "Today Done" โดยเทียบจากวันที่ปัจจุบัน
+        const todayStr = new Date().toISOString().split('T')[0];
+        const completed = db_content.filter(i => i.status === 'Completed' && i.timestamp.startsWith(todayStr));
 
         const waitingWalkin = waiting.filter(i => i.orderType !== 'booking'); 
         const waitingBooking = waiting.filter(i => i.orderType === 'booking');
 
+        // Customer UI
         const custQ = document.getElementById('cust-display-queue');
         const custN = document.getElementById('cust-display-name');
         if(custQ) custQ.innerText = serving ? serving.id : '-';
@@ -952,12 +1093,15 @@
             });
         }
 
+        // Admin View Updates
         if (activePage === 'admin') {
             document.getElementById('admin-display-queue').innerText = serving ? serving.id : '-';
             document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'No Serving';
             document.getElementById('count-waiting').innerText = waiting.length;
-            document.getElementById('count-serving').innerText = serving ? 1 : 0;
-            document.getElementById('count-total').innerText = db_content.length;
+            
+            // Fix count-serving error possibility
+            const countServingEl = document.getElementById('count-serving');
+            if(countServingEl) countServingEl.innerText = serving ? 1 : 0;
             
             document.getElementById('badge-walkin').innerText = waitingWalkin.length;
             document.getElementById('badge-booking').innerText = waitingBooking.length;
@@ -965,11 +1109,12 @@
 
             const walkinListEl = document.getElementById('admin-walkin-list');
             walkinListEl.innerHTML = '';
+            
             if(serving && serving.orderType !== 'booking') {
-                 walkinListEl.innerHTML += `<div class="text-xs text-[#15803D] font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+                 walkinListEl.innerHTML += createAdminCard(serving, true);
             }
             if(!waitingWalkin.length && (!serving || serving.orderType === 'booking')) {
-                walkinListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Walk-in</div>';
+                walkinListEl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีคิว Walk-in</div>';
             } else {
                 waitingWalkin.forEach(q => walkinListEl.innerHTML += createAdminCard(q, false));
             }
@@ -977,17 +1122,20 @@
             const bookingListEl = document.getElementById('admin-booking-list');
             bookingListEl.innerHTML = '';
             if(serving && serving.orderType === 'booking') {
-                 bookingListEl.innerHTML += `<div class="text-xs text-[#15803D] font-bold mb-2 uppercase tracking-widest">Now Serving</div>` + createAdminCard(serving, true);
+                 bookingListEl.innerHTML += createAdminCard(serving, true);
             }
-            const sortedBookings = waitingBooking.sort((a,b) => (a.bookingDate+a.bookingTime).localeCompare(b.bookingDate+b.bookingTime));
+            const sortedBookings = waitingBooking.sort((a,b) => {
+                if(a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
+                return a.bookingTime.localeCompare(b.bookingTime);
+            });
             if(!sortedBookings.length && (!serving || serving.orderType !== 'booking')) {
-                bookingListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Booking</div>';
+                bookingListEl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีรายการ Booking</div>';
             } else {
                 sortedBookings.forEach(q => bookingListEl.innerHTML += createAdminCard(q, false));
             }
 
             const tl = document.getElementById('admin-today-list'); tl.innerHTML = '';
-            if(completed.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">No completed queues</div>';
+            if(completed.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีประวัติคิววันนี้</div>';
             else completed.slice().reverse().forEach(q => tl.innerHTML += createAdminCard(q, false));
         }
     }
@@ -995,7 +1143,7 @@
     // --- UI INTERACTION UTILS ---
     function switchAdminTab(tab) {
         activeAdminTab = tab;
-        const tabs = ['walkin', 'booking', 'today'];
+        const tabs = ['walkin', 'booking', 'today', 'stats'];
         tabs.forEach(t => {
             const btn = document.getElementById(`admin-tab-${t}`);
             const list = document.getElementById(`admin-${t}-list`);
@@ -1007,9 +1155,15 @@
                 list.classList.add('hidden-elm');
             }
         });
+        
+        // Refresh Stats when clicking the tab
+        if(tab === 'stats') {
+            calculateStats();
+        }
     }
 
     function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
+    
     function showPage(page) { 
         activePage = page; 
         document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); 
@@ -1029,7 +1183,7 @@
             renderUI(); 
             document.getElementById('admin-pass').value = '';
         } else {
-            showToast('Wrong Password', 'error'); 
+            showToast('รหัสผ่านไม่ถูกต้อง', 'error'); 
         }
     }
 
@@ -1079,53 +1233,6 @@
         el.innerText = m; 
         c.appendChild(el); 
         setTimeout(() => el.remove(), 4000); 
-    }
-
-    function checkMyQueueStatus(data) { 
-        if (!myQueueId) { 
-            document.getElementById('my-queue-bar').classList.add('hidden-elm'); 
-            return; 
-        }
-        
-        const myQueue = data.find(q => q.id === myQueueId);
-        
-        if (!myQueue || myQueue.status === 'Completed' || myQueue.status === 'Delete') {
-             document.getElementById('my-queue-bar').classList.add('hidden-elm');
-             return;
-        }
-
-        if (myQueue && (myQueue.status === 'Waiting' || myQueue.status === 'Serving')) {
-            document.getElementById('my-queue-bar').classList.remove('hidden-elm');
-            document.getElementById('bar-my-id').innerText = myQueue.id;
-            
-            let statusText = 'Waiting...';
-            if(myQueue.status === 'Serving') {
-                statusText = '🎉 It\'s your turn!';
-            }
-            
-            document.getElementById('bar-my-status').innerText = statusText;
-            document.getElementById('bar-my-status').className = myQueue.status === 'Serving' ? 'text-[#15803D] font-bold text-sm animate-pulse' : 'text-[#4A3B32] font-bold text-sm';
-            
-            if (myQueue.status === 'Serving' && lastKnownStatus !== 'Serving') { 
-                triggerAlert(); 
-                lastKnownStatus = 'Serving'; 
-                localStorage.setItem('bloom_my_queue_status', 'Serving'); 
-            }
-        }
-    }
-    
-    function triggerAlert() { 
-        const audio = document.getElementById('notify-sound');
-        if(audio) { audio.currentTime = 0; audio.play().catch(e=>{}); }
-        if(navigator.vibrate) navigator.vibrate([200, 100, 200]); 
-        
-        if ("Notification" in window && Notification.permission === "granted") {
-            new Notification("🎉 It's your turn!", {
-                body: "Please come to the service point.",
-                icon: "https://cdn-icons-png.flaticon.com/512/3756/3756353.png"
-            });
-        }
-        showToast("🔔 It's your turn! Please come to the service point.", "success");
     }
 
   </script>
