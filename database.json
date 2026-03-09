@@ -60,7 +60,7 @@
   },
   {
     "id": "Q-004",
-    "status": "Serving",
+    "status": "Completed",
     "timestamp": "2026-03-09T10:39:00.824Z",
     "isPaid": true,
     "orderType": "booking",
@@ -75,7 +75,8 @@
     "shampoo": "Chance rich",
     "massagePressure": "Gentle",
     "headPressure": "Gentle",
-    "caution": ""
+    "caution": "",
+    "serviceStartTime": null
   },
   {
     "id": "Q-005",
