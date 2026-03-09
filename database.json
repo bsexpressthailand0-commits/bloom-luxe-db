@@ -60,7 +60,7 @@
   },
   {
     "id": "Q-004",
-    "status": "Pending",
+    "status": "Waiting",
     "timestamp": "2026-03-09T10:39:00.824Z",
     "isPaid": true,
     "orderType": "booking",
