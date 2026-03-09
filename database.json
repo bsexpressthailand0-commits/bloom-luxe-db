@@ -1,7 +1,7 @@
 [
   {
     "id": "Q-001",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-02-25T06:00:45.103Z",
     "isPaid": true,
     "orderType": "walkin",
@@ -20,7 +20,7 @@
   },
   {
     "id": "Q-002",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-02-26T09:30:24.432Z",
     "isPaid": true,
     "orderType": "walkin",
@@ -39,7 +39,7 @@
   },
   {
     "id": "Q-003",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-03-09T10:38:29.313Z",
     "isPaid": true,
     "orderType": "walkin",
@@ -80,7 +80,7 @@
   },
   {
     "id": "Q-005",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-03-09T10:39:52.656Z",
     "isPaid": true,
     "orderType": "walkin",
