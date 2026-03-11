@@ -101,7 +101,7 @@
   },
   {
     "id": "Q-006",
-    "status": "Serving",
+    "status": "Completed",
     "timestamp": "2026-03-11T07:00:18.210Z",
     "isPaid": true,
     "orderType": "walkin",
@@ -117,6 +117,7 @@
     "shampoo": "Choose at shop",
     "massagePressure": "Medium",
     "headPressure": "Medium",
-    "caution": ""
+    "caution": "",
+    "serviceStartTime": null
   }
 ]
