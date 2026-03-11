@@ -103,7 +103,7 @@
     "id": "Q-006",
     "status": "Waiting",
     "timestamp": "2026-03-11T07:00:18.210Z",
-    "isPaid": false,
+    "isPaid": true,
     "orderType": "walkin",
     "lineUserId": "",
     "nickname": "เชน",
