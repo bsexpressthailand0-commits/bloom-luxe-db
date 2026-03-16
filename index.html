@@ -39,11 +39,14 @@
     .radio-box:hover { background: rgba(255, 255, 255, 0.9); border-color: var(--primary-brown); }
     .radio-box input:checked + span { color: var(--primary-brown); font-weight: 600; }
     
-    .tab-btn { background: rgba(255, 255, 255, 0.5); color: #847568; transition: all 0.3s; border: 1px solid transparent; }
+    .tab-btn { background: rgba(255, 255, 255, 0.5); color: #847568; transition: all 0.3s; border: 1px solid transparent; position: relative; }
     .tab-btn.active { background: linear-gradient(135deg, var(--primary-brown), #705C4D); color: white; box-shadow: 0 4px 10px rgba(140, 116, 98, 0.3); border: 1px solid transparent; }
     
     .hidden-elm { display: none !important; }
+    
+    /* Status Badges */
     .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-pending { background: rgba(59, 130, 246, 0.15); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.3); } 
     .status-waiting { background: rgba(234, 179, 8, 0.15); color: #B45309; border: 1px solid rgba(234, 179, 8, 0.3); }
     .status-serving { background: rgba(34, 197, 94, 0.15); color: #15803D; border: 1px solid rgba(34, 197, 94, 0.3); }
     .status-completed { background: rgba(148, 163, 184, 0.15); color: #475569; border: 1px solid rgba(148, 163, 184, 0.3); }
@@ -58,6 +61,30 @@
     input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .my-queue-bar { animation: slideUp 0.5s ease-out forwards; }
+    
+    /* Notification Badge */
+    .notify-badge {
+        position: absolute; top: -5px; right: -5px; background: #EF4444; color: white; border-radius: 9999px;
+        font-size: 10px; font-weight: bold; padding: 2px 6px; box-shadow: 0 2px 5px rgba(239,68,68,0.5);
+        animation: pulse-glow 2s infinite;
+    }
+
+    /* Timeline Styles */
+    .timeline-container { position: relative; width: 100%; height: 160px; background: #FDFBF7; border-radius: 12px; border: 1px solid var(--light-brown); overflow: hidden; }
+    .timeline-axis { position: absolute; top: 0; left: 0; width: 100%; height: 30px; border-bottom: 1px dashed var(--light-brown); display: flex; }
+    .timeline-room { position: absolute; left: 0; width: 100%; height: 65px; border-bottom: 1px dashed rgba(212,196,183,0.5); display: flex; align-items: center; padding-left: 8px; font-size: 10px; font-weight: bold; color: var(--primary-brown); }
+    .timeline-room-bg { position: absolute; left: 60px; right: 0; height: 100%; border-left: 1px solid var(--light-brown); }
+    .timeline-block { position: absolute; height: 50px; border-radius: 8px; top: 7px; color: white; font-size: 10px; padding: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+    .timeline-block:hover { z-index: 10; transform: scale(1.02); }
+
+    /* Print Styles for Daily Report */
+    @media print {
+        body * { visibility: hidden; }
+        #daily-report-modal { display: block !important; position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; z-index: 9999; }
+        #daily-report-printable, #daily-report-printable * { visibility: visible; }
+        #daily-report-printable { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; box-shadow: none; border: none; }
+        .no-print { display: none !important; }
+    }
   </style>
  </head>
  <body class="h-full m-0 p-0 overflow-x-hidden">
@@ -103,15 +130,21 @@
       <div id="customer-form-view" class="glass-panel rounded-3xl p-5 md:p-8 shadow-xl animate-slide-in w-full">
         <form id="customer-form" class="space-y-6 md:space-y-8">
             <div class="flex bg-[#E8DFD3]/50 p-1.5 rounded-2xl border border-[#D4C4B7]/50">
-                <button type="button" onclick="switchFormTab('walkin')" id="tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">🚶 Walk-in</button>
+                <button type="button" onclick="switchFormTab('walkin')" id="tab-walkin" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn active">🚶 Walk-in (Today)</button>
                 <button type="button" onclick="switchFormTab('booking')" id="tab-booking" class="flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn">📅 Booking</button>
             </div>
             <input type="hidden" id="form-order-type" name="orderType" value="walkin">
             <input type="hidden" id="line-user-id" name="lineUserId" value="">
 
-            <div class="w-full">
-                <label class="block text-[#5A4A3D] font-medium text-sm mb-2">Nickname</label>
-                <input type="text" id="input-nickname" name="nickname" required class="glass-input w-full" placeholder="Enter your nickname...">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                <div class="w-full">
+                    <label class="block text-[#5A4A3D] font-medium text-sm mb-2">Nickname</label>
+                    <input type="text" id="input-nickname" name="nickname" required class="glass-input w-full" placeholder="Enter your nickname...">
+                </div>
+                <div class="w-full">
+                    <label class="block text-[#5A4A3D] font-medium text-sm mb-2">Phone Number</label>
+                    <input type="tel" id="input-phone" name="phone" required class="glass-input w-full" placeholder="08xxxxxxxx">
+                </div>
             </div>
 
             <!-- COURSE SECTION -->
@@ -124,13 +157,16 @@
             </div>
 
             <!-- SMART BOOKING SECTION -->
-            <div id="booking-section" class="hidden-elm mt-6 animate-slide-in">
+            <div id="booking-section" class="mt-6 animate-slide-in">
                 <div class="bg-white/40 border border-[#D4C4B7] rounded-2xl p-4 md:p-5 relative overflow-hidden w-full shadow-sm">
                     <div class="absolute -top-10 -right-10 w-32 h-32 bg-[#D4C4B7]/20 rounded-full blur-3xl pointer-events-none"></div>
                     
-                    <div class="flex items-center gap-2 mb-4 text-[#8C7462]">
-                        <span class="text-xl">📅</span>
-                        <span class="font-bold text-sm">Select Date & Time</span>
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2 text-[#8C7462]">
+                            <span class="text-xl">📅</span>
+                            <span class="font-bold text-sm">Select Date & Time</span>
+                        </div>
+                        <span class="text-[10px] font-medium text-[#847568] bg-[#F4EFE6] px-2 py-1 rounded-md border border-[#D4C4B7]">Operating Hours 10:00 - 20:00</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -151,6 +187,13 @@
                                     Please select date and course first...
                                 </div>
                             </div>
+                            
+                            <!-- ช่องพิมพ์เวลาแบบ Manual เฉพาะ Walk-in -->
+                            <div id="walkin-manual-time-box" class="mt-4 pt-4 border-t border-[#D4C4B7]/40 block">
+                                <label class="block text-[#8C7462] font-bold text-xs mb-2 ml-1">⏰ หรือระบุเวลาเข้าใช้บริการเอง (สำหรับ Walk-in)</label>
+                                <input type="time" id="manual-time-input" class="glass-input w-full max-w-[200px] h-12 bg-white" onchange="setManualTime(this.value)">
+                            </div>
+                            
                             <input type="hidden" name="bookingTime" id="booking-time-input" required>
                         </div>
                     </div>
@@ -158,11 +201,11 @@
                     <div class="mt-4 flex flex-wrap gap-3 justify-center text-[10px] text-[#847568] bg-[#E8DFD3]/30 p-2 rounded-xl border border-[#D4C4B7]/50">
                         <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-white border border-[#D4C4B7]"></div>Available</div>
                         <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#8C7462] to-[#705C4D]"></div>Selected</div>
-                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#E8DFD3] border border-transparent"></div>Booked</div>
+                        <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[#E8DFD3] border border-transparent"></div>Full (2/2)</div>
                     </div>
                     
                     <div class="mt-3 text-[10px] text-[#8C7462] font-medium text-center bg-[#8C7462]/10 rounded-lg py-2 px-3 border border-[#8C7462]/20">
-                        *Please arrive 10 minutes before appointment.
+                        *Please arrive 15 minutes before appointment.
                     </div>
                 </div>
             </div>
@@ -230,9 +273,9 @@
             </div>
 
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-[#8C7462] to-[#705C4D] shadow-lg shadow-[#8C7462]/30 transition-all hover:scale-[1.02]">
-                <span id="submit-text">✅ Confirm Service</span>
+                <span id="submit-text">✅ Request Booking</span>
             </button>
-            <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">*Notifications enabled to alert you when it's your queue.</div>
+            <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">Wait for staff confirmation after submitting.</div>
         </form>
       </div>
 
@@ -258,10 +301,10 @@
         <div class="flex flex-wrap justify-between items-end mb-6 border-b border-[#D4C4B7] pb-4">
             <div>
                 <h2 class="text-2xl md:text-3xl font-bold text-[#4A3B32]">Store Management</h2>
-                <p class="text-[#847568] text-sm font-medium mt-1">ระบบจัดการคิวและยอดขายร้าน</p>
+                <p class="text-[#847568] text-sm font-medium mt-1">Queue & Sales Management System</p>
             </div>
             <button onclick="toggleSettings()" class="text-xs text-[#8C7462] font-bold hover:text-[#4A3B32] transition-all bg-white px-4 py-2 rounded-xl border border-[#D4C4B7] shadow-sm mt-3 md:mt-0 flex items-center gap-2">
-                <span>⚙️</span> การตั้งค่าระบบ
+                <span>⚙️</span> System Settings
             </button>
         </div>
 
@@ -280,21 +323,42 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-[#15803D] text-white rounded-xl text-xs font-bold shadow-md hover:bg-green-800 transition-all">🛠️ สร้างไฟล์ Database (Fix 404)</button>
+                    <button onclick="autoFix404()" id="btn-autofix" class="hidden-elm flex-1 py-3 bg-[#15803D] text-white rounded-xl text-xs font-bold shadow-md hover:bg-green-800 transition-all">🛠️ Create Database File (Fix 404)</button>
+                </div>
+
+                <!-- ตั้งค่า LINE แจ้งเตือนพนักงาน -->
+                <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
+                    <label class="text-xs text-[#4A3B32] font-bold mb-2 flex items-center gap-1">🔔 แจ้งเตือนพนักงาน (LINE User ID)</label>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="staff-line-1" class="glass-input text-xs bg-white" placeholder="Staff 1 LINE ID">
+                        <input type="text" id="staff-line-2" class="glass-input text-xs bg-white" placeholder="Staff 2 LINE ID">
+                        <input type="text" id="staff-line-3" class="glass-input text-xs bg-white" placeholder="Staff 3 LINE ID">
+                        <input type="text" id="staff-line-4" class="glass-input text-xs bg-white" placeholder="Staff 4 LINE ID">
+                    </div>
+                    <button onclick="saveSystemSettings()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm">💾 บันทึกตั้งค่า (Save Settings)</button>
+                </div>
+
+                <!-- [NEW] ส่งสรุปคิววันพรุ่งนี้ -->
+                <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
+                    <label class="text-xs text-[#4A3B32] font-bold mb-2 flex items-center gap-1">📣 ส่งสรุปคิว (Manual Notify)</label>
+                    <button onclick="notifyTomorrowQueues()" class="w-full py-2.5 bg-[#15803D] hover:bg-green-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+                        <span>📅</span> แจ้งเตือนคิวของ "วันพรุ่งนี้" ให้พนักงาน
+                    </button>
+                    <div class="text-[10px] text-[#847568] text-center mt-1">กดเพื่อสรุปยอดคิวจองล่วงหน้าส่งเข้า LINE พนักงานทุกคน</div>
                 </div>
 
                 <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
                     <div class="grid grid-cols-2 gap-3 mb-2">
-                        <button onclick="resetQueueByType('walkin')" class="py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
+                        <button onclick="resetQueueByType('walkin', this)" class="py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
                             <span class="text-lg">🗑️🚶</span> 
-                            <span>ปิดรอบ Walk-in</span>
+                            <span>Archive Walk-in</span>
                         </button>
-                        <button onclick="resetQueueByType('booking')" class="py-3 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white border border-orange-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
+                        <button onclick="resetQueueByType('booking', this)" class="py-3 bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white border border-orange-200 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm">
                             <span class="text-lg">🗑️📅</span> 
-                            <span>ปิดรอบ Booking</span>
+                            <span>Archive Booking</span>
                         </button>
                     </div>
-                    <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">กดเมื่อต้องการปิดรอบวัน (ระบบจะซ่อนคิวที่กดลบไปไว้ในประวัติเพื่อคำนวณสถิติ)</div>
+                    <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">Press to close the day (Queues will be archived for stats)</div>
                 </div>
             </div>
         </div>
@@ -312,15 +376,15 @@
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
                         <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Completed</div>
-                        <div class="text-2xl font-bold text-[#4A3B32]" id="stat-today-completed">0 <span class="text-xs text-[#847568] font-normal">คิว</span></div>
+                        <div class="text-2xl font-bold text-[#4A3B32]" id="stat-today-completed">0 <span class="text-xs text-[#847568] font-normal">Queues</span></div>
                     </div>
-                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
-                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Serving</div>
-                        <div class="text-2xl font-bold text-[#D97706]" id="count-serving">0</div>
+                    <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center relative overflow-hidden">
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Pending</div>
+                        <div class="text-2xl font-bold text-[#2563EB]" id="count-pending">0</div>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
                         <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Waiting</div>
-                        <div class="text-2xl font-bold text-[#B45309]" id="count-waiting">0</div>
+                        <div class="text-2xl font-bold text-[#D97706]" id="count-waiting">0</div>
                     </div>
                 </div>
 
@@ -330,7 +394,7 @@
                     <div class="relative z-10">
                         <div class="text-white/80 text-xs font-bold uppercase tracking-widest mb-3">NOW SERVING</div>
                         <div class="text-6xl font-bold text-white queue-number mb-2 drop-shadow-md" id="admin-display-queue">-</div>
-                        <div class="text-lg text-[#D4C4B7] font-medium" id="admin-display-name">รอเรียกคิว...</div>
+                        <div class="text-lg text-[#D4C4B7] font-medium" id="admin-display-name">No queue at the moment</div>
                     </div>
                 </div>
             </div>
@@ -339,17 +403,22 @@
             <div class="lg:col-span-8">
                 <!-- Admin Tabs -->
                 <div class="flex bg-white border border-[#D4C4B7] p-1.5 rounded-2xl mb-5 gap-1 overflow-x-auto shadow-sm">
-                    <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn active whitespace-nowrap px-2">
-                        🚶 Walk-in (<span id="badge-walkin">0</span>)
+                    <button type="button" onclick="switchAdminTab('walkin')" id="admin-tab-walkin" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn active whitespace-nowrap px-2 relative">
+                        🚶 Walk-in
+                        <span id="badge-walkin-pending" class="hidden-elm notify-badge">0</span>
                     </button>
-                    <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                        📅 Booking (<span id="badge-booking">0</span>)
+                    <button type="button" onclick="switchAdminTab('booking')" id="admin-tab-booking" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2 relative">
+                        📅 Booking 
+                        <span id="badge-booking-pending" class="hidden-elm notify-badge">0</span>
+                    </button>
+                    <button type="button" onclick="switchAdminTab('timeline')" id="admin-tab-timeline" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2 relative">
+                        ⏰ Timeline
                     </button>
                     <button type="button" onclick="switchAdminTab('today')" id="admin-tab-today" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                        ✅ ประวัติวันนี้ (<span id="badge-today">0</span>)
+                        ✅ Today's History
                     </button>
                     <button type="button" onclick="switchAdminTab('stats')" id="admin-tab-stats" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                        📊 สรุปยอด
+                        📊 Dashboard
                     </button>
                 </div>
 
@@ -358,38 +427,109 @@
                 <div id="admin-booking-list" class="space-y-4 hidden-elm"></div>
                 <div id="admin-today-list" class="space-y-4 hidden-elm"></div>
                 
+                <!-- TIMELINE CONTENT -->
+                <div id="admin-timeline-list" class="space-y-4 hidden-elm">
+                    <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm overflow-x-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-[#4A3B32] font-bold text-lg flex items-center gap-2">⏰ Schedule View</h3>
+                            <input type="date" id="timeline-date-filter" class="glass-input w-auto h-10 py-1 text-sm bg-white/60 border-[#D4C4B7] focus:border-[#8C7462]" onchange="renderTimeline()">
+                        </div>
+                        
+                        <!-- Timeline Container -->
+                        <div class="timeline-container mt-2 min-w-[600px]" id="timeline-box">
+                            <!-- Axis -->
+                            <div class="timeline-axis">
+                                <!-- Generated by JS (10:00 to 20:00) -->
+                            </div>
+                            
+                            <!-- Room 1 -->
+                            <div class="timeline-room" style="top: 30px;">
+                                Room 1
+                                <div class="timeline-room-bg" id="timeline-room-1"></div>
+                            </div>
+                            
+                            <!-- Room 2 -->
+                            <div class="timeline-room" style="top: 95px;">
+                                Room 2
+                                <div class="timeline-room-bg" id="timeline-room-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- STATS DASHBOARD CONTENT -->
                 <div id="admin-stats-list" class="space-y-5 hidden-elm">
-                    <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
-                        <h3 class="text-[#4A3B32] font-bold mb-4 text-lg flex items-center gap-2">📈 ยอดขายสัปดาห์นี้ <span class="text-sm font-normal text-[#847568]">(This Week)</span></h3>
+                    
+                    <!-- Date Filter -->
+                    <div class="bg-white p-5 rounded-3xl border border-[#D4C4B7] shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="w-full sm:w-auto text-center sm:text-left">
+                            <h3 class="text-[#4A3B32] font-bold text-lg">📅 Report Filter</h3>
+                            <div class="text-xs text-[#847568]">เลือกช่วงวันที่เพื่อดูยอดขาย</div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <input type="date" id="stats-start-date" class="glass-input flex-1 sm:w-auto h-12 font-bold bg-[#F4EFE6] border-[#D4C4B7] focus:border-[#8C7462] text-sm" onchange="calculateStats()">
+                            <span class="text-[#847568] font-bold text-sm">ถึง</span>
+                            <input type="date" id="stats-end-date" class="glass-input flex-1 sm:w-auto h-12 font-bold bg-[#F4EFE6] border-[#D4C4B7] focus:border-[#8C7462] text-sm" onchange="calculateStats()">
+                        </div>
+                    </div>
+
+                    <!-- Selected Range Stats -->
+                    <div class="bg-gradient-to-br from-[#8C7462] to-[#705C4D] p-6 rounded-3xl border border-[#D4C4B7] shadow-md text-white">
+                        <h3 class="font-bold mb-4 text-lg flex items-center gap-2">🎯 ยอดขายตามช่วงเวลา <span class="text-sm font-normal opacity-80" id="label-stat-range"></span></h3>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
-                                <div class="text-xs text-[#847568] font-bold mb-1">จำนวนลูกค้า (คน)</div>
-                                <div class="text-3xl font-bold text-[#8C7462]" id="stat-week-count">0</div>
+                            <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center shadow-sm">
+                                <div class="text-xs text-white/80 font-bold mb-1">Customers</div>
+                                <div class="text-4xl font-bold text-white" id="stat-range-count">0</div>
                             </div>
-                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
-                                <div class="text-xs text-[#847568] font-bold mb-1">ยอดเงิน (บาท)</div>
-                                <div class="text-3xl font-bold text-[#15803D]" id="stat-week-rev">0</div>
+                            <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center shadow-sm">
+                                <div class="text-xs text-white/80 font-bold mb-1">Revenue (THB)</div>
+                                <div class="text-4xl font-bold text-[#4ade80]" id="stat-range-rev">0</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
-                        <h3 class="text-[#4A3B32] font-bold mb-4 text-lg flex items-center gap-2">📊 ยอดขายเดือนนี้ <span class="text-sm font-normal text-[#847568]">(This Month)</span></h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
-                                <div class="text-xs text-[#847568] font-bold mb-1">จำนวนลูกค้า (คน)</div>
-                                <div class="text-3xl font-bold text-[#8C7462]" id="stat-month-count">0</div>
+                    <!-- Today & Month Stats Side-by-Side -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
+                            <h3 class="text-[#4A3B32] font-bold mb-4 text-base flex items-center gap-2">🟢 ยอดขายวันนี้ <span class="text-xs font-normal text-[#847568]" id="label-stat-today"></span></h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-[#F4EFE6] p-3 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                    <div class="text-[10px] text-[#847568] font-bold mb-1">Customers</div>
+                                    <div class="text-xl font-bold text-[#8C7462]" id="stat-day-count">0</div>
+                                </div>
+                                <div class="bg-[#F4EFE6] p-3 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                    <div class="text-[10px] text-[#847568] font-bold mb-1">Revenue</div>
+                                    <div class="text-xl font-bold text-[#15803D]" id="stat-day-rev">0</div>
+                                </div>
                             </div>
-                            <div class="bg-[#F4EFE6] p-4 rounded-2xl border border-[#D4C4B7]/50 text-center">
-                                <div class="text-xs text-[#847568] font-bold mb-1">ยอดเงิน (บาท)</div>
-                                <div class="text-3xl font-bold text-[#15803D]" id="stat-month-rev">0</div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-[#D4C4B7] shadow-sm">
+                            <h3 class="text-[#4A3B32] font-bold mb-4 text-base flex items-center gap-2">📊 ยอดขายเดือนนี้ <span class="text-xs font-normal text-[#847568]" id="label-stat-month"></span></h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-[#F4EFE6] p-3 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                    <div class="text-[10px] text-[#847568] font-bold mb-1">Customers</div>
+                                    <div class="text-xl font-bold text-[#8C7462]" id="stat-month-count">0</div>
+                                </div>
+                                <div class="bg-[#F4EFE6] p-3 rounded-2xl border border-[#D4C4B7]/50 text-center">
+                                    <div class="text-[10px] text-[#847568] font-bold mb-1">Revenue</div>
+                                    <div class="text-xl font-bold text-[#15803D]" id="stat-month-rev">0</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="exportToCSV()" class="w-full py-3 bg-[#4A3B32] text-white rounded-xl font-bold shadow-md hover:bg-[#2c231e] transition-all flex justify-center items-center gap-2">
+                            <span>📥</span> Export Data (CSV)
+                        </button>
+                        <button onclick="openDailyReport()" class="w-full py-3 bg-white text-[#4A3B32] border border-[#4A3B32] rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-all flex justify-center items-center gap-2">
+                            <span>📄</span> สรุปยอดประจำวัน (Print/PDF)
+                        </button>
+                    </div>
+
                     <div class="text-center text-xs text-[#847568] mt-2 font-medium bg-white py-3 rounded-xl border border-[#D4C4B7] shadow-sm">
-                        💡 หมายเหตุ: ระบบคำนวณยอดขายจากคิวที่ให้บริการเสร็จสิ้นและพนักงานกดติ๊ก <span class="font-bold text-[#15803D]">✅ Paid</span> แล้วเท่านั้น
+                        💡 Note: Revenue is calculated from <span class="font-bold text-[#4A3B32]">Completed</span> queues marked as <span class="font-bold text-[#15803D]">✅ Paid</span>. (Archived are excluded)
                     </div>
                 </div>
 
@@ -397,6 +537,147 @@
         </div>
     </div>
     
+    <!-- EDIT MODAL (ADMIN) -->
+    <div id="edit-modal" class="hidden-elm fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-md bg-[#F4EFE6] max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-[#4A3B32]">📝 Edit Queue / Note</h3>
+                <button onclick="closeEditModal()" class="text-[#847568] hover:text-red-500 font-bold text-xl">&times;</button>
+            </div>
+            <form id="edit-form" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">Nickname</label>
+                        <input type="text" id="edit-nickname" class="glass-input bg-white text-sm py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">Phone</label>
+                        <input type="tel" id="edit-phone" class="glass-input bg-white text-sm py-2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">Date</label>
+                        <input type="date" id="edit-date" class="glass-input bg-white text-sm py-2">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">Time</label>
+                        <input type="time" id="edit-time" class="glass-input bg-white text-sm py-2">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">Course</label>
+                        <select id="edit-course" class="glass-input bg-white text-sm py-2">
+                            <option value="60 min">60 min</option>
+                            <option value="90 min">90 min</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">ยอดจ่ายจริง (฿)</label>
+                        <input type="number" id="edit-price" class="glass-input bg-white text-sm py-2" placeholder="เช่น 531">
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-[#D4C4B7]">
+                    <label class="block text-sm font-bold text-[#8C7462] mb-2 flex items-center gap-1">🔒 Internal Note <span class="text-[10px] font-normal text-[#847568]">(Customer won't see this)</span></label>
+                    <textarea id="edit-note" rows="3" class="glass-input bg-[#FFFDF9] border-[#8C7462]/30 text-sm" placeholder="e.g. VIP, Paid Deposit 500.-, Late 10 mins"></textarea>
+                </div>
+                <button type="button" onclick="saveEditQueue()" class="w-full py-3 bg-[#15803D] hover:bg-green-800 text-white rounded-xl font-bold shadow-md transition-all mt-4">💾 Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DAILY REPORT MODAL (PRINTABLE) -->
+    <div id="daily-report-modal" class="hidden-elm fixed inset-0 z-[100] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 sm:p-8 overflow-y-auto">
+        <div class="bg-white w-full max-w-3xl min-h-[80vh] rounded-none sm:rounded-2xl shadow-2xl relative">
+            <!-- Action Bar (Not Printed) -->
+            <div class="no-print sticky top-0 bg-gray-100 px-6 py-4 flex justify-between items-center border-b border-gray-300 z-10 sm:rounded-t-2xl">
+                <h3 class="font-bold text-gray-700">Daily Report Preview</h3>
+                <div class="flex gap-3">
+                    <button onclick="closeDailyReport()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 shadow-sm">ปิด (Close)</button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-[#8C7462] hover:bg-[#705C4D] rounded-lg text-sm font-bold text-white shadow-sm flex items-center gap-2">
+                        <span>🖨️</span> Print / Save PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Area -->
+            <div id="daily-report-printable" class="p-8 sm:p-12 bg-white text-gray-800">
+                <!-- Report Header -->
+                <div class="text-center mb-8 border-b-2 border-gray-800 pb-6">
+                    <div class="text-3xl mb-2">🌸</div>
+                    <h1 class="text-2xl font-black text-gray-900 tracking-wider">BLOOM LUXE SALON</h1>
+                    <h2 class="text-xl font-bold text-gray-600 mt-2">รายงานสรุปยอดประจำวัน (Daily Summary Report)</h2>
+                    <p class="text-sm text-gray-500 mt-2 font-medium">วันที่ประจำรายงาน: <span id="report-date-display" class="font-bold text-gray-800">YYYY-MM-DD</span></p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-3 gap-6 mb-8">
+                    <div class="border border-gray-300 rounded-xl p-4 text-center bg-gray-50">
+                        <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">ยอดขายสุทธิ (Revenue)</div>
+                        <div class="text-2xl font-black text-[#15803D]" id="report-total-rev">฿0</div>
+                    </div>
+                    <div class="border border-gray-300 rounded-xl p-4 text-center bg-gray-50">
+                        <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">ลูกค้าที่ให้บริการ (Served)</div>
+                        <div class="text-2xl font-black text-gray-800" id="report-total-cust">0</div>
+                    </div>
+                    <div class="border border-gray-300 rounded-xl p-4 text-center bg-gray-50">
+                        <div class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">ลูกค้ายกเลิก (Cancelled)</div>
+                        <div class="text-2xl font-black text-red-600" id="report-total-cancel">0</div>
+                    </div>
+                </div>
+
+                <!-- Detail Table -->
+                <h3 class="font-bold text-gray-800 mb-3 border-b border-gray-300 pb-2">รายการที่ให้บริการสำเร็จ (Completed Services)</h3>
+                <table class="w-full text-left border-collapse mb-8">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
+                            <th class="p-3 border-b border-gray-300">เวลา</th>
+                            <th class="p-3 border-b border-gray-300">รหัสคิว</th>
+                            <th class="p-3 border-b border-gray-300">ชื่อลูกค้า</th>
+                            <th class="p-3 border-b border-gray-300">เบอร์โทร</th>
+                            <th class="p-3 border-b border-gray-300">บริการ (Course)</th>
+                            <th class="p-3 border-b border-gray-300 text-right">จำนวนเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-tbody" class="text-sm text-gray-700 divide-y divide-gray-200">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+
+                <!-- Signature Area -->
+                <div class="mt-16 pt-8 flex justify-between px-10">
+                    <div class="text-center">
+                        <div class="w-40 border-b border-gray-400 mb-2 mx-auto"></div>
+                        <p class="text-xs text-gray-500 font-medium">ผู้จัดทำรายงาน (Staff)</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-40 border-b border-gray-400 mb-2 mx-auto"></div>
+                        <p class="text-xs text-gray-500 font-medium">ผู้ตรวจสอบ (Manager)</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-12 text-[10px] text-gray-400">
+                    เอกสารสร้างอัตโนมัติจากระบบ Bloom Luxe Store Management - <span id="report-gen-time"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM MODAL (CUSTOM UI) -->
+    <div id="confirm-modal" class="hidden-elm fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm bg-[#F4EFE6] text-center shadow-2xl">
+            <div class="text-4xl mb-3">⚠️</div>
+            <h3 class="text-lg font-bold text-[#4A3B32] mb-2" id="confirm-title">ยืนยันการดำเนินการ</h3>
+            <p class="text-sm text-[#847568] mb-6 whitespace-pre-line" id="confirm-message">คุณแน่ใจหรือไม่?</p>
+            <div class="flex gap-3">
+                <button id="confirm-cancel-btn" class="flex-1 py-3 bg-white text-[#847568] hover:bg-gray-50 border border-[#D4C4B7] rounded-xl font-bold transition-all shadow-sm">ยกเลิก</button>
+                <button id="confirm-ok-btn" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-all shadow-md">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CUSTOMER BOTTOM BAR (MY QUEUE) -->
     <div id="my-queue-bar" class="fixed bottom-0 left-0 w-full z-40 p-4 hidden-elm my-queue-bar">
         <div class="glass-panel p-4 rounded-2xl bg-[#F4EFE6]/95 border-[#8C7462]/30 shadow-[0_-10px_40px_rgba(74,59,50,0.15)] flex justify-between items-center relative overflow-hidden">
@@ -425,7 +706,10 @@
     </div>
 
     <div id="toast-container" class="fixed top-4 right-4 z-[70] space-y-2 pointer-events-none"></div>
+    
+    <!-- Audio Elements -->
     <audio id="notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="admin-notify-sound" src="https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3" preload="auto"></audio>
   </div>
 
   <script>
@@ -440,13 +724,16 @@
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
     const LIFF_ID = "2009162443-gCuBKaOD"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzyZ17QpAqQ8txQzxRZ_ZWLJZI-oDr6aiRw17KHYLd31OV_qY4XoAq-ZdwM1fHLKyxSvA/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby4gi1s0ph2pPPHu423muiauix7XTsRizbpH2SuS5ggTTzET6t1mKxsAjCcVoVox6zf/exec";
 
-    // 💰 การตั้งราคาคอร์ส (สำหรับคำนวณยอดขาย)
+    // 💰 Pricing config (Default prices)
     const SERVICE_PRICES = {
-        "60 min": 590, // <--- เปลี่ยนราคา 60 นาทีตรงนี้
-        "90 min": 890  // <--- เปลี่ยนราคา 90 นาทีตรงนี้
+        "60 min": 590, 
+        "90 min": 890  
     };
+
+    // 🏨 Store limits (2 Rooms / 2 Staff)
+    const MAX_CONCURRENT_BOOKINGS = 2;
 
     const getAuthToken = () => CONFIG.token_part_1 + CONFIG.token_part_2;
     const getHeaders = () => {
@@ -456,13 +743,210 @@
         return headers;
     };
 
+    // ตัวแปรเก็บการตั้งค่าระบบที่จะบันทึกลง Database ด้วย
+    let store_settings = { id: 'SYS_SETTINGS', staffLineIds: ["", "", "", ""] };
+
     let db_sha = '';
     let db_content = [];
     let activePage = 'customer';
     let activeAdminTab = 'walkin';
     let isFetching = false;
+    let pauseSyncUntil = 0;
     let myQueueId = localStorage.getItem('bloom_my_queue_id'); 
     let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
+    let lastPendingCount = 0; 
+
+    // --- UTILS DECLARATION ---
+    function updateStatusIcon(state, code='') { 
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        if(!dot || !text) return;
+        if(state === 'error') {
+            dot.className = 'w-2 h-2 rounded-full bg-red-500';
+            text.innerText = `Offline (${code})`;
+            text.className = 'text-[10px] text-red-500 font-bold uppercase tracking-widest';
+        } else {
+            dot.className = 'w-2 h-2 rounded-full bg-green-500 live-dot';
+            text.innerText = 'Live System';
+            text.className = 'text-[10px] text-green-600 font-bold uppercase tracking-widest';
+        }
+    }
+
+    function showToast(m, t) { 
+        const c = document.getElementById('toast-container');
+        if(!c) return;
+        const el = document.createElement('div'); 
+        el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm font-bold shadow-xl pointer-events-auto border border-white/20 ${t==='success'?'bg-[#15803D]/95':'bg-red-600/95'}`; 
+        el.innerText = m; 
+        c.appendChild(el); 
+        setTimeout(() => el.remove(), 4000); 
+    }
+
+    function showConfirmModal(title, message, onConfirm) {
+        const modal = document.getElementById('confirm-modal');
+        const titleEl = document.getElementById('confirm-title');
+        const msgEl = document.getElementById('confirm-message');
+        const okBtn = document.getElementById('confirm-ok-btn');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+        modal.classList.remove('hidden-elm');
+
+        const newOkBtn = okBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        newCancelBtn.onclick = () => {
+            modal.classList.add('hidden-elm');
+        };
+
+        newOkBtn.onclick = () => {
+            modal.classList.add('hidden-elm');
+            onConfirm();
+        };
+    }
+
+    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
+    
+    function checkMyQueueStatus(db) {
+        if(!myQueueId) return;
+        const q = db.find(i => i.id === myQueueId);
+        const bar = document.getElementById('my-queue-bar');
+        const statusEl = document.getElementById('bar-my-status');
+        const idEl = document.getElementById('bar-my-id');
+
+        if(!q || q.status === 'Completed' || q.status === 'Archived' || q.status === 'Cancelled') {
+            if(bar) bar.classList.add('hidden-elm');
+            
+            // แจ้งเตือนลูกค้าว่าคิวถูกยกเลิกแล้ว
+            if (q && q.status === 'Cancelled' && lastKnownStatus !== 'Cancelled') {
+                showToast('❌ คิวของคุณถูกยกเลิก', 'error');
+            }
+            if (q) {
+                lastKnownStatus = q.status;
+                localStorage.setItem('bloom_my_queue_status', q.status);
+            }
+            return;
+        }
+
+        if(bar) {
+            bar.classList.remove('hidden-elm');
+            if(idEl) idEl.innerText = q.id;
+            if(statusEl) {
+                statusEl.innerText = q.status;
+                if(q.status === 'Serving') statusEl.className = 'text-[#15803D] font-bold text-sm';
+                else if(q.status === 'Waiting') statusEl.className = 'text-[#D97706] font-bold text-sm';
+                else statusEl.className = 'text-[#2563EB] font-bold text-sm';
+            }
+        }
+
+        if(lastKnownStatus && q.status !== lastKnownStatus) {
+            if(q.status === 'Serving') showToast('🎉 ถึงคิวของคุณแล้ว!', 'success');
+            else if(q.status === 'Waiting') showToast('✅ คิวของคุณได้รับการยืนยันแล้ว', 'success');
+        }
+        lastKnownStatus = q.status;
+        localStorage.setItem('bloom_my_queue_status', q.status);
+    }
+
+    function showPage(page) { 
+        activePage = page; 
+        const modal = document.getElementById('login-modal');
+        const pageCust = document.getElementById('page-customer');
+        const pageAdmin = document.getElementById('page-admin');
+        
+        if (modal) {
+            page === 'admin' ? modal.classList.remove('hidden-elm') : modal.classList.add('hidden-elm');
+        }
+        
+        if(page !== 'admin') { 
+            if(pageCust) pageCust.classList.remove('hidden-elm'); 
+            if(pageAdmin) pageAdmin.classList.add('hidden-elm'); 
+            toggleNavStyle('customer'); 
+        } 
+    }
+
+    function toggleNavStyle(active) { 
+        const c = document.getElementById('nav-customer'), a = document.getElementById('nav-admin');
+        const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold bg-[#8C7462] text-white shadow-md whitespace-nowrap';
+        const inactiveClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-[#847568] hover:text-[#4A3B32] whitespace-nowrap';
+        if(c) c.className = active === 'customer' ? activeClass : inactiveClass;
+        if(a) a.className = active === 'admin' ? activeClass : inactiveClass;
+    }
+
+    function switchCustomerView(view) {
+        const f = document.getElementById('customer-form-view'), q = document.getElementById('customer-queue-view');
+        const bf = document.getElementById('btn-view-form'), bq = document.getElementById('btn-view-queue');
+        const active = 'flex-1 py-3 rounded-2xl font-bold bg-white text-[#8C7462] shadow-lg border border-[#D4C4B7]/50 scale-105 text-sm md:text-base transition-all';
+        const inactive = 'flex-1 py-3 rounded-2xl font-bold bg-white/40 text-[#847568] border border-transparent text-sm md:text-base transition-all';
+        
+        if(f && q && bf && bq) {
+            if(view==='form') { f.classList.remove('hidden-elm'); q.classList.add('hidden-elm'); bf.className=active; bq.className=inactive; }
+            else { q.classList.remove('hidden-elm'); f.classList.add('hidden-elm'); bq.className=active; bf.className=inactive; refreshData(); }
+        }
+    }
+
+    function switchFormTab(type) {
+        const formOrderType = document.getElementById('form-order-type');
+        if(formOrderType) formOrderType.value = type;
+        
+        const dateInput = document.getElementById('booking-date-input');
+        const today = new Date().toISOString().split('T')[0];
+        
+        if(dateInput) {
+            if (type === 'walkin') {
+                dateInput.min = today;
+                dateInput.max = today;
+                dateInput.value = today;
+            } else {
+                dateInput.min = today;
+                dateInput.removeAttribute('max');
+            }
+        }
+
+        const tabWalkin = document.getElementById('tab-walkin');
+        const tabBooking = document.getElementById('tab-booking');
+        
+        if(tabWalkin) tabWalkin.className = type === 'walkin' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
+        if(tabBooking) tabBooking.className = type === 'booking' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
+        
+        // Show/Hide Manual Time input for Walk-in
+        const manualBox = document.getElementById('walkin-manual-time-box');
+        if (manualBox) {
+            manualBox.style.display = (type === 'walkin') ? 'block' : 'none';
+        }
+        
+        renderTimeSlots();
+    }
+
+    // Set time manually via Walk-in custom input
+    function setManualTime(val) {
+        document.getElementById('booking-time-input').value = val;
+        document.querySelectorAll('.time-slot-btn').forEach(el => el.classList.remove('slot-selected'));
+    }
+
+    function switchAdminTab(tab) {
+        activeAdminTab = tab;
+        const tabs = ['walkin', 'booking', 'timeline', 'today', 'stats'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(`admin-tab-${t}`);
+            const list = document.getElementById(`admin-${t}-list`);
+            if(btn && list) {
+                if(t === tab) {
+                    btn.classList.add('active');
+                    list.classList.remove('hidden-elm');
+                } else {
+                    btn.classList.remove('active');
+                    list.classList.add('hidden-elm');
+                }
+            }
+        });
+        
+        if(tab === 'stats') calculateStats();
+        if(tab === 'timeline') renderTimeline();
+    }
+    // --- END UTILS ---
 
     // --- MAIN LOGIC ---
     window.onload = () => {
@@ -471,10 +955,22 @@
         if(ownerInput) ownerInput.value = CONFIG.owner;
         if(repoInput) repoInput.value = CONFIG.repo;
         
-        // Set default date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('booking-date-input').value = today;
-        document.getElementById('booking-date-input').min = today;
+        // Set default date to today for date picker
+        const today = new Date(Date.now() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        const dateInput = document.getElementById('booking-date-input');
+        const timelineFilter = document.getElementById('timeline-date-filter');
+        const statsStartFilter = document.getElementById('stats-start-date');
+        const statsEndFilter = document.getElementById('stats-end-date');
+        
+        if(dateInput) {
+            dateInput.value = today;
+            dateInput.min = today;
+        }
+        if(timelineFilter) {
+            timelineFilter.value = today;
+        }
+        if(statsStartFilter) statsStartFilter.value = today;
+        if(statsEndFilter) statsEndFilter.value = today;
 
         if(myQueueId && "Notification" in window && Notification.permission !== "granted") {
             Notification.requestPermission();
@@ -484,22 +980,66 @@
         refreshData();
         setInterval(refreshData, 5000); 
         setInterval(updateTimers, 1000);
+        setInterval(checkAutoCancel, 30000); // [NEW] ตรวจสอบคิวที่เลยเวลา 15 นาที ทุกๆ 30 วินาที
     };
 
-    // --- TIME SLOT LOGIC ---
+    // --- [NEW] AUTO-CANCEL LOGIC ---
+    async function checkAutoCancel() {
+        if (activePage !== 'admin') return; 
+        
+        const now = new Date();
+        let hasChanges = false;
+        let updatedDB = [...db_content];
+
+        for (let i = 0; i < updatedDB.length; i++) {
+            const q = updatedDB[i];
+            if (q.status === 'Waiting' || q.status === 'Pending') {
+                if (q.bookingDate && q.bookingTime) {
+                    const [year, month, day] = q.bookingDate.split('-');
+                    const [hours, minutes] = q.bookingTime.split(':');
+                    const qDateTime = new Date(year, month - 1, day, hours, minutes);
+                    
+                    const diffMins = (now - qDateTime) / (1000 * 60);
+                    
+                    // ปรับเวลาเป็น 15 นาที และเช็คว่า "ยังไม่ได้จ่ายมัดจำ"
+                    if (diffMins >= 15 && !q.isDepositPaid) {
+                        updatedDB[i] = { ...q, status: 'Cancelled' };
+                        hasChanges = true;
+                        
+                        // Send Line Notify
+                        if (q.lineUserId) {
+                            const msg = `❌ ยกเลิกคิวอัตโนมัติ (${q.id})\n\nเนื่องจากเลยเวลานัดหมายเกิน 15 นาที และยังไม่มีการชำระมัดจำ ระบบได้ทำการยกเลิกคิวของคุณเพื่อเปิดสิทธิ์ให้ลูกค้าท่านอื่นค่ะ\nหากต้องการใช้บริการ กรุณาจองคิวใหม่อีกครั้งนะคะ 🙏`;
+                            sendLineNotification(q.lineUserId, msg);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (hasChanges) {
+            db_content = updatedDB;
+            renderUI();
+            await saveToGithub(db_content);
+            showToast('มีคิวที่ถูกยกเลิกอัตโนมัติเนื่องจากเลยเวลานัด 15 นาทีและยังไม่ได้มัดจำ', 'error');
+        }
+    }
+
+    // --- TIME SLOT LOGIC (SUPPORT 2 CONCURRENT BOOKINGS) ---
     function renderTimeSlots() {
-        const dateInput = document.getElementById('booking-date-input').value;
+        const dateInput = document.getElementById('booking-date-input');
         const courseInput = document.querySelector('input[name="course"]:checked');
         const grid = document.getElementById('time-slots-grid');
         const hiddenInput = document.getElementById('booking-time-input');
         
-        if (!dateInput || !courseInput) {
+        if(!grid) return;
+
+        if (!dateInput || !dateInput.value || !courseInput) {
             grid.innerHTML = `<div class="col-span-3 sm:col-span-4 text-center text-[#847568] text-xs py-6 bg-white/40 rounded-xl border border-[#D4C4B7] border-dashed">Please select date and course first...</div>`;
             return;
         }
 
         const duration = courseInput.value.includes('90') ? 90 : 60;
-        const occupied = getOccupiedSlots(dateInput);
+        const occupied = getOccupiedSlots(dateInput.value);
         const shopOpen = 10 * 60; // 10:00 in minutes
         const shopClose = 20 * 60; // 20:00 in minutes
         const interval = 30; // 30 min steps
@@ -507,23 +1047,35 @@
         let html = '';
         let hasSlots = false;
 
+        const now = new Date();
+        const currentMins = now.getHours() * 60 + now.getMinutes();
+        const isToday = dateInput.value === new Date(Date.now() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
         for (let time = shopOpen; time <= shopClose - duration; time += interval) {
-            const start = time;
-            const end = time + duration;
+            const reqStart = time;
+            const reqEnd = time + duration;
+
+            if (isToday && reqStart <= currentMins) {
+                continue; 
+            }
             
-            // Check Collision
-            let isOverlap = false;
-            for (let slot of occupied) {
-                if (start < slot.end && end > slot.start) {
-                    isOverlap = true;
-                    break;
+            let maxOverlapCount = 0;
+            for (let checkTime = reqStart; checkTime < reqEnd; checkTime += interval) {
+                let currentOverlap = 0;
+                for (let slot of occupied) {
+                    if (checkTime < slot.end && (checkTime + interval) > slot.start) {
+                        currentOverlap++;
+                    }
+                }
+                if (currentOverlap > maxOverlapCount) {
+                    maxOverlapCount = currentOverlap;
                 }
             }
 
-            const timeStr = minutesToTime(start);
+            const timeStr = minutesToTime(reqStart);
             
-            if (isOverlap) {
-                html += `<div class="time-slot-btn slot-occupied" title="Booked"><span class="text-[10px] line-through">${timeStr}</span></div>`;
+            if (maxOverlapCount >= MAX_CONCURRENT_BOOKINGS) {
+                html += `<div class="time-slot-btn slot-occupied" title="Full"><span class="text-[10px] line-through">${timeStr}</span></div>`;
             } else {
                 hasSlots = true;
                 html += `<div onclick="selectTimeSlot('${timeStr}', this)" class="time-slot-btn slot-available group" data-time="${timeStr}">
@@ -538,16 +1090,16 @@
         }
         
         grid.innerHTML = html;
-        hiddenInput.value = ''; // Reset selection
+        if(hiddenInput) hiddenInput.value = ''; // Reset selection
     }
 
     function getOccupiedSlots(dateStr) {
         return db_content
-            .filter(b => b.orderType === 'booking' && b.bookingDate === dateStr && b.status !== 'Completed' && b.status !== 'Delete' && b.status !== 'Archived')
+            .filter(b => b.bookingDate === dateStr && (b.status === 'Waiting' || b.status === 'Serving' || b.status === 'Pending'))
             .map(b => {
                 const startMin = timeToMinutes(b.bookingTime);
                 const duration = (b.course && b.course.includes('90')) ? 90 : 60;
-                return { start: startMin, end: startMin + duration };
+                return { start: startMin, end: startMin + duration, id: b.id, nickname: b.nickname };
             });
     }
 
@@ -558,13 +1110,18 @@
                 el.classList.add('slot-available');
             }
         });
-        
         btn.classList.remove('slot-available');
         btn.classList.add('slot-selected');
-        document.getElementById('booking-time-input').value = timeStr;
+        
+        const hiddenInput = document.getElementById('booking-time-input');
+        if(hiddenInput) hiddenInput.value = timeStr;
+        
+        const manualInput = document.getElementById('manual-time-input');
+        if(manualInput) manualInput.value = '';
     }
 
     function timeToMinutes(timeStr) {
+        if(!timeStr) return 0;
         const [h, m] = timeStr.split(':').map(Number);
         return h * 60 + m;
     }
@@ -582,12 +1139,19 @@
             await liff.init({ liffId: LIFF_ID });
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
-                document.getElementById('input-nickname').value = profile.displayName;
-                document.getElementById('line-user-id').value = profile.userId;
-                document.getElementById('liff-user-info').classList.remove('hidden-elm');
-                document.getElementById('liff-user-img').src = profile.pictureUrl;
-                document.getElementById('liff-user-name').innerText = "Hi, " + profile.displayName;
-                document.getElementById('nav-admin').style.display = 'none';
+                const nickInput = document.getElementById('input-nickname');
+                const lineUserIdInput = document.getElementById('line-user-id');
+                const liffUserInfo = document.getElementById('liff-user-info');
+                const liffUserImg = document.getElementById('liff-user-img');
+                const liffUserName = document.getElementById('liff-user-name');
+                const navAdmin = document.getElementById('nav-admin');
+                
+                if(nickInput) nickInput.value = profile.displayName;
+                if(lineUserIdInput) lineUserIdInput.value = profile.userId;
+                if(liffUserInfo) liffUserInfo.classList.remove('hidden-elm');
+                if(liffUserImg) liffUserImg.src = profile.pictureUrl;
+                if(liffUserName) liffUserName.innerText = "Hi, " + profile.displayName;
+                if(navAdmin) navAdmin.style.display = 'none';
             }
         } catch (err) { console.error('LIFF Init failed', err); }
     }
@@ -601,12 +1165,86 @@
                 headers: { 'Content-Type': 'text/plain' }, 
                 body: JSON.stringify({ userId: userId, message: message })
             });
-            console.log("Notification sent to " + userId);
         } catch (e) { console.error("Notify failed", e); }
     }
 
+    // [NEW] ฟังก์ชันสำหรับบันทึกการตั้งค่า Staff LINE IDs
+    async function saveSystemSettings() {
+        const ids = [];
+        for(let i=1; i<=4; i++) {
+            ids.push(document.getElementById(`staff-line-${i}`).value.trim());
+        }
+        store_settings.staffLineIds = ids;
+        if (await saveToGithub(db_content)) {
+            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
+        } else {
+            showToast('เกิดข้อผิดพลาดในการบันทึกตั้งค่า', 'error');
+        }
+    }
+
+    // [NEW] ฟังก์ชันส่งสรุปคิววันพรุ่งนี้ให้พนักงาน
+    async function notifyTomorrowQueues() {
+        if (!store_settings.staffLineIds || store_settings.staffLineIds.length === 0 || store_settings.staffLineIds.every(id => !id || id.length < 5)) {
+            showToast('⚠️ กรุณาตั้งค่า LINE ID พนักงานก่อน', 'error');
+            return;
+        }
+
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'กำลังส่ง...';
+        btn.disabled = true;
+
+        // หาวันที่ของพรุ่งนี้
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const y = tomorrow.getFullYear();
+        const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const d = String(tomorrow.getDate()).padStart(2, '0');
+        const tomorrowStr = `${y}-${m}-${d}`;
+
+        // ดึงเฉพาะคิวจอง (booking) ของพรุ่งนี้ ที่ยังไม่โดนยกเลิกหรือลบ
+        const tomorrowsQueues = db_content.filter(q => 
+            q.bookingDate === tomorrowStr && 
+            q.orderType === 'booking' &&
+            (q.status === 'Pending' || q.status === 'Waiting' || q.status === 'Serving' || q.status === 'Completed')
+        );
+
+        // เรียงตามเวลา
+        tomorrowsQueues.sort((a,b) => (a.bookingTime || '').localeCompare(b.bookingTime || ''));
+
+        let msg = `📅 สรุปคิวจองล่วงหน้าสำหรับพรุ่งนี้ (${tomorrowStr})\n\n`;
+
+        if (tomorrowsQueues.length === 0) {
+            msg += `ไม่มีคิวจองล่วงหน้าสำหรับพรุ่งนี้ค่ะ 🍃`;
+        } else {
+            msg += `มีคิวจองทั้งหมด ${tomorrowsQueues.length} คิว:\n`;
+            tomorrowsQueues.forEach((q, idx) => {
+                const depositStatus = q.isDepositPaid ? '[💸มัดจำแล้ว]' : '[รอชำระ]';
+                msg += `${idx + 1}. [${q.bookingTime}] ${q.nickname} (${q.course})\n   📞 ${q.phone || '-'} ${depositStatus}\n`;
+            });
+            msg += `\n✨ พนักงานเตรียมตัวรับลูกค้าด้วยนะคะ`;
+        }
+
+        let sentCount = 0;
+        for (const staffId of store_settings.staffLineIds) {
+            if (staffId && staffId.length > 5) {
+                await sendLineNotification(staffId, msg);
+                sentCount++;
+            }
+        }
+
+        if (sentCount > 0) {
+            showToast(`ส่งแจ้งเตือนคิวพรุ่งนี้ให้พนักงาน ${sentCount} คนแล้ว`, 'success');
+        } else {
+            showToast('เกิดข้อผิดพลาดในการส่งข้อความ', 'error');
+        }
+
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+
     async function refreshData() {
-        if (isFetching) return;
+        if (isFetching || Date.now() < pauseSyncUntil) return;
         isFetching = true;
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
         try {
@@ -615,18 +1253,36 @@
                 const data = await res.json();
                 if (db_sha !== data.sha) {
                     db_sha = data.sha;
-                    db_content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                    let rawData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                    
+                    // แยกข้อมูลตั้งค่า (SYS_SETTINGS) ออกจากข้อมูลคิว
+                    const settingsItem = rawData.find(i => i.id === 'SYS_SETTINGS');
+                    if (settingsItem) {
+                        store_settings = settingsItem;
+                        if (!store_settings.staffLineIds) store_settings.staffLineIds = ["", "", "", ""];
+                    }
+                    db_content = rawData.filter(i => i.id !== 'SYS_SETTINGS');
+                    
+                    // อัปเดตช่องกรอก LINE IDs ในหน้าตั้งค่า
+                    for(let i=1; i<=4; i++) {
+                        const input = document.getElementById(`staff-line-${i}`);
+                        if(input) input.value = store_settings.staffLineIds[i-1] || '';
+                    }
+
                     renderUI();
                     checkMyQueueStatus(db_content);
                     
-                    if(!document.getElementById('booking-section').classList.contains('hidden-elm')) {
+                    const bookingSection = document.getElementById('booking-section');
+                    if(bookingSection && !bookingSection.classList.contains('hidden-elm')) {
                         renderTimeSlots();
                     }
                 }
                 updateStatusIcon('live');
-                document.getElementById('btn-autofix').classList.add('hidden-elm'); 
+                const btnAutofix = document.getElementById('btn-autofix');
+                if(btnAutofix) btnAutofix.classList.add('hidden-elm'); 
             } else {
-                if(res.status === 404) document.getElementById('btn-autofix').classList.remove('hidden-elm');
+                const btnAutofix = document.getElementById('btn-autofix');
+                if(res.status === 404 && btnAutofix) btnAutofix.classList.remove('hidden-elm');
                 updateStatusIcon('error', res.status);
             }
         } catch (e) { updateStatusIcon('error', 'NET'); } 
@@ -635,6 +1291,7 @@
 
     async function autoFix404() {
         const btn = document.getElementById('btn-autofix');
+        if(!btn) return;
         btn.innerText = "Creating file...";
         btn.disabled = true;
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
@@ -642,37 +1299,39 @@
             const res = await fetch(url, {
                 method: 'PUT',
                 headers: getHeaders(),
-                body: JSON.stringify({
-                    message: "Create database.json (Auto Fix)",
-                    content: "W10=", 
-                })
+                body: JSON.stringify({ message: "Create database.json (Auto Fix)", content: "W10=" })
             });
             if(res.ok) {
-                showToast("สร้างไฟล์สำเร็จ! ระบบพร้อมใช้งาน", "success");
+                showToast("Database file created! System ready.", "success");
                 btn.classList.add('hidden-elm');
                 refreshData();
             } else {
                 const err = await res.json();
-                showToast(`Failed: ${err.message}`, "error");
-                btn.innerText = "Try again";
+                showToast(`Failed to create: ${err.message}`, "error");
+                btn.innerText = "Try Again";
                 btn.disabled = false;
             }
         } catch(e) {
             showToast("Connection Error", "error");
-            btn.innerText = "Try again";
+            btn.innerText = "Try Again";
             btn.disabled = false;
         }
     }
 
     async function saveToGithub(newContent) {
+        pauseSyncUntil = Date.now() + 5000; // หน่วงเวลาดึงข้อมูล 5 วินาทีหลังเซฟเสร็จ
         const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+        
+        // แนบการตั้งค่าเข้าไปกับข้อมูลคิวทุกครั้งที่บันทึก
+        const dataToSave = [...newContent, store_settings];
+
         try {
             const res = await fetch(url, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify({
                     message: `Update`,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(newContent, null, 2)))),
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2)))),
                     sha: db_sha
                 })
             });
@@ -685,25 +1344,43 @@
         let updatedDB;
         const item = db_content.find(i => i.id === id);
         
-        if (newStatus === 'Delete') updatedDB = db_content.filter(i => i.id !== id);
-        else if (newStatus === 'Done') updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Completed' } : i);
+        if (newStatus === 'Cancelled') updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Cancelled', serviceStartTime: null } : i);
+        else if (newStatus === 'Done') updatedDB = db_content.map(i => i.id === id ? { ...i, status: 'Completed', serviceStartTime: null } : i);
         else updatedDB = db_content.map(i => { 
             if(i.id===id) return {...i, status: newStatus}; 
-            if(newStatus==='Serving'&&i.status==='Serving') return null; 
             return i; 
         }).filter(Boolean);
         
+        // Optimistic Update ปรับหน้าจอให้แสดงผลทันที ไม่ต้องรอโหลด
+        db_content = updatedDB;
+        renderUI();
+        
         if (await saveToGithub(updatedDB)) { 
             showToast('อัปเดตสถานะสำเร็จ', 'success'); 
+            
             if (item && item.lineUserId) {
-                if (newStatus === 'Serving') {
-                    const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ\nIt's your turn! Please come to the service point.`;
+                if (newStatus === 'Waiting') {
+                    const msg = `✅ ยืนยันการจองสำเร็จ! (${item.id})\n📅 วันที่: ${item.bookingDate}\n⏰ เวลา: ${item.bookingTime}\n📞 เบอร์โทร: ${item.phone || '-'}\n\nกรุณามาถึงก่อนเวลานัด 15 นาทีค่ะ \nหากเลยเวลานัด 15 นาทีและยังไม่ได้ชำระมัดจำ ระบบจะยกเลิกคิวอัตโนมัติ`;
+                    sendLineNotification(item.lineUserId, msg);
+                } else if (newStatus === 'Serving') {
+                    const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ`;
                     sendLineNotification(item.lineUserId, msg);
                 } else if (newStatus === 'Done') {
-                    const msg = `🌸 ขอบคุณที่ใช้บริการ BLOOM LUXE SALON ค่ะ (${item.id})\n\nหวังว่าจะได้ดูแลคุณลูกค้าอีกครั้งนะคะ 💖\n\nThank you for visiting us! We look forward to seeing you again. ✨`;
+                    const msg = `🌸 ขอบคุณที่ใช้บริการ BLOOM LUXE SALON ค่ะ (${item.id})\n\nหวังว่าจะได้ดูแลคุณลูกค้าอีกครั้งนะคะ 💖`;
+                    sendLineNotification(item.lineUserId, msg);
+                } else if (newStatus === 'Cancelled') {
+                    let msg = '';
+                    if (item.status === 'Pending') {
+                        msg = `❌ ขออภัยค่ะ คิวของคุณถูกปฏิเสธ (${item.id})\nเนื่องจากเวลาที่เลือกไม่พร้อมให้บริการ กรุณาเลือกเวลาอื่นใหม่อีกครั้งค่ะ`;
+                    } else {
+                        msg = `❌ คิวของคุณถูกยกเลิก (${item.id})\n\nหากมีข้อสงสัยกรุณาติดต่อพนักงานค่ะ`;
+                    }
                     sendLineNotification(item.lineUserId, msg);
                 }
             }
+            setTimeout(refreshData, 1000); 
+        } else {
+            showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
             refreshData(); 
         }
     }
@@ -715,47 +1392,81 @@
         const waiting = db_content.filter(i => i.status === 'Waiting' && i.id !== id);
         const others = db_content.filter(i => i.status !== 'Serving' && i.status !== 'Waiting');
         const newOrder = [...serving, itemToSkip, ...waiting, ...others];
-        if (await saveToGithub(newOrder)) { showToast('ลัดคิวเรียบร้อย', 'success'); refreshData(); }
-    }
+        
+        db_content = newOrder;
+        renderUI();
 
-    async function resetQueueByType(type) {
-        const confirmMsg = `⚠️ คำเตือน: ยืนยันการปิดรอบ ${type === 'walkin' ? 'Walk-in' : 'Booking'} ใช่หรือไม่?\n(คิวจะถูกซ่อนจากหน้ารอคิว แต่ยังคงนำไปคำนวณในหน้าสถิติ)`;
-
-        if(!confirm(confirmMsg)) return;
-
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerText = "Wait...";
-        btn.disabled = true;
-
-        let newContent = db_content.map(item => {
-            if (type === 'walkin' && item.orderType !== 'booking') {
-                return { ...item, status: 'Archived' };
-            }
-            if (type === 'booking' && item.orderType === 'booking') {
-                return { ...item, status: 'Archived' };
-            }
-            return item;
-        });
-
-        if (await saveToGithub(newContent)) {
-            showToast(`ปิดรอบคิวเรียบร้อยแล้ว`, 'success');
-            refreshData();
+        if (await saveToGithub(newOrder)) { 
+            showToast('ลัดคิวเรียบร้อย', 'success'); 
+            setTimeout(refreshData, 1000); 
         } else {
             showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+            refreshData();
         }
-        
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+    }
+
+    function resetQueueByType(type, btn) {
+        const title = type === 'walkin' ? 'ปิดรอบ Walk-in' : 'ปิดรอบ Booking';
+        const msg = `ยืนยันการปิดรอบ ${type === 'walkin' ? 'Walk-in' : 'Booking'} ใช่หรือไม่?\n(คิวจะถูกซ่อนจากหน้ารอคิว แต่ยังคงนำไปคำนวณในหน้าสถิติ)`;
+
+        showConfirmModal(title, msg, async () => {
+            const originalText = btn ? btn.innerHTML : "Wait...";
+            if (btn) {
+                btn.innerText = "Wait...";
+                btn.disabled = true;
+            }
+
+            let newContent = db_content.map(item => {
+                if (type === 'walkin' && item.orderType !== 'booking') {
+                    return { ...item, status: 'Archived' };
+                }
+                if (type === 'booking' && item.orderType === 'booking') {
+                    return { ...item, status: 'Archived' };
+                }
+                return item;
+            });
+
+            db_content = newContent;
+            document.getElementById('settings-panel').classList.add('hidden-elm'); // ปิดหน้าต่างตั้งค่าอัตโนมัติ
+            renderUI();
+
+            if (await saveToGithub(newContent)) {
+                showToast(`ปิดรอบคิวเรียบร้อยแล้ว`, 'success');
+                setTimeout(refreshData, 1000);
+            } else {
+                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                refreshData();
+            }
+            
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
     }
 
     async function togglePayment(id, isPaid) {
         const itemIndex = db_content.findIndex(i => i.id === id);
         if (itemIndex > -1) {
             db_content[itemIndex].isPaid = isPaid;
-            renderUI(); // Optimistic UI
+            renderUI(); 
             if (await saveToGithub(db_content)) {
                 showToast('อัปเดตสถานะการชำระเงินแล้ว', 'success');
+            } else {
+                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                refreshData();
+            }
+        }
+    }
+
+    // เพิ่มฟังก์ชัน toggleDeposit สำหรับการมัดจำ
+    async function toggleDeposit(id, isDepositPaid) {
+        const itemIndex = db_content.findIndex(i => i.id === id);
+        if (itemIndex > -1) {
+            db_content[itemIndex].isDepositPaid = isDepositPaid;
+            renderUI(); 
+            if (await saveToGithub(db_content)) {
+                showToast('อัปเดตสถานะมัดจำแล้ว', 'success');
             } else {
                 showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
                 refreshData();
@@ -769,7 +1480,6 @@
             db_content[itemIndex].serviceStartTime = new Date().toISOString();
             db_content[itemIndex].notifiedNext = false; 
             renderUI();
-            
             if (await saveToGithub(db_content)) {
                 showToast('เริ่มจับเวลาแล้ว', 'success');
             } else {
@@ -795,14 +1505,13 @@
                 const s = Math.floor((remaining % 60000) / 1000);
                 el.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
                 
-                // 5-minute warning
                 if (remaining <= 300000 && el.dataset.notified === 'false') {
                     el.dataset.notified = 'true'; 
                     triggerNextQueueWarning(el.dataset.id);
                 }
             } else {
                 el.innerText = `00:00 (Time Up)`;
-                el.classList.remove('text-[#D97706]'); // Yellow-ish
+                el.classList.remove('text-[#D97706]'); 
                 el.classList.add('text-red-600', 'animate-pulse', 'font-bold');
             }
         });
@@ -821,9 +1530,8 @@
                 servingItem.notifiedNext = true; 
                 
                 const nextQueue = currentDB.find(i => i.status === 'Waiting');
-                
                 if (nextQueue && nextQueue.lineUserId) {
-                    const msg = `🔔 เตรียมตัวเข้าใช้บริการ!\n\nคิวก่อนหน้าเหลือเวลาอีกประมาณ 5 นาที จะถึงคิวของคุณ (${nextQueue.id}) แล้วค่ะ\nกรุณาเตรียมตัวที่หน้าร้านได้เลยค่ะ ✨\n\nGet ready! Your queue (${nextQueue.id}) is coming up in about 5 minutes.`;
+                    const msg = `🔔 เตรียมตัวเข้าใช้บริการ!\n\nอีกประมาณ 5 นาที จะถึงคิวของคุณ (${nextQueue.id}) แล้วค่ะ\nกรุณาเตรียมตัวที่หน้าร้านได้เลยค่ะ ✨`;
                     sendLineNotification(nextQueue.lineUserId, msg);
                 }
                 
@@ -838,134 +1546,464 @@
     // --- FORM SUBMIT ---
     document.getElementById('customer-form').onsubmit = async (e) => {
         e.preventDefault();
-        
         if("Notification" in window && Notification.permission !== "granted") {
             Notification.requestPermission();
         }
 
         const type = document.getElementById('form-order-type').value;
-        const btn = document.getElementById('submit-btn');
-        
-        if (type === 'booking') {
-            const time = document.getElementById('booking-time-input').value;
-            if (!time) {
-                alert("Please select an available time slot.");
-                return;
-            }
+        const timeInputEl = document.getElementById('booking-time-input');
+        const timeInput = timeInputEl ? timeInputEl.value : null;
+
+        if (!timeInput) {
+            showToast("⚠️ กรุณาเลือกเวลาที่ต้องการจองก่อนยืนยัน", "error");
+            return;
         }
 
-        btn.disabled = true;
-        btn.innerText = 'Saving...';
+        const btn = document.getElementById('submit-btn');
+        if(btn) {
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        }
         
         const fd = new FormData(e.target);
 
-        // Get absolute max ID number to prevent duplicates even after archive
         const getRunNumber = (id) => parseInt(id.replace(/\D/g, '')) || 0;
         const maxId = db_content.reduce((max, item) => Math.max(max, getRunNumber(item.id)), 0);
         const nextId = "Q-" + String(maxId + 1).padStart(3, '0');
         
+        // กำหนดราคาเริ่มต้น (ดึงจากตัวแปร SERVICE_PRICES)
+        const courseSelected = fd.get('course');
+        const defaultPrice = courseSelected.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"];
+
         const newEntry = {
             id: nextId,
-            status: 'Waiting',
+            status: 'Pending',
             timestamp: new Date().toISOString(),
             isPaid: false,
+            isDepositPaid: false, // Default is not paid
+            actualPrice: defaultPrice, // กำหนดยอดจ่ายจริงเริ่มต้นเท่ากับราคาคอร์ส
             ...Object.fromEntries(fd.entries())
         };
 
         const updatedDB = [...db_content, newEntry];
         if (await saveToGithub(updatedDB)) {
             localStorage.setItem('bloom_my_queue_id', nextId);
-            localStorage.setItem('bloom_my_queue_status', 'Waiting');
+            localStorage.setItem('bloom_my_queue_status', 'Pending');
             myQueueId = nextId;
-            lastKnownStatus = 'Waiting';
+            lastKnownStatus = 'Pending';
 
-            const lineUserId = document.getElementById('line-user-id').value;
+            const lineUserIdEl = document.getElementById('line-user-id');
+            const lineUserId = lineUserIdEl ? lineUserIdEl.value : null;
+            
+            // 1. แจ้งเตือนลูกค้าที่จองเข้ามา
             if(lineUserId) {
-                let msg = `✅ จองคิวสำเร็จ / Booking Confirmed (${nextId})`;
-                if (type === 'booking') {
-                   msg += `\n📅 วันที่/Date: ${fd.get('bookingDate')}\n⏰ เวลา/Time: ${fd.get('bookingTime')}`;
-                } else {
-                   msg += `\nประเภท/Type: Walk-in`;
-                }
+                let msg = `⏳ ส่งคำขอจองคิวเรียบร้อย (${nextId})\n📞 เบอร์โทร: ${fd.get('phone')}\n\nกรุณารอพนักงานยืนยันคิวสักครู่นะคะ`;
                 sendLineNotification(lineUserId, msg);
             }
 
-            showToast('Success! Your Queue is ' + nextId, 'success');
+            // 2. แจ้งเตือนไปยัง Line พนักงาน (วนลูปส่งตามจำนวนพนักงานที่ระบุใน Settings)
+            const staffMsg = `🔔 มีคิวใหม่เข้าสู่ระบบ!\n\nรหัสคิว: ${nextId}\nรูปแบบ: ${type === 'walkin' ? '🚶 Walk-in' : '📅 Booking'}\nชื่อลูกค้า: ${fd.get('nickname')}\nเบอร์โทร: ${fd.get('phone')}\nวันที่: ${fd.get('bookingDate')}\nเวลา: ${timeInput}\nบริการ: ${courseSelected}\n\nกรุณาตรวจสอบและยืนยันคิวในระบบค่ะ`;
+            
+            if (store_settings.staffLineIds && store_settings.staffLineIds.length > 0) {
+                store_settings.staffLineIds.forEach(staffId => {
+                    // เช็คว่ากรอกไอดีไว้ และไม่ใช่ค่าว่าง
+                    if (staffId && staffId.length > 5) { 
+                        sendLineNotification(staffId, staffMsg);
+                    }
+                });
+            }
+
+            showToast('Request sent successfully! Wait for confirmation.', 'success');
             e.target.reset();
             switchCustomerView('queue');
             refreshData();
         } else {
-            showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+            showToast('Connection failed', 'error');
         }
-        btn.disabled = false;
-        btn.innerText = '✅ Confirm Service';
+        
+        if(btn) {
+            btn.disabled = false;
+            btn.innerText = '✅ Confirm Service';
+        }
     };
 
-    // --- CALCULATE STATS (NEW!) ---
+    // --- CALCULATE STATS ---
     function calculateStats() {
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
+        const absoluteTodayStr = new Date(Date.now() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+        // Ensure date filters have default values
+        const startInput = document.getElementById('stats-start-date');
+        const endInput = document.getElementById('stats-end-date');
         
-        // Start of Week (Monday)
-        const dayOfWeek = now.getDay() || 7; 
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - dayOfWeek + 1);
-        startOfWeek.setHours(0,0,0,0);
+        if (startInput && !startInput.value) startInput.value = absoluteTodayStr;
+        if (endInput && !endInput.value) endInput.value = absoluteTodayStr;
         
-        // Start of Month
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        startOfMonth.setHours(0,0,0,0);
+        let startDateStr = startInput ? startInput.value : absoluteTodayStr;
+        let endDateStr = endInput ? endInput.value : absoluteTodayStr;
         
-        let weekCount = 0, weekRev = 0;
+        // Swap dates if start is greater than end
+        if (new Date(startDateStr) > new Date(endDateStr)) {
+            const temp = startDateStr;
+            startDateStr = endDateStr;
+            endDateStr = temp;
+            if(startInput) startInput.value = startDateStr;
+            if(endInput) endInput.value = endDateStr;
+        }
+        
+        let rangeCount = 0, rangeRev = 0;
+        let dayCount = 0, dayRev = 0;
         let monthCount = 0, monthRev = 0;
-        let todayRev = 0;
-        let todayCompletedCount = 0;
+        
+        let absoluteTodayRev = 0;
+        let absoluteTodayCompletedCount = 0;
         
         db_content.forEach(q => {
-            // นับเฉพาะรายการที่ Completed หรือถูกย้ายไป Archived แล้ว แต่ต้องมีการชำระเงินแล้วเท่านั้น
-            if((q.status === 'Completed' || q.status === 'Archived') && q.isPaid) {
-                const qDate = new Date(q.timestamp);
-                let price = 0;
+            // ดึงมาคำนวณเฉพาะสถานะ Completed เท่านั้น
+            if(q.status === 'Completed' && q.isPaid) {
+                const qDateStr = q.bookingDate || q.timestamp.split('T')[0]; 
                 
-                // หา ราคาตามคอร์ส
-                if(q.course && q.course.includes('60')) price = SERVICE_PRICES["60 min"] || 0;
-                if(q.course && q.course.includes('90')) price = SERVICE_PRICES["90 min"] || 0;
+                // ใช้ยอดเงินจริง (actualPrice) ในการคำนวณรายรับ (มี Fallback ถ้าไม่มีข้อมูลเก่า)
+                let price = q.actualPrice !== undefined ? q.actualPrice : (q.course && q.course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"]);
                 
-                if(qDate >= startOfMonth) {
+                // 1. Range Calculation
+                if(qDateStr >= startDateStr && qDateStr <= endDateStr) {
+                    rangeCount++;
+                    rangeRev += price;
+                }
+                
+                // 2. This Month Calculation
+                if(qDateStr.substring(0, 7) === absoluteTodayStr.substring(0, 7)) {
                     monthCount++;
                     monthRev += price;
                 }
-                if(qDate >= startOfWeek) {
-                    weekCount++;
-                    weekRev += price;
-                }
-                if(q.timestamp.startsWith(todayStr)) {
-                    todayRev += price;
-                    todayCompletedCount++;
+
+                // 3. Today Calculation
+                if(qDateStr === absoluteTodayStr) {
+                    dayCount++;
+                    dayRev += price;
+                    
+                    absoluteTodayRev += price;
+                    absoluteTodayCompletedCount++;
                 }
             }
         });
         
-        // อัปเดต UI หน้าสถิติ
-        const elWC = document.getElementById('stat-week-count');
-        const elWR = document.getElementById('stat-week-rev');
+        // Update Range UI
+        const elRC = document.getElementById('stat-range-count');
+        const elRR = document.getElementById('stat-range-rev');
+        if(elRC) elRC.innerText = rangeCount;
+        if(elRR) elRR.innerText = "฿" + rangeRev.toLocaleString();
+
+        // Update Today UI
+        const elDC = document.getElementById('stat-day-count');
+        const elDR = document.getElementById('stat-day-rev');
+        if(elDC) elDC.innerText = dayCount;
+        if(elDR) elDR.innerText = "฿" + dayRev.toLocaleString();
+
+        // Update Month UI
         const elMC = document.getElementById('stat-month-count');
         const elMR = document.getElementById('stat-month-rev');
-        const elTR = document.getElementById('stat-today-revenue');
-        const elTC = document.getElementById('stat-today-completed');
-        
-        if(elWC) elWC.innerText = weekCount;
-        if(elWR) elWR.innerText = "฿" + weekRev.toLocaleString();
         if(elMC) elMC.innerText = monthCount;
         if(elMR) elMR.innerText = "฿" + monthRev.toLocaleString();
-        if(elTR) elTR.innerText = "฿" + todayRev.toLocaleString();
-        if(elTC) elTC.innerHTML = todayCompletedCount + ' <span class="text-xs text-[#847568] font-normal">คิว</span>';
+        
+        // Update Main Dashboard Stats (Left Panel)
+        const elTR = document.getElementById('stat-today-revenue');
+        const elTC = document.getElementById('stat-today-completed');
+        if(elTR) elTR.innerText = "฿" + absoluteTodayRev.toLocaleString();
+        if(elTC) elTC.innerHTML = absoluteTodayCompletedCount + ' <span class="text-xs text-[#847568] font-normal">Queues</span>';
+        
+        // Update Labels dynamically
+        const lblRange = document.getElementById('label-stat-range');
+        const lblToday = document.getElementById('label-stat-today');
+        const lblMonth = document.getElementById('label-stat-month');
+        
+        if(lblRange) lblRange.innerText = `(${startDateStr} - ${endDateStr})`;
+        if(lblToday) lblToday.innerText = `(${absoluteTodayStr})`;
+        if(lblMonth) lblMonth.innerText = `(${new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' })})`;
+    }
+
+    // --- FEATURE 3: EXPORT CSV ---
+    function exportToCSV() {
+        if(db_content.length === 0) {
+            showToast("No data to export", "error");
+            return;
+        }
+
+        // 1. Get Date Range from Filter
+        const startInput = document.getElementById('stats-start-date');
+        const endInput = document.getElementById('stats-end-date');
+        
+        const now = new Date();
+        const absoluteTodayStr = new Date(Date.now() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+        let startDateStr = startInput && startInput.value ? startInput.value : absoluteTodayStr;
+        let endDateStr = endInput && endInput.value ? endInput.value : absoluteTodayStr;
+
+        // Swap if start > end
+        if (new Date(startDateStr) > new Date(endDateStr)) {
+            const temp = startDateStr;
+            startDateStr = endDateStr;
+            endDateStr = temp;
+        }
+
+        // 2. Filter Data by Date
+        const filteredData = db_content.filter(q => {
+            const qDateStr = q.bookingDate || q.timestamp.split('T')[0];
+            return qDateStr >= startDateStr && qDateStr <= endDateStr;
+        });
+
+        if(filteredData.length === 0) {
+            showToast("ไม่มีข้อมูลในช่วงวันที่เลือก", "error");
+            return;
+        }
+        
+        const headers = ["ID", "Status", "Date", "Time", "Type", "Name", "Phone", "Gender", "Course", "Water", "Oil", "Shampoo", "Massage", "Head", "Caution", "Deposit Paid", "Paid Full", "Actual Price (THB)", "Note"];
+        
+        // 3. Map filtered data to CSV rows
+        const csvRows = filteredData.map(q => {
+            let price = 0;
+            if(q.isPaid) {
+                 price = q.actualPrice !== undefined ? q.actualPrice : (q.course && q.course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"]);
+            }
+            
+            const row = [
+                q.id,
+                q.status,
+                q.bookingDate || q.timestamp.split('T')[0],
+                q.bookingTime || q.timestamp.split('T')[1].slice(0,5),
+                q.orderType || 'walkin',
+                `"${(q.nickname || '').replace(/"/g, '""')}"`, // escape quotes
+                `"${q.phone || '-'}"`, 
+                q.gender || '-',
+                q.course || '-',
+                q.waterTemp || '-',
+                q.oil || '-',
+                q.shampoo || '-',
+                q.massagePressure || '-',
+                q.headPressure || '-',
+                `"${(q.caution || '').replace(/"/g, '""')}"`,
+                q.isDepositPaid ? 'Yes' : 'No', // new Deposit column
+                q.isPaid ? 'Yes' : 'No',
+                price,
+                `"${(q.internalNote || '').replace(/"/g, '""')}"`
+            ];
+            return row.join(",");
+        });
+        
+        const csvString = [headers.join(","), ...csvRows].join("\n");
+        
+        const blob = new Blob(["\uFEFF" + csvString], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `BloomLuxe_Export_${startDateStr}_to_${endDateStr}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // --- FEATURE 4: DAILY REPORT (PRINTABLE) ---
+    function openDailyReport() {
+        if(db_content.length === 0) {
+            showToast("ไม่มีข้อมูลระบบ", "error");
+            return;
+        }
+
+        // ดึงวันที่จากตัวกรอง (เอาเฉพาะวันเริ่มต้น) ถ้าไม่มีให้ใช้วันนี้
+        const startInput = document.getElementById('stats-start-date');
+        const now = new Date();
+        const absoluteTodayStr = new Date(Date.now() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        const reportDate = (startInput && startInput.value) ? startInput.value : absoluteTodayStr;
+
+        // ฟิลเตอร์ข้อมูลเฉพาะวันที่เลือก
+        const dailyData = db_content.filter(q => (q.bookingDate || q.timestamp.split('T')[0]) === reportDate);
+        
+        // แยกประเภทสถานะ
+        const completedPaid = dailyData.filter(q => q.status === 'Completed' && q.isPaid);
+        const cancelled = dailyData.filter(q => q.status === 'Cancelled' || q.status === 'Delete'); // รวมลบ/ยกเลิก
+
+        // คำนวณยอดและสร้างตาราง
+        let totalRev = 0;
+        let tbodyHtml = '';
+        
+        // เรียงตามเวลา
+        completedPaid.sort((a,b) => {
+            const timeA = a.bookingTime || a.timestamp.split('T')[1];
+            const timeB = b.bookingTime || b.timestamp.split('T')[1];
+            return timeA.localeCompare(timeB);
+        });
+
+        completedPaid.forEach(q => {
+            let price = q.actualPrice !== undefined ? q.actualPrice : (q.course && q.course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"]);
+            totalRev += price;
+            
+            const timeStr = q.bookingTime || q.timestamp.split('T')[1].slice(0,5);
+            
+            tbodyHtml += `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-3 whitespace-nowrap">${timeStr}</td>
+                    <td class="p-3 font-mono font-bold">${q.id}</td>
+                    <td class="p-3">${q.nickname} ${q.orderType === 'booking' ? '📅' : '🚶'}</td>
+                    <td class="p-3">${q.phone || '-'}</td>
+                    <td class="p-3">${q.course}</td>
+                    <td class="p-3 text-right font-bold text-[#15803D]">฿${price.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+
+        // อัปเดตข้อมูลลง UI
+        document.getElementById('report-date-display').innerText = reportDate;
+        document.getElementById('report-total-rev').innerText = `฿${totalRev.toLocaleString()}`;
+        document.getElementById('report-total-cust').innerText = completedPaid.length;
+        document.getElementById('report-total-cancel').innerText = cancelled.length;
+        document.getElementById('report-gen-time').innerText = new Date().toLocaleString('th-TH');
+        
+        const tbodyEl = document.getElementById('report-tbody');
+        if(completedPaid.length > 0) {
+            tbodyEl.innerHTML = tbodyHtml;
+        } else {
+            tbodyEl.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500 font-medium">ไม่มีรายการที่ชำระเงินสำเร็จในวันที่เลือก</td></tr>`;
+        }
+
+        // แสดง Modal
+        document.getElementById('daily-report-modal').classList.remove('hidden-elm');
+    }
+
+    function closeDailyReport() {
+        document.getElementById('daily-report-modal').classList.add('hidden-elm');
+    }
+
+    // --- FEATURE 2: EDIT MODAL LOGIC ---
+    function openEditModal(id) {
+        const q = db_content.find(i => i.id === id);
+        if(!q) return;
+        
+        document.getElementById('edit-id').value = q.id;
+        document.getElementById('edit-nickname').value = q.nickname || '';
+        document.getElementById('edit-phone').value = q.phone || '';
+        document.getElementById('edit-date').value = q.bookingDate || q.timestamp.split('T')[0];
+        document.getElementById('edit-time').value = q.bookingTime || '';
+        document.getElementById('edit-course').value = q.course || '60 min';
+        
+        // ดึงราคาจริงมาโชว์ ถ้าไม่มีให้ดึงราคาเต็ม
+        const defaultPrice = (q.course && q.course.includes('90')) ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"];
+        document.getElementById('edit-price').value = q.actualPrice !== undefined ? q.actualPrice : defaultPrice;
+        
+        document.getElementById('edit-note').value = q.internalNote || '';
+        
+        document.getElementById('edit-modal').classList.remove('hidden-elm');
+    }
+    
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden-elm');
+    }
+    
+    async function saveEditQueue() {
+        const id = document.getElementById('edit-id').value;
+        const itemIndex = db_content.findIndex(i => i.id === id);
+        if(itemIndex > -1) {
+            db_content[itemIndex].nickname = document.getElementById('edit-nickname').value;
+            db_content[itemIndex].phone = document.getElementById('edit-phone').value;
+            db_content[itemIndex].bookingDate = document.getElementById('edit-date').value;
+            db_content[itemIndex].bookingTime = document.getElementById('edit-time').value;
+            db_content[itemIndex].course = document.getElementById('edit-course').value;
+            
+            // เซฟค่า "ยอดจ่ายจริง" ลงระบบ
+            const parsedPrice = parseFloat(document.getElementById('edit-price').value);
+            db_content[itemIndex].actualPrice = isNaN(parsedPrice) ? 0 : parsedPrice;
+            
+            db_content[itemIndex].internalNote = document.getElementById('edit-note').value;
+            
+            closeEditModal();
+            renderUI(); // Optimistic
+            
+            if (await saveToGithub(db_content)) {
+                showToast('แก้ไขข้อมูลสำเร็จ (Updated)', 'success');
+            } else {
+                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                refreshData();
+            }
+        }
+    }
+
+    // --- FEATURE 5: TIMELINE VIEW ---
+    function renderTimeline() {
+        const dateInput = document.getElementById('timeline-date-filter');
+        if(!dateInput) return;
+        
+        const filterDate = dateInput.value;
+        const container1 = document.getElementById('timeline-room-1');
+        const container2 = document.getElementById('timeline-room-2');
+        if(!container1 || !container2) return;
+        
+        container1.innerHTML = '';
+        container2.innerHTML = '';
+        
+        const shopOpenMins = 10 * 60; // 10:00 = 600
+        const shopCloseMins = 20 * 60; // 20:00 = 1200
+        const totalMins = shopCloseMins - shopOpenMins;
+
+        // Render Axis Time markers
+        const axis = document.querySelector('.timeline-axis');
+        if(axis && axis.childElementCount === 0) {
+            let axisHtml = '';
+            for(let h=10; h<=20; h+=2) {
+                const posPercent = ((h*60 - shopOpenMins) / totalMins) * 100;
+                axisHtml += `<div style="position:absolute; left:calc(60px + ${posPercent}%); border-left:1px solid #D4C4B7; height:100%; padding-left:4px; font-size:10px; color:#847568;">${h}:00</div>`;
+            }
+            axis.innerHTML = axisHtml;
+        }
+
+        // Get slots for specific date
+        let slots = getOccupiedSlots(filterDate);
+        
+        // Sort by start time
+        slots.sort((a,b) => a.start - b.start);
+        
+        let r1End = 0, r2End = 0;
+        
+        slots.forEach(slot => {
+            // Ensure bounds within shop hours
+            let renderStart = Math.max(shopOpenMins, slot.start);
+            let renderEnd = Math.min(shopCloseMins, slot.end);
+            if(renderStart >= renderEnd) return; // Out of bounds
+
+            const leftPercent = ((renderStart - shopOpenMins) / totalMins) * 100;
+            const widthPercent = ((renderEnd - renderStart) / totalMins) * 100;
+            
+            // Assign Room logic
+            let targetRoom = 1;
+            if(slot.start >= r1End) {
+                targetRoom = 1;
+                r1End = slot.end;
+            } else if (slot.start >= r2End) {
+                targetRoom = 2;
+                r2End = slot.end;
+            } else {
+                targetRoom = 2;
+                r2End = slot.end;
+            }
+
+            const blockHtml = `
+                <div class="timeline-block bg-gradient-to-r from-[#8C7462] to-[#705C4D]" 
+                     style="left: ${leftPercent}%; width: ${widthPercent}%;"
+                     title="${slot.nickname} | ${minutesToTime(slot.start)} - ${minutesToTime(slot.end)}">
+                    <span class="font-bold">${slot.id}</span>
+                    <span class="opacity-80">${slot.nickname}</span>
+                </div>
+            `;
+            
+            if(targetRoom === 1) container1.innerHTML += blockHtml;
+            else container2.innerHTML += blockHtml;
+        });
     }
 
     // --- UI RENDER FUNCTIONS ---
     function createAdminCard(q, isServing = false) {
         const isCompleted = q.status === 'Completed';
-        const isBooking = q.orderType === 'booking';
+        const isPending = q.status === 'Pending';
+        const isCancelled = q.status === 'Cancelled';
         
         let badgeClass, badgeText;
         if (isServing) {
@@ -974,17 +2012,26 @@
         } else if (isCompleted) {
             badgeClass = 'bg-gray-200 text-gray-600 border border-gray-300';
             badgeText = 'Completed';
+        } else if (isCancelled) {
+            badgeClass = 'bg-red-50 text-red-600 border border-red-200';
+            badgeText = 'Cancelled';
+        } else if (isPending) {
+            badgeClass = 'status-pending';
+            badgeText = 'Pending';
         } else {
-            badgeClass = isBooking ? 'bg-orange-500/10 text-orange-600 border border-orange-500/30' : 'bg-yellow-500/10 text-yellow-700 border border-yellow-500/30';
-            badgeText = isBooking ? 'Booking' : 'Walk-in';
+            badgeClass = 'bg-yellow-500/10 text-yellow-700 border border-yellow-500/30';
+            badgeText = 'Waiting';
         }
         
-        const timeDisplay = isBooking ? `📅 ${q.bookingDate || ''} | ⏰ ${q.bookingTime || '??:??'}` : `🕒 Walk-in (${q.timestamp.split('T')[1].slice(0,5)})`;
-        const timeColor = isBooking ? 'text-orange-600' : 'text-[#847568]';
+        const timeDisplay = `📅 ${q.bookingDate || ''} | ⏰ ${q.bookingTime || '??:??'}`;
+        const timeColor = isPending ? 'text-[#2563EB]' : (isCancelled ? 'text-red-500' : 'text-orange-600');
 
         const paidText = q.isPaid ? '✅ Paid' : '⏳ Unpaid';
         const paidBorderClass = q.isPaid ? 'border-[#15803D]/50 bg-[#15803D]/10' : 'border-[#D4C4B7] bg-white/50';
         const paidTextClass = q.isPaid ? 'text-[#15803D] font-bold' : 'text-[#847568] font-medium';
+        
+        // แสดงยอดเงินใน Card
+        const displayPrice = q.actualPrice !== undefined ? q.actualPrice : (q.course && q.course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"]);
 
         let timerUI = '';
         if (isServing) {
@@ -1006,15 +2053,37 @@
             }
         }
 
+        let actionBtns = '';
+        if (isPending) {
+            actionBtns = `
+                <button onclick="updateStatus('${q.id}', 'Waiting')" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">✅ Confirm</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-red-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">❌ Reject</button>
+            `;
+        } else if (q.status === 'Waiting') {
+             actionBtns = `
+                <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Cancel</button>
+            `;
+        } else if (q.status === 'Serving') {
+            actionBtns = `
+                <button onclick="updateStatus('${q.id}', 'Done')" class="bg-[#4A3B32] hover:bg-[#2c231e] px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Cancel</button>
+            `;
+        }
+
         return `
-        <div class="bg-white rounded-2xl shadow-sm border border-[#D4C4B7] overflow-hidden mb-4 animate-slide-in ${isCompleted ? 'opacity-70' : ''}">
+        <div class="bg-white rounded-2xl shadow-sm border ${isPending ? 'border-[#2563EB]/50' : 'border-[#D4C4B7]'} overflow-hidden mb-4 animate-slide-in ${isCompleted || isCancelled ? 'opacity-70 grayscale-[30%]' : ''}">
             <!-- Header Ticket -->
-            <div class="${isServing ? 'bg-[#8C7462]/10' : 'bg-[#F4EFE6]'} px-5 py-3 flex justify-between items-center border-b border-[#D4C4B7]">
+            <div class="${isServing ? 'bg-[#8C7462]/10' : (isPending ? 'bg-[#2563EB]/5' : '#F4EFE6')} px-5 py-3 flex justify-between items-center border-b ${isPending ? 'border-[#2563EB]/30' : 'border-[#D4C4B7]'}">
                 <div class="flex items-center gap-3">
                     <span class="bg-white px-3 py-1 rounded-lg text-[#4A3B32] font-mono font-bold border border-[#D4C4B7] shadow-sm">${q.id}</span>
                     <div>
-                        <div class="font-bold text-[#4A3B32]">${q.nickname} <span class="text-xs text-[#847568] font-normal">(${q.gender})</span></div>
-                        <div class="text-[10px] font-medium ${timeColor}">${timeDisplay}</div>
+                        <div class="font-bold text-[#4A3B32] flex items-center gap-2">
+                            ${q.nickname} 
+                            <span class="text-xs text-[#847568] font-normal">(${q.gender} | 📞 ${q.phone || '-'})</span>
+                            ${!isCompleted && !isCancelled ? `<button onclick="openEditModal('${q.id}')" class="text-[10px] bg-white/60 hover:bg-white border border-[#D4C4B7] px-2 py-0.5 rounded shadow-sm text-[#8C7462]">✏️ Edit</button>` : ''}
+                        </div>
+                        <div class="text-[10px] font-medium ${timeColor}">${timeDisplay} <span class="text-[#847568]">(${q.orderType})</span></div>
                     </div>
                 </div>
                 <span class="status-badge ${badgeClass} shadow-sm">${badgeText}</span>
@@ -1024,6 +2093,7 @@
             <div class="p-5">
                 <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs text-[#5A4A3D]">
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Course</span><span class="text-[#4A3B32] font-bold">${q.course || '-'}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">ยอดชำระ (Price)</span><span class="text-[#15803D] font-bold">฿${displayPrice.toLocaleString()}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Water</span><span class="text-[#4A3B32] font-bold">${q.waterTemp || '-'}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Scent</span><span class="text-[#4A3B32] font-bold">${q.oil || '-'}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Shampoo</span><span class="text-[#4A3B32] font-bold">${q.shampoo || '-'}</span></div>
@@ -1032,21 +2102,28 @@
                 </div>
                 ${q.caution ? `<div class="mt-3 pt-3 border-t border-dashed border-[#D4C4B7] text-red-600 font-medium text-xs">⚠️ Caution: ${q.caution}</div>` : ''}
                 
+                ${q.internalNote ? `
+                <div class="mt-3 bg-[#FFFDF9] p-3 rounded-xl border border-[#8C7462]/30 text-xs">
+                    <div class="font-bold text-[#8C7462] mb-1">🔒 Internal Note:</div>
+                    <div class="text-[#4A3B32] whitespace-pre-wrap">${q.internalNote}</div>
+                </div>` : ''}
+                
                 ${timerUI}
 
                 <!-- Footer Ticket (Actions) -->
-                <div class="flex flex-wrap justify-between items-center mt-5 pt-4 border-t border-[#D4C4B7] gap-2">
-                    <label class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border ${paidBorderClass} transition-all hover:bg-[#F4EFE6]">
-                        <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer">
-                        <span class="text-xs ${paidTextClass}">${paidText}</span>
-                    </label>
-                    <div class="flex gap-2 items-center">
-                        ${q.status === 'Waiting' ? `
-                            <button onclick="skipQueue('${q.id}')" class="bg-white text-amber-600 hover:bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">🚀 Skip</button>
-                            <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
-                        ` : ''}
-                        ${q.status === 'Serving' ? `<button onclick="updateStatus('${q.id}', 'Done')" class="bg-[#4A3B32] hover:bg-[#2c231e] px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>` : ''}
-                        <button onclick="updateStatus('${q.id}', 'Delete')" class="bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">Del</button>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-5 pt-4 border-t ${isPending ? 'border-[#2563EB]/30' : 'border-[#D4C4B7]'} gap-3">
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <label class="flex items-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border ${q.isDepositPaid ? 'border-blue-500/50 bg-blue-50' : 'border-[#D4C4B7] bg-white/50'} transition-all hover:bg-[#F4EFE6] flex-1 sm:flex-none justify-center">
+                            <input type="checkbox" onchange="toggleDeposit('${q.id}', this.checked)" ${q.isDepositPaid ? 'checked' : ''} class="w-4 h-4 accent-blue-600 rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
+                            <span class="text-xs ${q.isDepositPaid ? 'text-blue-700 font-bold' : 'text-[#847568] font-medium'}">${q.isDepositPaid ? '💸 มัดจำแล้ว' : 'รอจ่ายมัดจำ'}</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border ${paidBorderClass} transition-all hover:bg-[#F4EFE6] flex-1 sm:flex-none justify-center">
+                            <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
+                            <span class="text-xs ${paidTextClass}">${paidText}</span>
+                        </label>
+                    </div>
+                    <div class="flex gap-2 items-center w-full sm:w-auto justify-end">
+                        ${actionBtns}
                     </div>
                 </div>
             </div>
@@ -1054,185 +2131,157 @@
     }
 
     function renderUI() {
-        // Calculate Stats immediately
         calculateStats();
 
-        const serving = db_content.find(i => i.status === 'Serving');
-        const waiting = db_content.filter(i => i.status === 'Waiting');
+        const servings = db_content.filter(i => i.status === 'Serving');
+        const waitings = db_content.filter(i => i.status === 'Waiting');
+        const pendings = db_content.filter(i => i.status === 'Pending');
         
-        // กรอง "Today Done" โดยเทียบจากวันที่ปัจจุบัน
-        const todayStr = new Date().toISOString().split('T')[0];
-        const completed = db_content.filter(i => i.status === 'Completed' && i.timestamp.startsWith(todayStr));
+        // FEATURE 1: Sound alert for new pending requests in Admin view
+        if (activePage === 'admin') {
+            const currentPendingCount = pendings.length;
+            if (currentPendingCount > lastPendingCount) {
+                const adminAudio = document.getElementById('admin-notify-sound');
+                if(adminAudio) {
+                    adminAudio.currentTime = 0;
+                    adminAudio.play().catch(e => {});
+                }
+            }
+            lastPendingCount = currentPendingCount;
+        }
 
-        const waitingWalkin = waiting.filter(i => i.orderType !== 'booking'); 
-        const waitingBooking = waiting.filter(i => i.orderType === 'booking');
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        // รวมทั้ง Completed และ Cancelled ของวันนี้ไว้ดูในแท็บ Today's History
+        const todayHistory = db_content.filter(i => (i.status === 'Completed' || i.status === 'Cancelled') && ((i.bookingDate || i.timestamp.split('T')[0]) === todayStr));
+
+        const waitingWalkin = db_content.filter(i => i.orderType !== 'booking' && (i.status === 'Pending' || i.status === 'Waiting' || i.status === 'Serving')); 
+        const waitingBooking = db_content.filter(i => i.orderType === 'booking' && (i.status === 'Pending' || i.status === 'Waiting' || i.status === 'Serving'));
+
+        const myQueue = db_content.find(q => q.id === myQueueId);
 
         // Customer UI
         const custQ = document.getElementById('cust-display-queue');
         const custN = document.getElementById('cust-display-name');
-        if(custQ) custQ.innerText = serving ? serving.id : '-';
-        if(custN) custN.innerText = serving ? serving.nickname : 'No queue at the moment';
+        
+        if(custQ) custQ.innerText = servings.length > 0 ? servings[0].id + (servings.length>1?'...':'') : '-';
+        if(custN) custN.innerText = servings.length > 0 ? servings.map(s=>s.nickname).join(', ') : 'No queue at the moment';
 
         const custWaitingList = document.getElementById('cust-waiting-list');
         if(custWaitingList) {
-            custWaitingList.innerHTML = waiting.length ? '' : `<div class="text-[#847568] text-center py-6 bg-white/60 rounded-2xl border border-[#D4C4B7]">No waiting queue...</div>`;
-            waiting.forEach(q => {
+            const allWaiting = [...pendings, ...waitings];
+            custWaitingList.innerHTML = allWaiting.length ? '' : `<div class="text-[#847568] text-center py-6 bg-white/60 rounded-2xl border border-[#D4C4B7]">No waiting queue...</div>`;
+            allWaiting.forEach(q => {
                 const isMe = q.id === myQueueId;
-                const isBook = q.orderType === 'booking';
+                const isPending = q.status === 'Pending';
                 custWaitingList.innerHTML += `
                     <div class="flex justify-between items-center p-4 rounded-2xl animate-slide-in border shadow-sm ${isMe ? 'bg-[#8C7462]/10 border-[#8C7462]' : 'bg-white/80 border-[#D4C4B7]'}">
                         <div class="flex items-center gap-4">
                             <div class="font-mono text-2xl font-bold ${isMe ? 'text-[#8C7462]' : 'text-[#4A3B32]'}">${q.id}</div>
                             <div>
                                 <div class="text-[#4A3B32] font-bold text-sm">${q.nickname} ${isMe ? '(You)' : ''}</div>
-                                ${isBook ? `<div class="text-orange-600 text-[10px] font-bold">Booking: ${q.bookingTime}</div>` : `<div class="text-[#847568] text-[10px]">Walk-in</div>`}
+                                <div class="text-orange-600 text-[10px] font-bold">${q.bookingTime}</div>
                             </div>
                         </div>
-                        <span class="status-badge ${isBook ? 'bg-orange-500/10 text-orange-600 border-orange-500/30' : 'status-waiting'}">${isBook ? 'Booking' : 'Waiting'}</span>
+                        <span class="status-badge ${isPending ? 'status-pending' : 'status-waiting'}">${isPending ? 'Pending' : 'Waiting'}</span>
                     </div>`;
             });
         }
 
         // Admin View Updates
         if (activePage === 'admin') {
-            document.getElementById('admin-display-queue').innerText = serving ? serving.id : '-';
-            document.getElementById('admin-display-name').innerText = serving ? serving.nickname : 'No Serving';
-            document.getElementById('count-waiting').innerText = waiting.length;
-            
-            // Fix count-serving error possibility
+            const adminQueueEl = document.getElementById('admin-display-queue');
+            const adminNameEl = document.getElementById('admin-display-name');
+            const countWaitingEl = document.getElementById('count-waiting');
+            const countPendingEl = document.getElementById('count-pending');
             const countServingEl = document.getElementById('count-serving');
-            if(countServingEl) countServingEl.innerText = serving ? 1 : 0;
+            const countTotalEl = document.getElementById('count-total');
+            const badgeWalkinEl = document.getElementById('badge-walkin');
+            const badgeBookingEl = document.getElementById('badge-booking');
+            const badgeTodayEl = document.getElementById('badge-today');
             
-            document.getElementById('badge-walkin').innerText = waitingWalkin.length;
-            document.getElementById('badge-booking').innerText = waitingBooking.length;
-            document.getElementById('badge-today').innerText = completed.length;
+            if(adminQueueEl) adminQueueEl.innerText = servings.length > 0 ? servings.length + '/2 Rooms' : '-';
+            if(adminNameEl) adminNameEl.innerText = servings.length > 0 ? servings.map(s=>s.id).join(', ') : 'No Serving';
+            if(countWaitingEl) countWaitingEl.innerText = waitings.length;
+            if(countPendingEl) countPendingEl.innerText = pendings.length;
+            if(countServingEl) countServingEl.innerText = servings.length;
+            if(countTotalEl) countTotalEl.innerText = db_content.length;
+            if(badgeWalkinEl) badgeWalkinEl.innerText = waitingWalkin.length;
+            if(badgeBookingEl) badgeBookingEl.innerText = waitingBooking.length;
+            if(badgeTodayEl) badgeTodayEl.innerText = todayHistory.length;
+
+            // Badges for pending
+            const pendingWalkin = waitingWalkin.filter(q => q.status === 'Pending').length;
+            const pendingBooking = waitingBooking.filter(q => q.status === 'Pending').length;
+            
+            const bw = document.getElementById('badge-walkin-pending');
+            if(bw) { bw.innerText = pendingWalkin; bw.className = pendingWalkin > 0 ? 'notify-badge' : 'hidden-elm'; }
+            
+            const bb = document.getElementById('badge-booking-pending');
+            if(bb) { bb.innerText = pendingBooking; bb.className = pendingBooking > 0 ? 'notify-badge' : 'hidden-elm'; }
 
             const walkinListEl = document.getElementById('admin-walkin-list');
-            walkinListEl.innerHTML = '';
-            
-            if(serving && serving.orderType !== 'booking') {
-                 walkinListEl.innerHTML += createAdminCard(serving, true);
-            }
-            if(!waitingWalkin.length && (!serving || serving.orderType === 'booking')) {
-                walkinListEl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีคิว Walk-in</div>';
-            } else {
-                waitingWalkin.forEach(q => walkinListEl.innerHTML += createAdminCard(q, false));
+            if(walkinListEl) {
+                walkinListEl.innerHTML = '';
+                
+                if(waitingWalkin.length === 0) {
+                    walkinListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Walk-in Queues</div>';
+                } else {
+                    waitingWalkin.sort((a,b) => {
+                        const weight = {'Serving':1, 'Pending':2, 'Waiting':3};
+                        return weight[a.status] - weight[b.status];
+                    }).forEach(q => walkinListEl.innerHTML += createAdminCard(q, q.status==='Serving'));
+                }
             }
 
             const bookingListEl = document.getElementById('admin-booking-list');
-            bookingListEl.innerHTML = '';
-            if(serving && serving.orderType === 'booking') {
-                 bookingListEl.innerHTML += createAdminCard(serving, true);
-            }
-            const sortedBookings = waitingBooking.sort((a,b) => {
-                if(a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
-                return a.bookingTime.localeCompare(b.bookingTime);
-            });
-            if(!sortedBookings.length && (!serving || serving.orderType !== 'booking')) {
-                bookingListEl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีรายการ Booking</div>';
-            } else {
-                sortedBookings.forEach(q => bookingListEl.innerHTML += createAdminCard(q, false));
+            if(bookingListEl) {
+                bookingListEl.innerHTML = '';
+                
+                if(waitingBooking.length === 0) {
+                    bookingListEl.innerHTML = '<div class="text-[#847568] text-center py-8">No Booking Queues</div>';
+                } else {
+                    waitingBooking.sort((a,b) => {
+                        const weight = {'Serving':1, 'Pending':2, 'Waiting':3};
+                        if (weight[a.status] !== weight[b.status]) return weight[a.status] - weight[b.status];
+                        if (a.bookingDate !== b.bookingDate) return (a.bookingDate || '').localeCompare(b.bookingDate || '');
+                        return (a.bookingTime || '').localeCompare(b.bookingTime || '');
+                    }).forEach(q => bookingListEl.innerHTML += createAdminCard(q, q.status==='Serving'));
+                }
             }
 
-            const tl = document.getElementById('admin-today-list'); tl.innerHTML = '';
-            if(completed.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">ไม่มีประวัติคิววันนี้</div>';
-            else completed.slice().reverse().forEach(q => tl.innerHTML += createAdminCard(q, false));
+            const tl = document.getElementById('admin-today-list');
+            if(tl) {
+                tl.innerHTML = '';
+                if(todayHistory.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">No queue history today</div>';
+                else todayHistory.slice().reverse().forEach(q => tl.innerHTML += createAdminCard(q, false));
+            }
+
+            // Render Timeline if active
+            if(activeAdminTab === 'timeline') {
+                renderTimeline();
+            }
         }
     }
 
-    // --- UI INTERACTION UTILS ---
-    function switchAdminTab(tab) {
-        activeAdminTab = tab;
-        const tabs = ['walkin', 'booking', 'today', 'stats'];
-        tabs.forEach(t => {
-            const btn = document.getElementById(`admin-tab-${t}`);
-            const list = document.getElementById(`admin-${t}-list`);
-            if(t === tab) {
-                btn.classList.add('active');
-                list.classList.remove('hidden-elm');
-            } else {
-                btn.classList.remove('active');
-                list.classList.add('hidden-elm');
-            }
-        });
-        
-        // Refresh Stats when clicking the tab
-        if(tab === 'stats') {
-            calculateStats();
-        }
-    }
-
-    function toggleSettings() { document.getElementById('settings-panel').classList.toggle('hidden-elm'); }
-    
-    function showPage(page) { 
-        activePage = page; 
-        document.getElementById('login-modal').classList[page==='admin'?'remove':'add']('hidden-elm'); 
-        if(page!=='admin') { 
-            document.getElementById('page-customer').classList.remove('hidden-elm'); 
-            document.getElementById('page-admin').classList.add('hidden-elm'); 
-            toggleNavStyle('customer'); 
-        } 
-    }
-    
     function checkLogin() { 
-        if(document.getElementById('admin-pass').value==='1234') { 
-            document.getElementById('login-modal').classList.add('hidden-elm'); 
-            document.getElementById('page-admin').classList.remove('hidden-elm'); 
-            document.getElementById('page-customer').classList.add('hidden-elm'); 
+        const passEl = document.getElementById('admin-pass');
+        const passVal = passEl ? passEl.value : '';
+        if(passVal === '1234') { 
+            const modal = document.getElementById('login-modal');
+            const pageAdmin = document.getElementById('page-admin');
+            const pageCust = document.getElementById('page-customer');
+            
+            if(modal) modal.classList.add('hidden-elm'); 
+            if(pageAdmin) pageAdmin.classList.remove('hidden-elm'); 
+            if(pageCust) pageCust.classList.add('hidden-elm'); 
+            
             toggleNavStyle('admin'); 
             renderUI(); 
-            document.getElementById('admin-pass').value = '';
+            if(passEl) passEl.value = '';
         } else {
-            showToast('รหัสผ่านไม่ถูกต้อง', 'error'); 
+            showToast('Incorrect Password', 'error'); 
         }
-    }
-
-    function toggleNavStyle(active) { 
-        const c = document.getElementById('nav-customer'), a = document.getElementById('nav-admin');
-        const activeClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-bold bg-[#8C7462] text-white shadow-md whitespace-nowrap';
-        const inactiveClass = 'px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium text-[#847568] hover:text-[#4A3B32] whitespace-nowrap';
-        c.className = active === 'customer' ? activeClass : inactiveClass;
-        a.className = active === 'admin' ? activeClass : inactiveClass;
-    }
-
-    function switchCustomerView(view) {
-        const f = document.getElementById('customer-form-view'), q = document.getElementById('customer-queue-view');
-        const bf = document.getElementById('btn-view-form'), bq = document.getElementById('btn-view-queue');
-        const active = 'flex-1 py-3 rounded-2xl font-bold bg-white text-[#8C7462] shadow-lg border border-[#D4C4B7]/50 scale-105 text-sm md:text-base transition-all';
-        const inactive = 'flex-1 py-3 rounded-2xl font-bold bg-white/40 text-[#847568] border border-transparent text-sm md:text-base transition-all';
-        if(view==='form') { f.classList.remove('hidden-elm'); q.classList.add('hidden-elm'); bf.className=active; bq.className=inactive; }
-        else { q.classList.remove('hidden-elm'); f.classList.add('hidden-elm'); bq.className=active; bf.className=inactive; refreshData(); }
-    }
-
-    function switchFormTab(type) {
-        document.getElementById('form-order-type').value = type;
-        document.getElementById('booking-section').className = type === 'booking' ? 'mt-6 animate-slide-in' : 'hidden-elm';
-        document.getElementById('tab-walkin').className = type==='walkin' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
-        document.getElementById('tab-booking').className = type==='booking' ? 'flex-1 py-3 rounded-xl font-bold text-sm transition-all tab-btn active' : 'flex-1 py-3 rounded-xl font-medium text-sm transition-all tab-btn';
-        if(type === 'booking') renderTimeSlots();
-    }
-
-    function updateStatusIcon(state, code='') { 
-        const dot = document.getElementById('status-dot');
-        const text = document.getElementById('status-text');
-        if(!dot || !text) return;
-        if(state === 'error') {
-            dot.className = 'w-2 h-2 rounded-full bg-red-500';
-            text.innerText = `Offline (${code})`;
-            text.className = 'text-[10px] text-red-500 font-bold uppercase tracking-widest';
-        } else {
-            dot.className = 'w-2 h-2 rounded-full bg-green-500 live-dot';
-            text.innerText = 'Live System';
-            text.className = 'text-[10px] text-green-600 font-bold uppercase tracking-widest';
-        }
-    }
-
-    function showToast(m, t) { 
-        const c = document.getElementById('toast-container'), el = document.createElement('div'); 
-        el.className = `animate-slide-in px-6 py-4 rounded-2xl text-white text-sm font-bold shadow-xl pointer-events-auto border border-white/20 ${t==='success'?'bg-[#15803D]/95':'bg-red-600/95'}`; 
-        el.innerText = m; 
-        c.appendChild(el); 
-        setTimeout(() => el.remove(), 4000); 
     }
 
   </script>
