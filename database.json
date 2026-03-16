@@ -125,7 +125,7 @@
     "status": "Waiting",
     "timestamp": "2026-03-16T04:59:30.682Z",
     "isPaid": false,
-    "isDepositPaid": false,
+    "isDepositPaid": true,
     "orderType": "walkin",
     "lineUserId": "",
     "nickname": "เชน",
