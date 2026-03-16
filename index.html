@@ -414,8 +414,8 @@
                     <button type="button" onclick="switchAdminTab('timeline')" id="admin-tab-timeline" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2 relative">
                         ⏰ Timeline
                     </button>
-                    <button type="button" onclick="switchAdminTab('today')" id="admin-tab-today" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
-                        ✅ Today's History
+                    <button type="button" onclick="switchAdminTab('history')" id="admin-tab-history" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
+                        ✅ ประวัติ (History)
                     </button>
                     <button type="button" onclick="switchAdminTab('stats')" id="admin-tab-stats" class="flex-1 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all tab-btn whitespace-nowrap px-2">
                         📊 Dashboard
@@ -425,7 +425,21 @@
                 <!-- Tab Content -->
                 <div id="admin-walkin-list" class="space-y-4"></div>
                 <div id="admin-booking-list" class="space-y-4 hidden-elm"></div>
-                <div id="admin-today-list" class="space-y-4 hidden-elm"></div>
+                
+                <!-- HISTORY CONTENT -->
+                <div id="admin-history-list" class="space-y-4 hidden-elm">
+                    <div class="bg-white p-4 rounded-3xl border border-[#D4C4B7] shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                        <h3 class="text-[#4A3B32] font-bold text-sm sm:text-base flex items-center gap-2">
+                            <span>📅</span> ประวัติการเข้าใช้บริการ
+                        </h3>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <input type="date" id="history-start-date" class="glass-input flex-1 sm:w-auto h-10 py-1 text-sm bg-[#F4EFE6] border-[#D4C4B7] focus:border-[#8C7462]" onchange="renderUI()">
+                            <span class="text-[#847568] font-bold text-sm">ถึง</span>
+                            <input type="date" id="history-end-date" class="glass-input flex-1 sm:w-auto h-10 py-1 text-sm bg-[#F4EFE6] border-[#D4C4B7] focus:border-[#8C7462]" onchange="renderUI()">
+                        </div>
+                    </div>
+                    <div id="history-results" class="space-y-4"></div>
+                </div>
                 
                 <!-- TIMELINE CONTENT -->
                 <div id="admin-timeline-list" class="space-y-4 hidden-elm">
@@ -932,7 +946,7 @@
 
     function switchAdminTab(tab) {
         activeAdminTab = tab;
-        const tabs = ['walkin', 'booking', 'timeline', 'today', 'stats'];
+        const tabs = ['walkin', 'booking', 'timeline', 'history', 'stats'];
         tabs.forEach(t => {
             const btn = document.getElementById(`admin-tab-${t}`);
             const list = document.getElementById(`admin-${t}-list`);
@@ -963,6 +977,8 @@
         const today = new Date(Date.now() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
         const dateInput = document.getElementById('booking-date-input');
         const timelineFilter = document.getElementById('timeline-date-filter');
+        const historyStartFilter = document.getElementById('history-start-date');
+        const historyEndFilter = document.getElementById('history-end-date');
         const statsStartFilter = document.getElementById('stats-start-date');
         const statsEndFilter = document.getElementById('stats-end-date');
         
@@ -973,6 +989,9 @@
         if(timelineFilter) {
             timelineFilter.value = today;
         }
+        if(historyStartFilter) historyStartFilter.value = today;
+        if(historyEndFilter) historyEndFilter.value = today;
+        
         if(statsStartFilter) statsStartFilter.value = today;
         if(statsEndFilter) statsEndFilter.value = today;
 
@@ -2029,14 +2048,15 @@
         const isCompleted = q.status === 'Completed';
         const isPending = q.status === 'Pending';
         const isCancelled = q.status === 'Cancelled';
+        const isArchived = q.status === 'Archived';
         
         let badgeClass, badgeText;
         if (isServing) {
             badgeClass = 'bg-[#15803D]/10 text-[#15803D] border border-[#15803D]/30';
             badgeText = 'Serving';
-        } else if (isCompleted) {
+        } else if (isCompleted || isArchived) {
             badgeClass = 'bg-gray-200 text-gray-600 border border-gray-300';
-            badgeText = 'Completed';
+            badgeText = isArchived ? 'Archived' : 'Completed';
         } else if (isCancelled) {
             badgeClass = 'bg-red-50 text-red-600 border border-red-200';
             badgeText = 'Cancelled';
@@ -2099,7 +2119,7 @@
         }
 
         return `
-        <div class="bg-white rounded-2xl shadow-sm border ${isPending ? 'border-[#2563EB]/50' : 'border-[#D4C4B7]'} overflow-hidden mb-4 animate-slide-in ${isCompleted || isCancelled ? 'opacity-70 grayscale-[30%]' : ''}">
+        <div class="bg-white rounded-2xl shadow-sm border ${isPending ? 'border-[#2563EB]/50' : 'border-[#D4C4B7]'} overflow-hidden mb-4 animate-slide-in ${isCompleted || isCancelled || isArchived ? 'opacity-70 grayscale-[30%]' : ''}">
             <!-- Header Ticket -->
             <div class="${isServing ? 'bg-[#8C7462]/10' : (isPending ? 'bg-[#2563EB]/5' : '#F4EFE6')} px-5 py-3 flex justify-between items-center border-b ${isPending ? 'border-[#2563EB]/30' : 'border-[#D4C4B7]'}">
                 <div class="flex items-center gap-3">
@@ -2179,8 +2199,25 @@
 
         const todayStr = new Date().toISOString().split('T')[0];
         
-        // รวมทั้ง Completed และ Cancelled ของวันนี้ไว้ดูในแท็บ Today's History
-        const todayHistory = db_content.filter(i => (i.status === 'Completed' || i.status === 'Cancelled') && ((i.bookingDate || i.timestamp.split('T')[0]) === todayStr));
+        // ดึงวันที่จาก Date Picker ในหน้า History
+        const historyStartInput = document.getElementById('history-start-date');
+        const historyEndInput = document.getElementById('history-end-date');
+        let hStart = (historyStartInput && historyStartInput.value) ? historyStartInput.value : todayStr;
+        let hEnd = (historyEndInput && historyEndInput.value) ? historyEndInput.value : todayStr;
+
+        // สลับวันที่ถ้าเลือกวันเริ่มต้นมากกว่าวันสิ้นสุด
+        if (new Date(hStart) > new Date(hEnd)) {
+            const temp = hStart;
+            hStart = hEnd;
+            hEnd = temp;
+        }
+        
+        // ประวัติคิวตามช่วงวันที่เลือก (แสดง Completed, Cancelled, Archived)
+        const historyData = db_content.filter(i => {
+            if (!(i.status === 'Completed' || i.status === 'Cancelled' || i.status === 'Archived')) return false;
+            const qDateStr = i.bookingDate || i.timestamp.split('T')[0];
+            return qDateStr >= hStart && qDateStr <= hEnd;
+        });
 
         const waitingWalkin = db_content.filter(i => i.orderType !== 'booking' && (i.status === 'Pending' || i.status === 'Waiting' || i.status === 'Serving')); 
         const waitingBooking = db_content.filter(i => i.orderType === 'booking' && (i.status === 'Pending' || i.status === 'Waiting' || i.status === 'Serving'));
@@ -2221,21 +2258,11 @@
             const adminNameEl = document.getElementById('admin-display-name');
             const countWaitingEl = document.getElementById('count-waiting');
             const countPendingEl = document.getElementById('count-pending');
-            const countServingEl = document.getElementById('count-serving');
-            const countTotalEl = document.getElementById('count-total');
-            const badgeWalkinEl = document.getElementById('badge-walkin');
-            const badgeBookingEl = document.getElementById('badge-booking');
-            const badgeTodayEl = document.getElementById('badge-today');
             
             if(adminQueueEl) adminQueueEl.innerText = servings.length > 0 ? servings.length + '/2 Rooms' : '-';
             if(adminNameEl) adminNameEl.innerText = servings.length > 0 ? servings.map(s=>s.id).join(', ') : 'No Serving';
             if(countWaitingEl) countWaitingEl.innerText = waitings.length;
             if(countPendingEl) countPendingEl.innerText = pendings.length;
-            if(countServingEl) countServingEl.innerText = servings.length;
-            if(countTotalEl) countTotalEl.innerText = db_content.length;
-            if(badgeWalkinEl) badgeWalkinEl.innerText = waitingWalkin.length;
-            if(badgeBookingEl) badgeBookingEl.innerText = waitingBooking.length;
-            if(badgeTodayEl) badgeTodayEl.innerText = todayHistory.length;
 
             // Badges for pending
             const pendingWalkin = waitingWalkin.filter(q => q.status === 'Pending').length;
@@ -2277,11 +2304,12 @@
                 }
             }
 
-            const tl = document.getElementById('admin-today-list');
-            if(tl) {
-                tl.innerHTML = '';
-                if(todayHistory.length === 0) tl.innerHTML = '<div class="text-[#847568] text-center py-8">No queue history today</div>';
-                else todayHistory.slice().reverse().forEach(q => tl.innerHTML += createAdminCard(q, false));
+            const hl = document.getElementById('history-results');
+            if(hl) {
+                hl.innerHTML = '';
+                const rangeText = hStart === hEnd ? hStart : `${hStart} ถึง ${hEnd}`;
+                if(historyData.length === 0) hl.innerHTML = `<div class="text-[#847568] text-center py-8 bg-white/60 rounded-2xl border border-[#D4C4B7]">ไม่มีประวัติคิวในช่วงวันที่ ${rangeText}</div>`;
+                else historyData.slice().reverse().forEach(q => hl.innerHTML += createAdminCard(q, false));
             }
 
             // Render Timeline if active
