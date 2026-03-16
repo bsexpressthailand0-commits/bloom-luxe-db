@@ -253,23 +253,23 @@
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆 Levels of Massage</label>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆 Levels of Massage / ระดับการนวด</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Gentle" class="accent-[#8C7462]"><span class="text-xs">Gentle</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Medium" class="accent-[#8C7462]"><span class="text-xs">Medium</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Strong" class="accent-[#8C7462]"><span class="text-xs">Strong</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Gentle" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Gentle / เบา</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Medium" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Medium / กลาง</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="massagePressure" value="Strong" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Strong / หนัก</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆‍♀️ Level of Pressure Hair</label>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-3">💆‍♀️ Level of Pressure Hair / น้ำหนักมือตอนสระ</label>
                     <div class="flex gap-2 w-full">
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Gentle" class="accent-[#8C7462]"><span class="text-xs">Gentle</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Medium" class="accent-[#8C7462]"><span class="text-xs">Medium</span></label>
-                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Strong" class="accent-[#8C7462]"><span class="text-xs">Strong</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Gentle" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Gentle / เบา</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Medium" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Medium / กลาง</span></label>
+                        <label class="radio-box flex-1 justify-center"><input type="radio" name="headPressure" value="Strong" class="accent-[#8C7462]"><span class="text-[11px] sm:text-xs whitespace-nowrap">Strong / หนัก</span></label>
                     </div>
                  </div>
 
-                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-2">⚠️ Special Caution Areas</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin..."></textarea></div>
+                 <div class="w-full"><label class="block text-[#5A4A3D] font-medium text-sm mb-2">⚠️ Special Caution Areas / จุดที่ต้องระวังเป็นพิเศษ</label><textarea name="caution" rows="2" class="glass-input w-full" placeholder="e.g., Surgery wound, Sensitive skin (เช่น แผลผ่าตัด, ผิวแพ้ง่าย...)"></textarea></div>
             </div>
 
             <button type="submit" id="submit-btn" class="w-full py-4 rounded-xl font-bold text-white text-lg bg-gradient-to-r from-[#8C7462] to-[#705C4D] shadow-lg shadow-[#8C7462]/30 transition-all hover:scale-[1.02]">
@@ -371,19 +371,19 @@
                 <!-- Overview Stats -->
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
-                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Today's Revenue</div>
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">ยอดขายวันนี้</div>
                         <div class="text-2xl font-bold text-[#15803D]" id="stat-today-revenue">฿0</div>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
-                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Completed</div>
-                        <div class="text-2xl font-bold text-[#4A3B32]" id="stat-today-completed">0 <span class="text-xs text-[#847568] font-normal">Queues</span></div>
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">เสร็จสิ้น</div>
+                        <div class="text-2xl font-bold text-[#4A3B32]" id="stat-today-completed">0 <span class="text-xs text-[#847568] font-normal">คิว</span></div>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center relative overflow-hidden">
-                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Pending</div>
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">รอยืนยัน</div>
                         <div class="text-2xl font-bold text-[#2563EB]" id="count-pending">0</div>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-[#D4C4B7] shadow-sm flex flex-col justify-center">
-                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">Waiting</div>
+                        <div class="text-[10px] text-[#847568] font-bold uppercase tracking-wider mb-1">รอรับบริการ</div>
                         <div class="text-2xl font-bold text-[#D97706]" id="count-waiting">0</div>
                     </div>
                 </div>
@@ -1711,7 +1711,7 @@
         const elTR = document.getElementById('stat-today-revenue');
         const elTC = document.getElementById('stat-today-completed');
         if(elTR) elTR.innerText = "฿" + absoluteTodayRev.toLocaleString();
-        if(elTC) elTC.innerHTML = absoluteTodayCompletedCount + ' <span class="text-xs text-[#847568] font-normal">Queues</span>';
+        if(elTC) elTC.innerHTML = absoluteTodayCompletedCount + ' <span class="text-xs text-[#847568] font-normal">คิว</span>';
         
         // Update Labels dynamically
         const lblRange = document.getElementById('label-stat-range');
