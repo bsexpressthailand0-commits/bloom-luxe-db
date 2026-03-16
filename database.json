@@ -190,7 +190,7 @@
   },
   {
     "id": "Q-010",
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-03-16T07:06:04.375Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -208,7 +208,8 @@
     "shampoo": "Choose at shop",
     "massagePressure": "Medium",
     "headPressure": "Medium",
-    "caution": ""
+    "caution": "",
+    "serviceStartTime": null
   },
   {
     "id": "SYS_SETTINGS",
