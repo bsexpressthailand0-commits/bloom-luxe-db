@@ -566,17 +566,21 @@
                         <input type="time" id="edit-time" class="glass-input bg-white text-sm py-2">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-[#847568] mb-1">Course</label>
-                        <select id="edit-course" class="glass-input bg-white text-sm py-2">
+                        <select id="edit-course" class="glass-input bg-white text-sm py-2" onchange="autoCalcPrice()">
                             <option value="60 min">60 min</option>
                             <option value="90 min">90 min</option>
                         </select>
                     </div>
                     <div>
+                        <label class="block text-xs font-bold text-[#847568] mb-1">ส่วนลด</label>
+                        <input type="text" id="edit-discount" class="glass-input bg-white text-sm py-2" placeholder="เช่น 10% หรือ 50" oninput="autoCalcPrice()">
+                    </div>
+                    <div>
                         <label class="block text-xs font-bold text-[#847568] mb-1">ยอดจ่ายจริง (฿)</label>
-                        <input type="number" id="edit-price" class="glass-input bg-white text-sm py-2" placeholder="เช่น 531">
+                        <input type="number" id="edit-price" class="glass-input bg-white text-sm py-2 font-bold text-[#15803D]" placeholder="เช่น 531">
                     </div>
                 </div>
                 <div class="pt-2 border-t border-[#D4C4B7]">
@@ -1758,7 +1762,7 @@
             return;
         }
         
-        const headers = ["ID", "Status", "Date", "Time", "Type", "Name", "Phone", "Gender", "Course", "Water", "Oil", "Shampoo", "Massage", "Head", "Caution", "Deposit Paid", "Paid Full", "Actual Price (THB)", "Note"];
+        const headers = ["ID", "Status", "Date", "Time", "Type", "Name", "Phone", "Gender", "Course", "Water", "Oil", "Shampoo", "Massage", "Head", "Caution", "Deposit Paid", "Paid Full", "Discount", "Actual Price (THB)", "Note"];
         
         // 3. Map filtered data to CSV rows
         const csvRows = filteredData.map(q => {
@@ -1785,6 +1789,7 @@
                 `"${(q.caution || '').replace(/"/g, '""')}"`,
                 q.isDepositPaid ? 'Yes' : 'No', // new Deposit column
                 q.isPaid ? 'Yes' : 'No',
+                `"${q.discount || '-'}"`, // new Discount column
                 price,
                 `"${(q.internalNote || '').replace(/"/g, '""')}"`
             ];
@@ -1885,6 +1890,7 @@
         document.getElementById('edit-date').value = q.bookingDate || q.timestamp.split('T')[0];
         document.getElementById('edit-time').value = q.bookingTime || '';
         document.getElementById('edit-course').value = q.course || '60 min';
+        document.getElementById('edit-discount').value = q.discount || '';
         
         // ดึงราคาจริงมาโชว์ ถ้าไม่มีให้ดึงราคาเต็ม
         const defaultPrice = (q.course && q.course.includes('90')) ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"];
@@ -1899,6 +1905,24 @@
         document.getElementById('edit-modal').classList.add('hidden-elm');
     }
     
+    function autoCalcPrice() {
+        const course = document.getElementById('edit-course').value;
+        const basePrice = course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"];
+        const discountVal = document.getElementById('edit-discount').value.trim();
+        let finalPrice = basePrice;
+        
+        if (discountVal) {
+            if (discountVal.endsWith('%')) {
+                const percent = parseFloat(discountVal);
+                if (!isNaN(percent)) finalPrice = basePrice - (basePrice * percent / 100);
+            } else {
+                const amt = parseFloat(discountVal);
+                if (!isNaN(amt)) finalPrice = basePrice - amt;
+            }
+        }
+        document.getElementById('edit-price').value = Math.max(0, Math.round(finalPrice));
+    }
+
     async function saveEditQueue() {
         const id = document.getElementById('edit-id').value;
         const itemIndex = db_content.findIndex(i => i.id === id);
@@ -1908,6 +1932,7 @@
             db_content[itemIndex].bookingDate = document.getElementById('edit-date').value;
             db_content[itemIndex].bookingTime = document.getElementById('edit-time').value;
             db_content[itemIndex].course = document.getElementById('edit-course').value;
+            db_content[itemIndex].discount = document.getElementById('edit-discount').value.trim();
             
             // เซฟค่า "ยอดจ่ายจริง" ลงระบบ
             const parsedPrice = parseFloat(document.getElementById('edit-price').value);
@@ -2031,7 +2056,9 @@
         const paidTextClass = q.isPaid ? 'text-[#15803D] font-bold' : 'text-[#847568] font-medium';
         
         // แสดงยอดเงินใน Card
-        const displayPrice = q.actualPrice !== undefined ? q.actualPrice : (q.course && q.course.includes('90') ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"]);
+        const originalPrice = (q.course && q.course.includes('90')) ? SERVICE_PRICES["90 min"] : SERVICE_PRICES["60 min"];
+        const displayPrice = q.actualPrice !== undefined ? q.actualPrice : originalPrice;
+        const discountDisplay = q.discount ? ` <span class="text-rose-500 font-normal text-[10px] bg-rose-50 px-1 rounded">-ส่วนลด ${q.discount}</span>` : '';
 
         let timerUI = '';
         if (isServing) {
@@ -2093,7 +2120,7 @@
             <div class="p-5">
                 <div class="grid grid-cols-2 gap-y-3 gap-x-4 text-xs text-[#5A4A3D]">
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Course</span><span class="text-[#4A3B32] font-bold">${q.course || '-'}</span></div>
-                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">ยอดชำระ (Price)</span><span class="text-[#15803D] font-bold">฿${displayPrice.toLocaleString()}</span></div>
+                    <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">ยอดชำระ (Price)</span><span class="text-[#15803D] font-bold">฿${displayPrice.toLocaleString()}${discountDisplay}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Water</span><span class="text-[#4A3B32] font-bold">${q.waterTemp || '-'}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Scent</span><span class="text-[#4A3B32] font-bold">${q.oil || '-'}</span></div>
                     <div class="flex flex-col"><span class="text-[10px] text-[#847568] uppercase mb-0.5">Shampoo</span><span class="text-[#4A3B32] font-bold">${q.shampoo || '-'}</span></div>
