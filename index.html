@@ -723,8 +723,8 @@
         token_part_1: 'ghp_',  
         token_part_2: 'h6daIFVk1iI75xLCB6ENeLj9gP4aZC4CqLwM'
     };
-    const LIFF_ID = "2009265660-2ZsXyxi7"; 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycby4gi1s0ph2pPPHu423muiauix7XTsRizbpH2SuS5ggTTzET6t1mKxsAjCcVoVox6zf/exec";
+    const LIFF_ID = "2009162443-gCuBKaOD"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzyZ17QpAqQ8txQzxRZ_ZWLJZI-oDr6aiRw17KHYLd31OV_qY4XoAq-ZdwM1fHLKyxSvA/exec";
 
     // 💰 Pricing config (Default prices)
     const SERVICE_PRICES = {
@@ -980,8 +980,83 @@
         refreshData();
         setInterval(refreshData, 5000); 
         setInterval(updateTimers, 1000);
-        setInterval(checkAutoCancel, 30000); // [NEW] ตรวจสอบคิวที่เลยเวลา 15 นาที ทุกๆ 30 วินาที
+        setInterval(checkAutoCancel, 30000); // ตรวจสอบคิวที่เลยเวลา 15 นาที ทุกๆ 30 วินาที
     };
+
+    // --- [NEW] ฟังก์ชันสำหรับบันทึกการตั้งค่า Staff LINE IDs ---
+    async function saveSystemSettings() {
+        const ids = [];
+        for(let i=1; i<=4; i++) {
+            ids.push(document.getElementById(`staff-line-${i}`).value.trim());
+        }
+        store_settings.staffLineIds = ids;
+        if (await saveToGithub(db_content)) {
+            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
+        } else {
+            showToast('เกิดข้อผิดพลาดในการบันทึกตั้งค่า', 'error');
+        }
+    }
+
+    // --- [NEW] ฟังก์ชันส่งสรุปคิววันพรุ่งนี้ให้พนักงาน (Manual Notify) ---
+    async function notifyTomorrowQueues() {
+        if (!store_settings.staffLineIds || store_settings.staffLineIds.length === 0 || store_settings.staffLineIds.every(id => !id || id.length < 5)) {
+            showToast('⚠️ กรุณาตั้งค่า LINE ID พนักงานก่อน', 'error');
+            return;
+        }
+
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'กำลังส่ง...';
+        btn.disabled = true;
+
+        // หาวันที่ของพรุ่งนี้
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const y = tomorrow.getFullYear();
+        const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const d = String(tomorrow.getDate()).padStart(2, '0');
+        const tomorrowStr = `${y}-${m}-${d}`;
+
+        // ดึงเฉพาะคิวจอง (booking) ของพรุ่งนี้ ที่ยังไม่โดนยกเลิกหรือลบ
+        const tomorrowsQueues = db_content.filter(q => 
+            q.bookingDate === tomorrowStr && 
+            q.orderType === 'booking' &&
+            (q.status === 'Pending' || q.status === 'Waiting' || q.status === 'Serving' || q.status === 'Completed')
+        );
+
+        // เรียงตามเวลา
+        tomorrowsQueues.sort((a,b) => (a.bookingTime || '').localeCompare(b.bookingTime || ''));
+
+        let msg = `📅 สรุปคิวจองล่วงหน้าสำหรับพรุ่งนี้ (${tomorrowStr})\n\n`;
+
+        if (tomorrowsQueues.length === 0) {
+            msg += `ไม่มีคิวจองล่วงหน้าสำหรับพรุ่งนี้ค่ะ 🍃`;
+        } else {
+            msg += `มีคิวจองทั้งหมด ${tomorrowsQueues.length} คิว:\n`;
+            tomorrowsQueues.forEach((q, idx) => {
+                const depositStatus = q.isDepositPaid ? '[💸มัดจำแล้ว]' : '[รอชำระ]';
+                msg += `${idx + 1}. [${q.bookingTime}] ${q.nickname} (${q.course})\n   📞 ${q.phone || '-'} ${depositStatus}\n`;
+            });
+            msg += `\n✨ พนักงานเตรียมตัวรับลูกค้าด้วยนะคะ`;
+        }
+
+        let sentCount = 0;
+        for (const staffId of store_settings.staffLineIds) {
+            if (staffId && staffId.length > 5) {
+                await sendLineNotification(staffId, msg);
+                sentCount++;
+            }
+        }
+
+        if (sentCount > 0) {
+            showToast(`ส่งแจ้งเตือนคิวพรุ่งนี้ให้พนักงาน ${sentCount} คนแล้ว`, 'success');
+        } else {
+            showToast('เกิดข้อผิดพลาดในการส่งข้อความ', 'error');
+        }
+
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
 
     // --- [NEW] AUTO-CANCEL LOGIC ---
     async function checkAutoCancel() {
@@ -1166,81 +1241,6 @@
                 body: JSON.stringify({ userId: userId, message: message })
             });
         } catch (e) { console.error("Notify failed", e); }
-    }
-
-    // [NEW] ฟังก์ชันสำหรับบันทึกการตั้งค่า Staff LINE IDs
-    async function saveSystemSettings() {
-        const ids = [];
-        for(let i=1; i<=4; i++) {
-            ids.push(document.getElementById(`staff-line-${i}`).value.trim());
-        }
-        store_settings.staffLineIds = ids;
-        if (await saveToGithub(db_content)) {
-            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
-        } else {
-            showToast('เกิดข้อผิดพลาดในการบันทึกตั้งค่า', 'error');
-        }
-    }
-
-    // [NEW] ฟังก์ชันส่งสรุปคิววันพรุ่งนี้ให้พนักงาน
-    async function notifyTomorrowQueues() {
-        if (!store_settings.staffLineIds || store_settings.staffLineIds.length === 0 || store_settings.staffLineIds.every(id => !id || id.length < 5)) {
-            showToast('⚠️ กรุณาตั้งค่า LINE ID พนักงานก่อน', 'error');
-            return;
-        }
-
-        const btn = event.currentTarget;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = 'กำลังส่ง...';
-        btn.disabled = true;
-
-        // หาวันที่ของพรุ่งนี้
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const y = tomorrow.getFullYear();
-        const m = String(tomorrow.getMonth() + 1).padStart(2, '0');
-        const d = String(tomorrow.getDate()).padStart(2, '0');
-        const tomorrowStr = `${y}-${m}-${d}`;
-
-        // ดึงเฉพาะคิวจอง (booking) ของพรุ่งนี้ ที่ยังไม่โดนยกเลิกหรือลบ
-        const tomorrowsQueues = db_content.filter(q => 
-            q.bookingDate === tomorrowStr && 
-            q.orderType === 'booking' &&
-            (q.status === 'Pending' || q.status === 'Waiting' || q.status === 'Serving' || q.status === 'Completed')
-        );
-
-        // เรียงตามเวลา
-        tomorrowsQueues.sort((a,b) => (a.bookingTime || '').localeCompare(b.bookingTime || ''));
-
-        let msg = `📅 สรุปคิวจองล่วงหน้าสำหรับพรุ่งนี้ (${tomorrowStr})\n\n`;
-
-        if (tomorrowsQueues.length === 0) {
-            msg += `ไม่มีคิวจองล่วงหน้าสำหรับพรุ่งนี้ค่ะ 🍃`;
-        } else {
-            msg += `มีคิวจองทั้งหมด ${tomorrowsQueues.length} คิว:\n`;
-            tomorrowsQueues.forEach((q, idx) => {
-                const depositStatus = q.isDepositPaid ? '[💸มัดจำแล้ว]' : '[รอชำระ]';
-                msg += `${idx + 1}. [${q.bookingTime}] ${q.nickname} (${q.course})\n   📞 ${q.phone || '-'} ${depositStatus}\n`;
-            });
-            msg += `\n✨ พนักงานเตรียมตัวรับลูกค้าด้วยนะคะ`;
-        }
-
-        let sentCount = 0;
-        for (const staffId of store_settings.staffLineIds) {
-            if (staffId && staffId.length > 5) {
-                await sendLineNotification(staffId, msg);
-                sentCount++;
-            }
-        }
-
-        if (sentCount > 0) {
-            showToast(`ส่งแจ้งเตือนคิวพรุ่งนี้ให้พนักงาน ${sentCount} คนแล้ว`, 'success');
-        } else {
-            showToast('เกิดข้อผิดพลาดในการส่งข้อความ', 'error');
-        }
-
-        btn.innerHTML = originalText;
-        btn.disabled = false;
     }
 
     async function refreshData() {
