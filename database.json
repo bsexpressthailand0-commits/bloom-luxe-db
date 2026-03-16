@@ -140,5 +140,36 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": ""
+  },
+  {
+    "id": "Q-008",
+    "status": "Pending",
+    "timestamp": "2026-03-16T06:21:00.016Z",
+    "isPaid": false,
+    "isDepositPaid": false,
+    "actualPrice": 590,
+    "orderType": "walkin",
+    "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
+    "nickname": "เชน",
+    "phone": "0942623536",
+    "course": "60 min",
+    "bookingDate": "2026-03-16",
+    "bookingTime": "13:30",
+    "gender": "Male",
+    "waterTemp": "Cold",
+    "oil": "Choose at shop",
+    "shampoo": "Choose at shop",
+    "massagePressure": "Medium",
+    "headPressure": "Medium",
+    "caution": ""
+  },
+  {
+    "id": "SYS_SETTINGS",
+    "staffLineIds": [
+      "",
+      "",
+      "",
+      ""
+    ]
   }
 ]
