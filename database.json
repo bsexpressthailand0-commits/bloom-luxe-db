@@ -263,7 +263,7 @@
     "timestamp": "2026-03-16T07:26:59.617Z",
     "isPaid": false,
     "isDepositPaid": false,
-    "actualPrice": 590,
+    "actualPrice": 531,
     "orderType": "walkin",
     "lineUserId": "Uc0a46da4ae5eddc0fa16b3263c54e18e",
     "nickname": "เชน",
@@ -277,7 +277,9 @@
     "shampoo": "Choose at shop",
     "massagePressure": "Medium",
     "headPressure": "Medium",
-    "caution": ""
+    "caution": "",
+    "discount": "10%",
+    "internalNote": ""
   },
   {
     "id": "Q-014",
