@@ -328,7 +328,7 @@
   },
   {
     "id": "Q-016",
-    "status": "Serving",
+    "status": "Completed",
     "timestamp": "2026-03-30T07:03:55.975Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -346,7 +346,8 @@
     "shampoo": "Honey sunset",
     "massagePressure": "Medium",
     "headPressure": "Medium",
-    "caution": ""
+    "caution": "",
+    "serviceStartTime": null
   },
   {
     "id": "SYS_SETTINGS",
