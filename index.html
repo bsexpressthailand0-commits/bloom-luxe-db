@@ -1402,8 +1402,10 @@
     }
 
     // --- ADMIN ACTIONS & TIMER ---
-    async function updateStatus(id, newStatus) {
-        if(isSaving) return showToast('⏳ กำลังบันทึกข้อมูล กรุณารอสักครู่...', 'error');
+    async function updateStatus(id, newStatus, btnElement) {
+        if(isSaving) return showToast('⏳ ระบบกำลังทำงาน กรุณารอสักครู่...', 'error');
+        
+        setButtonLoading(btnElement, true); // แสดงปุ่มหมุนรอ
         
         let updatedDB;
         const item = db_content.find(i => i.id === id);
@@ -1415,23 +1417,18 @@
             return i; 
         }).filter(Boolean);
         
-        db_content = updatedDB;
-        renderUI(); // อัปเดตหน้าจอทันที (รวมถึงคำนวณยอดเงินใหม่ถ้าเป็น Done)
-        
+        // ส่งบันทึกขึ้น GitHub ก่อน
         if (await saveToGithub(updatedDB)) { 
+            db_content = updatedDB; // ถ้าเซฟผ่าน ค่อยอัปเดตข้อมูลในเครื่อง
+            renderUI(); // รีเฟรชหน้าจอ (ปุ่มหมุนจะหายไปเอง)
             showToast('อัปเดตสถานะสำเร็จ', 'success'); 
             
+            // (ระบบส่งแจ้งเตือน LINE)
             if (item && item.lineUserId) {
-                if (newStatus === 'Waiting') {
-                    const msg = `✅ ยืนยันการจองสำเร็จ! (${item.id})\n📅 วันที่: ${item.bookingDate}\n⏰ เวลา: ${item.bookingTime}\n📞 เบอร์โทร: ${item.phone || '-'}\n\nกรุณามาถึงก่อนเวลานัด 15 นาทีค่ะ \nหากเลยเวลานัด 15 นาทีและยังไม่ได้ชำระมัดจำ ระบบจะยกเลิกคิวอัตโนมัติ`;
-                    sendLineNotification(item.lineUserId, msg);
-                } else if (newStatus === 'Serving') {
-                    const msg = `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ`;
-                    sendLineNotification(item.lineUserId, msg);
-                } else if (newStatus === 'Done') {
-                    const msg = `🌸 ขอบคุณที่ใช้บริการ BLOOM LUXE SALON ค่ะ (${item.id})\n\nหวังว่าจะได้ดูแลคุณลูกค้าอีกครั้งนะคะ 💖`;
-                    sendLineNotification(item.lineUserId, msg);
-                } else if (newStatus === 'Cancelled') {
+                if (newStatus === 'Waiting') sendLineNotification(item.lineUserId, `✅ ยืนยันการจองสำเร็จ! (${item.id})\n📅 วันที่: ${item.bookingDate}\n⏰ เวลา: ${item.bookingTime}\n📞 เบอร์โทร: ${item.phone || '-'}\n\nกรุณามาถึงก่อนเวลานัด 15 นาทีค่ะ \nหากเลยเวลานัด 15 นาทีและยังไม่ได้ชำระมัดจำ ระบบจะยกเลิกคิวอัตโนมัติ`);
+                else if (newStatus === 'Serving') sendLineNotification(item.lineUserId, `🎉 ถึงคิวของคุณแล้ว! (${item.id})\nกรุณามาที่จุดให้บริการค่ะ`);
+                else if (newStatus === 'Done') sendLineNotification(item.lineUserId, `🌸 ขอบคุณที่ใช้บริการ BLOOM LUXE SALON ค่ะ (${item.id})\n\nหวังว่าจะได้ดูแลคุณลูกค้าอีกครั้งนะคะ 💖`);
+                else if (newStatus === 'Cancelled') {
                     let msg = '';
                     if (item.status === 'Pending') {
                         msg = `❌ ขออภัยค่ะ คิวของคุณถูกปฏิเสธ (${item.id})\nเนื่องจากเวลาที่เลือกไม่พร้อมให้บริการ กรุณาเลือกเวลาอื่นใหม่อีกครั้งค่ะ`;
@@ -1443,8 +1440,59 @@
             }
             setTimeout(refreshData, 1000); 
         } else {
+            setButtonLoading(btnElement, false); // ถ้าเซฟพลาด ให้ปุ่มกลับมาเป็นเหมือนเดิม
             showToast('❌ บันทึกไม่สำเร็จ โปรดกดอีกครั้ง', 'error');
             refreshData(); 
+        }
+    }
+
+    async function togglePayment(id, isPaid, checkboxElement) {
+        if(isSaving) {
+            if (checkboxElement) checkboxElement.checked = !isPaid;
+            return showToast('⏳ ระบบกำลังทำงาน กรุณารอ 2 วินาที', 'error');
+        }
+
+        setCheckboxLoading(checkboxElement, true); // เปลี่ยนข้อความเป็น Saving...
+
+        const itemIndex = db_content.findIndex(i => i.id === id);
+        if (itemIndex > -1) {
+            const tempDB = JSON.parse(JSON.stringify(db_content));
+            tempDB[itemIndex].isPaid = isPaid;
+            
+            if (await saveToGithub(tempDB)) {
+                db_content = tempDB;
+                renderUI(); 
+                showToast('✅ อัปเดตสถานะการชำระเงินแล้ว', 'success');
+            } else {
+                setCheckboxLoading(checkboxElement, false);
+                if (checkboxElement) checkboxElement.checked = !isPaid;
+                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
+            }
+        }
+    }
+
+    async function toggleDeposit(id, isDepositPaid, checkboxElement) {
+        if(isSaving) {
+            if (checkboxElement) checkboxElement.checked = !isDepositPaid;
+            return showToast('⏳ ระบบกำลังทำงาน กรุณารอ 2 วินาที', 'error');
+        }
+
+        setCheckboxLoading(checkboxElement, true); // เปลี่ยนข้อความเป็น Saving...
+
+        const itemIndex = db_content.findIndex(i => i.id === id);
+        if (itemIndex > -1) {
+            const tempDB = JSON.parse(JSON.stringify(db_content));
+            tempDB[itemIndex].isDepositPaid = isDepositPaid;
+            
+            if (await saveToGithub(tempDB)) {
+                db_content = tempDB;
+                renderUI(); 
+                showToast('✅ อัปเดตสถานะมัดจำแล้ว', 'success');
+            } else {
+                setCheckboxLoading(checkboxElement, false);
+                if (checkboxElement) checkboxElement.checked = !isDepositPaid;
+                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
+            }
         }
     }
 
@@ -1565,50 +1613,6 @@
         });
     }
 
-    async function togglePayment(id, isPaid) {
-        if(isSaving) {
-            // ถ้าระบบกำลังเซฟอยู่ ให้ติ๊กกลับไปค่าเดิมก่อน
-            if (typeof event !== 'undefined' && event.target) {
-                event.target.checked = !isPaid;
-            }
-            return showToast('⏳ กำลังเซฟข้อมูลก่อนหน้า กรุณารอ 2 วินาที', 'error');
-        }
-
-        const itemIndex = db_content.findIndex(i => i.id === id);
-        if (itemIndex > -1) {
-            db_content[itemIndex].isPaid = isPaid;
-            renderUI(); // คำนวณยอดเงินใหม่โชว์ที่ Dashboard ทันที
-            if (await saveToGithub(db_content)) {
-                showToast('✅ อัปเดตสถานะการชำระเงินแล้ว', 'success');
-            } else {
-                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
-                refreshData();
-            }
-        }
-    }
-
-    // เพิ่มฟังก์ชัน toggleDeposit สำหรับการมัดจำ
-    async function toggleDeposit(id, isDepositPaid) {
-        if(isSaving) {
-            if (typeof event !== 'undefined' && event.target) {
-                event.target.checked = !isDepositPaid;
-            }
-            return showToast('⏳ กำลังเซฟข้อมูลก่อนหน้า กรุณารอ 2 วินาที', 'error');
-        }
-
-        const itemIndex = db_content.findIndex(i => i.id === id);
-        if (itemIndex > -1) {
-            db_content[itemIndex].isDepositPaid = isDepositPaid;
-            renderUI(); 
-            if (await saveToGithub(db_content)) {
-                showToast('✅ อัปเดตสถานะมัดจำแล้ว', 'success');
-            } else {
-                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
-                refreshData();
-            }
-        }
-    }
-    
     async function startServiceTimer(id) {
         const itemIndex = db_content.findIndex(i => i.id === id);
         if (itemIndex > -1) {
@@ -2215,18 +2219,18 @@
         let actionBtns = '';
         if (isPending) {
             actionBtns = `
-                <button onclick="updateStatus('${q.id}', 'Waiting')" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">✅ Confirm</button>
-                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-red-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm">❌ Reject</button>
+                <button onclick="updateStatus('${q.id}', 'Waiting', this)" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md flex items-center justify-center">✅ Confirm</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled', this)" class="bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-red-200 px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center">❌ Reject</button>
             `;
         } else if (q.status === 'Waiting') {
              actionBtns = `
-                <button onclick="updateStatus('${q.id}', 'Serving')" class="bg-[#15803D] hover:bg-green-800 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Start</button>
-                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Cancel</button>
+                <button onclick="updateStatus('${q.id}', 'Serving', this)" class="bg-[#15803D] hover:bg-green-800 px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md flex items-center justify-center">Start</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled', this)" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center">Cancel</button>
             `;
         } else if (q.status === 'Serving') {
             actionBtns = `
-                <button onclick="updateStatus('${q.id}', 'Done')" class="bg-[#4A3B32] hover:bg-[#2c231e] px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md">Done</button>
-                <button onclick="updateStatus('${q.id}', 'Cancelled')" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all">Cancel</button>
+                <button onclick="updateStatus('${q.id}', 'Done', this)" class="bg-[#4A3B32] hover:bg-[#2c231e] px-5 py-2 rounded-lg text-xs font-bold text-white transition-all shadow-md flex items-center justify-center">Done</button>
+                <button onclick="updateStatus('${q.id}', 'Cancelled', this)" class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center">Cancel</button>
             `;
         }
 
@@ -2273,11 +2277,11 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-5 pt-4 border-t ${isPending ? 'border-[#2563EB]/30' : 'border-[#D4C4B7]'} gap-3">
                     <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         <label class="flex items-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border ${q.isDepositPaid ? 'border-blue-500/50 bg-blue-50' : 'border-[#D4C4B7] bg-white/50'} transition-all hover:bg-[#F4EFE6] flex-1 sm:flex-none justify-center">
-                            <input type="checkbox" onchange="toggleDeposit('${q.id}', this.checked)" ${q.isDepositPaid ? 'checked' : ''} class="w-4 h-4 accent-blue-600 rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
+                            <input type="checkbox" onchange="toggleDeposit('${q.id}', this.checked, this)" ${q.isDepositPaid ? 'checked' : ''} class="w-4 h-4 accent-blue-600 rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
                             <span class="text-xs ${q.isDepositPaid ? 'text-blue-700 font-bold' : 'text-[#847568] font-medium'}">${q.isDepositPaid ? '💸 มัดจำแล้ว' : 'รอจ่ายมัดจำ'}</span>
                         </label>
                         <label class="flex items-center gap-1.5 cursor-pointer px-3 py-2 rounded-lg border ${paidBorderClass} transition-all hover:bg-[#F4EFE6] flex-1 sm:flex-none justify-center">
-                            <input type="checkbox" onchange="togglePayment('${q.id}', this.checked)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
+                            <input type="checkbox" onchange="togglePayment('${q.id}', this.checked, this)" ${q.isPaid ? 'checked' : ''} class="w-4 h-4 accent-[#15803D] rounded cursor-pointer" ${isCancelled ? 'disabled' : ''}>
                             <span class="text-xs ${paidTextClass}">${paidText}</span>
                         </label>
                     </div>
@@ -2448,6 +2452,39 @@
             if(passEl) passEl.value = '';
         } else {
             showToast('Incorrect Password', 'error'); 
+        }
+    }
+
+    // --- [NEW] UI HELPER: สำหรับทำปุ่มหมุนรอ ---
+    function setButtonLoading(btn, isLoading) {
+        if (!btn) return;
+        if (isLoading) {
+            btn.disabled = true;
+            btn.dataset.originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 inline-block text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Wait...`;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    }
+
+    function setCheckboxLoading(checkbox, isLoading) {
+        if (!checkbox) return;
+        const label = checkbox.closest('label');
+        const span = label.querySelector('span');
+        if (isLoading) {
+            checkbox.disabled = true;
+            label.classList.add('opacity-50', 'cursor-wait');
+            if (span) {
+                span.dataset.originalText = span.innerHTML;
+                span.innerHTML = '⏳ Saving...';
+            }
+        } else {
+            checkbox.disabled = false;
+            label.classList.remove('opacity-50', 'cursor-wait');
+            if (span && span.dataset.originalText) span.innerHTML = span.dataset.originalText;
         }
     }
 
