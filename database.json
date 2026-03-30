@@ -292,7 +292,7 @@
     "id": "Q-016",
     "status": "Archived",
     "timestamp": "2026-03-30T07:03:55.975Z",
-    "isPaid": true,
+    "isPaid": false,
     "isDepositPaid": true,
     "actualPrice": 590,
     "orderType": "walkin",
