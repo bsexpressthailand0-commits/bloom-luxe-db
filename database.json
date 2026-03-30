@@ -353,7 +353,7 @@
     "id": "Q-017",
     "status": "Waiting",
     "timestamp": "2026-03-30T07:29:58.393Z",
-    "isPaid": false,
+    "isPaid": true,
     "isDepositPaid": true,
     "actualPrice": 575,
     "orderType": "walkin",
