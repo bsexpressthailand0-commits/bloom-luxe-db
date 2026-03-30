@@ -293,7 +293,7 @@
     "status": "Archived",
     "timestamp": "2026-03-30T07:03:55.975Z",
     "isPaid": false,
-    "isDepositPaid": true,
+    "isDepositPaid": false,
     "actualPrice": 590,
     "orderType": "walkin",
     "lineUserId": "",
