@@ -101,7 +101,7 @@
   },
   {
     "id": "Q-006",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-03-11T07:00:18.210Z",
     "isPaid": true,
     "orderType": "walkin",
@@ -122,7 +122,7 @@
   },
   {
     "id": "Q-007",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T04:59:30.682Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -144,7 +144,7 @@
   },
   {
     "id": "Q-008",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T06:21:00.016Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -167,7 +167,7 @@
   },
   {
     "id": "Q-009",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T06:50:18.547Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -259,7 +259,7 @@
   },
   {
     "id": "Q-013",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T07:26:59.617Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -306,7 +306,7 @@
   },
   {
     "id": "Q-015",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T09:46:32.841Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -328,7 +328,7 @@
   },
   {
     "id": "Q-016",
-    "status": "Completed",
+    "status": "Archived",
     "timestamp": "2026-03-30T07:03:55.975Z",
     "isPaid": true,
     "isDepositPaid": true,
