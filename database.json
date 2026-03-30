@@ -190,7 +190,7 @@
   },
   {
     "id": "Q-010",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T07:06:04.375Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -213,7 +213,7 @@
   },
   {
     "id": "Q-011",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T07:14:53.538Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -236,7 +236,7 @@
   },
   {
     "id": "Q-012",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T07:16:16.374Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -283,7 +283,7 @@
   },
   {
     "id": "Q-014",
-    "status": "Cancelled",
+    "status": "Archived",
     "timestamp": "2026-03-16T07:29:52.273Z",
     "isPaid": false,
     "isDepositPaid": false,
