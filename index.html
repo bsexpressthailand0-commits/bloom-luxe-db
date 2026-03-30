@@ -360,6 +360,16 @@
                     </div>
                     <div class="text-[10px] text-[#847568] text-center mt-2 font-medium">Press to close the day (Queues will be archived for stats)</div>
                 </div>
+
+                <!-- [NEW] ลบข้อมูลเก่า (Clear Data) -->
+                <div class="pt-4 mt-2 border-t border-[#D4C4B7]">
+                    <label class="text-xs text-red-600 font-bold mb-2 flex items-center gap-1">⚠️ จัดการพื้นที่เก็บข้อมูล (Database)</label>
+                    <button onclick="clearOldData()" class="w-full py-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 border border-red-200">
+                        <span>🗑️</span> ลบข้อมูลคิวของเดือนที่แล้ว (Clear Old Data)
+                    </button>
+                    <div class="text-[10px] text-[#847568] text-center mt-1">แนะนำให้กด "Export Data (CSV)" เก็บไว้ในคอมก่อนกดลบ</div>
+                </div>
+
             </div>
         </div>
 
@@ -769,6 +779,7 @@
     let activePage = 'customer';
     let activeAdminTab = 'walkin';
     let isFetching = false;
+    let isSaving = false; // ตัวแปรป้องกันเซฟชน/รัวๆ
     let pauseSyncUntil = 0;
     let myQueueId = localStorage.getItem('bloom_my_queue_id'); 
     let lastKnownStatus = localStorage.getItem('bloom_my_queue_status');
@@ -1001,7 +1012,7 @@
 
         initializeLiff();
         refreshData();
-        setInterval(refreshData, 5000); 
+        setInterval(refreshData, 15000); // อัปเดตข้อมูลอัตโนมัติทุกๆ 15 วินาที
         setInterval(updateTimers, 1000);
         setInterval(checkAutoCancel, 30000); // ตรวจสอบคิวที่เลยเวลา 15 นาที ทุกๆ 30 วินาที
     };
@@ -1342,28 +1353,58 @@
     }
 
     async function saveToGithub(newContent) {
-        pauseSyncUntil = Date.now() + 5000; // หน่วงเวลาดึงข้อมูล 5 วินาทีหลังเซฟเสร็จ
-        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
+        if (isSaving) {
+            showToast('⏳ กำลังบันทึกข้อมูล กรุณารอ 1-2 วินาที...', 'error');
+            return false;
+        }
+
+        isSaving = true; // ล็อคระบบไม่ให้กดเซฟซ้ำซ้อน
+        pauseSyncUntil = Date.now() + 10000; // หน่วงเวลาดึงข้อมูล 10 วินาทีหลังเซฟเสร็จ ป้องกันข้อมูลเด้งกลับ
         
-        // แนบการตั้งค่าเข้าไปกับข้อมูลคิวทุกครั้งที่บันทึก
+        const url = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`;
         const dataToSave = [...newContent, store_settings];
 
         try {
+            // 1. ดึงข้อมูลล่าสุดจาก DB สดๆ ก่อนเซฟเสมอ (แก้ปัญหาเซฟพัง / Error 409)
+            const getRes = await fetch(`${url}?t=${Date.now()}`, { headers: getHeaders() });
+            let latestSha = db_sha;
+            
+            if (getRes.ok) {
+                const currentData = await getRes.json();
+                latestSha = currentData.sha; // อัปเดต SHA ให้เป็นเวอร์ชั่นล่าสุด
+            }
+
+            // 2. สั่งบันทึกข้อมูลขึ้น GitHub
             const res = await fetch(url, {
                 method: 'PUT',
                 headers: getHeaders(),
                 body: JSON.stringify({
-                    message: `Update`,
+                    message: `Update Queue Data`,
                     content: btoa(unescape(encodeURIComponent(JSON.stringify(dataToSave, null, 2)))),
-                    sha: db_sha
+                    sha: latestSha
                 })
             });
-            return res.ok;
-        } catch (e) { return false; }
+
+            if (res.ok) {
+                const responseData = await res.json();
+                db_sha = responseData.content.sha; // อัปเดต SHA ในระบบเรา
+                isSaving = false;
+                return true;
+            } else {
+                isSaving = false;
+                return false;
+            }
+        } catch (e) { 
+            isSaving = false;
+            console.error(e);
+            return false; 
+        }
     }
 
     // --- ADMIN ACTIONS & TIMER ---
     async function updateStatus(id, newStatus) {
+        if(isSaving) return showToast('⏳ กำลังบันทึกข้อมูล กรุณารอสักครู่...', 'error');
+        
         let updatedDB;
         const item = db_content.find(i => i.id === id);
         
@@ -1374,9 +1415,8 @@
             return i; 
         }).filter(Boolean);
         
-        // Optimistic Update ปรับหน้าจอให้แสดงผลทันที ไม่ต้องรอโหลด
         db_content = updatedDB;
-        renderUI();
+        renderUI(); // อัปเดตหน้าจอทันที (รวมถึงคำนวณยอดเงินใหม่ถ้าเป็น Done)
         
         if (await saveToGithub(updatedDB)) { 
             showToast('อัปเดตสถานะสำเร็จ', 'success'); 
@@ -1403,7 +1443,7 @@
             }
             setTimeout(refreshData, 1000); 
         } else {
-            showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+            showToast('❌ บันทึกไม่สำเร็จ โปรดกดอีกครั้ง', 'error');
             refreshData(); 
         }
     }
@@ -1468,15 +1508,80 @@
         });
     }
 
+    // --- [NEW] ฟังก์ชันลบข้อมูลของเดือนก่อนหน้า ---
+    function clearOldData() {
+        if (isSaving) {
+            return showToast('⏳ ระบบกำลังทำงาน กรุณารอสักครู่', 'error');
+        }
+
+        const title = '⚠️ ยืนยันการลบข้อมูลเก่า';
+        const msg = `คุณได้ทำการ Export CSV เก็บไว้แล้วใช่หรือไม่?\n\nระบบจะทำการลบข้อมูลคิวที่ "เสร็จสิ้น/ยกเลิก" ของเดือนก่อนหน้าทั้งหมดทิ้งถาวร เพื่อให้ระบบทำงานได้เร็วขึ้น\n(ข้อมูลของเดือนปัจจุบันจะยังคงอยู่)`;
+
+        showConfirmModal(title, msg, async () => {
+            isSaving = true;
+            showToast('⏳ กำลังลบข้อมูลเก่า กรุณารอสักครู่...', 'success');
+
+            // หาคำนำหน้าเดือนปัจจุบัน เช่น "2024-03"
+            const now = new Date();
+            const currentMonthStr = new Date(Date.now() - (now.getTimezoneOffset() * 60000)).toISOString().substring(0, 7);
+
+            // กรองข้อมูล: เก็บเฉพาะคิวของ "เดือนปัจจุบัน" หรือ "คิวที่ยังทำงานไม่เสร็จ"
+            const filteredData = db_content.filter(item => {
+                const qDateStr = item.bookingDate || item.timestamp.split('T')[0];
+                
+                // 1. ถ้าเป็นคิวของเดือนนี้ -> เก็บไว้
+                if (qDateStr.startsWith(currentMonthStr)) return true;
+                
+                // 2. ถ้าเป็นคิวเดือนเก่า แต่สถานะยังค้างอยู่ (ยังไม่เสร็จสิ้น/ยกเลิก/เก็บเข้ากรุ) -> เก็บไว้กันบัค
+                if (item.status === 'Pending' || item.status === 'Waiting' || item.status === 'Serving') return true;
+
+                // 3. นอกนั้น (คิวเดือนเก่าที่จบงานแล้ว) -> ลบทิ้ง
+                return false;
+            });
+
+            const deletedCount = db_content.length - filteredData.length;
+
+            if (deletedCount === 0) {
+                isSaving = false;
+                document.getElementById('settings-panel').classList.add('hidden-elm');
+                return showToast('✨ ไม่มีข้อมูลเก่าให้ลบ (ไฟล์สะอาดอยู่แล้ว)', 'success');
+            }
+
+            // นำข้อมูลที่กรองแล้วบันทึกทับลงไป
+            db_content = filteredData;
+            renderUI(); // อัปเดตหน้าจอทันที
+
+            // บังคับปลดล็อค isSaving เพื่อให้ฟังก์ชัน saveToGithub ทำงานได้
+            isSaving = false; 
+            
+            if (await saveToGithub(db_content)) {
+                showToast(`🗑️ ลบข้อมูลเก่าสำเร็จ (${deletedCount} รายการ)`, 'success');
+                document.getElementById('settings-panel').classList.add('hidden-elm');
+                setTimeout(refreshData, 1000);
+            } else {
+                showToast('❌ เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                refreshData();
+            }
+        });
+    }
+
     async function togglePayment(id, isPaid) {
+        if(isSaving) {
+            // ถ้าระบบกำลังเซฟอยู่ ให้ติ๊กกลับไปค่าเดิมก่อน
+            if (typeof event !== 'undefined' && event.target) {
+                event.target.checked = !isPaid;
+            }
+            return showToast('⏳ กำลังเซฟข้อมูลก่อนหน้า กรุณารอ 2 วินาที', 'error');
+        }
+
         const itemIndex = db_content.findIndex(i => i.id === id);
         if (itemIndex > -1) {
             db_content[itemIndex].isPaid = isPaid;
-            renderUI(); 
+            renderUI(); // คำนวณยอดเงินใหม่โชว์ที่ Dashboard ทันที
             if (await saveToGithub(db_content)) {
-                showToast('อัปเดตสถานะการชำระเงินแล้ว', 'success');
+                showToast('✅ อัปเดตสถานะการชำระเงินแล้ว', 'success');
             } else {
-                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
                 refreshData();
             }
         }
@@ -1484,14 +1589,21 @@
 
     // เพิ่มฟังก์ชัน toggleDeposit สำหรับการมัดจำ
     async function toggleDeposit(id, isDepositPaid) {
+        if(isSaving) {
+            if (typeof event !== 'undefined' && event.target) {
+                event.target.checked = !isDepositPaid;
+            }
+            return showToast('⏳ กำลังเซฟข้อมูลก่อนหน้า กรุณารอ 2 วินาที', 'error');
+        }
+
         const itemIndex = db_content.findIndex(i => i.id === id);
         if (itemIndex > -1) {
             db_content[itemIndex].isDepositPaid = isDepositPaid;
             renderUI(); 
             if (await saveToGithub(db_content)) {
-                showToast('อัปเดตสถานะมัดจำแล้ว', 'success');
+                showToast('✅ อัปเดตสถานะมัดจำแล้ว', 'success');
             } else {
-                showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+                showToast('❌ เกิดข้อผิดพลาดในการบันทึก', 'error');
                 refreshData();
             }
         }
