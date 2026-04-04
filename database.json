@@ -566,7 +566,7 @@
   {
     "status": "Serving",
     "timestamp": "2026-04-04T08:20:34.524Z",
-    "isPaid": false,
+    "isPaid": true,
     "isDepositPaid": true,
     "actualPrice": 590,
     "orderType": "walkin",
