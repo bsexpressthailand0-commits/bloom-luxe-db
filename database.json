@@ -495,7 +495,7 @@
     "caution": ""
   },
   {
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-04-04T08:08:03.713Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -514,7 +514,8 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": "",
-    "id": "Q-260404002"
+    "id": "Q-260404002",
+    "serviceStartTime": null
   },
   {
     "status": "Cancelled",
