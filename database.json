@@ -429,17 +429,8 @@
     "serviceStartTime": null
   },
   {
-    "id": "SYS_SETTINGS",
-    "staffLineIds": [
-      "Uc0a46da4ae5eddc0fa16b3263c54e18e",
-      "",
-      "",
-      ""
-    ]
-  },
-  {
     "id": "Q-022",
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-04-04T06:19:22.724Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -458,5 +449,14 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": ""
+  },
+  {
+    "id": "SYS_SETTINGS",
+    "staffLineIds": [
+      "Uc0a46da4ae5eddc0fa16b3263c54e18e",
+      "",
+      "",
+      ""
+    ]
   }
 ]
