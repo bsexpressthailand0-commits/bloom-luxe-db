@@ -517,7 +517,7 @@
     "id": "Q-260404002"
   },
   {
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-04-04T08:09:11.776Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -536,7 +536,8 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": "",
-    "id": "Q-260404003"
+    "id": "Q-260404003",
+    "serviceStartTime": null
   },
   {
     "id": "SYS_SETTINGS",
