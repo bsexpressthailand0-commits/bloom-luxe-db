@@ -473,6 +473,28 @@
     "caution": ""
   },
   {
+    "id": "Q-260404-001",
+    "status": "Pending",
+    "timestamp": "2026-04-04T07:17:23.676Z",
+    "isPaid": false,
+    "isDepositPaid": false,
+    "actualPrice": 590,
+    "orderType": "booking",
+    "lineUserId": "",
+    "nickname": "แสง",
+    "phone": "0942623536",
+    "course": "60 min",
+    "bookingDate": "2026-04-04",
+    "bookingTime": "10:30",
+    "gender": "Male",
+    "waterTemp": "Warm",
+    "oil": "Choose at shop",
+    "shampoo": "Choose at shop",
+    "massagePressure": "Medium",
+    "headPressure": "Medium",
+    "caution": ""
+  },
+  {
     "id": "SYS_SETTINGS",
     "staffLineIds": [
       "Uc0a46da4ae5eddc0fa16b3263c54e18e",
