@@ -541,7 +541,7 @@
     "serviceStartTime": null
   },
   {
-    "status": "Serving",
+    "status": "Completed",
     "timestamp": "2026-04-04T08:10:43.160Z",
     "isPaid": true,
     "isDepositPaid": true,
@@ -560,7 +560,8 @@
     "massagePressure": "Medium",
     "headPressure": "Medium",
     "caution": "",
-    "id": "Q-260404004"
+    "id": "Q-260404004",
+    "serviceStartTime": null
   },
   {
     "status": "Waiting",
