@@ -66,6 +66,28 @@
     "id": "Q-003"
   },
   {
+    "status": "Pending",
+    "timestamp": "2026-05-19T06:26:53.510Z",
+    "isPaid": false,
+    "isDepositPaid": false,
+    "actualPrice": 590,
+    "orderType": "walkin",
+    "lineUserId": "",
+    "nickname": "แสง",
+    "phone": "0875488898",
+    "course": "60 min",
+    "bookingDate": "2026-05-19",
+    "bookingTime": "16:00",
+    "gender": "Male",
+    "waterTemp": "Warm",
+    "oil": "Orchid",
+    "shampoo": "Choose at shop",
+    "massagePressure": "Medium",
+    "headPressure": "Medium",
+    "caution": "",
+    "id": "Q-004"
+  },
+  {
     "id": "SYS_SETTINGS",
     "staffLineIds": [
       "",
