@@ -1,6 +1,6 @@
 [
   {
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-05-18T10:00:50.660Z",
     "isPaid": false,
     "isDepositPaid": false,
@@ -22,7 +22,7 @@
     "id": "Q-001"
   },
   {
-    "status": "Pending",
+    "status": "Cancelled",
     "timestamp": "2026-05-18T10:01:31.723Z",
     "isPaid": false,
     "isDepositPaid": false,
